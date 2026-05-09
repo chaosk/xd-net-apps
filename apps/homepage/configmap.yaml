@@ -58,4 +58,8 @@ data:
     # token: username@pam!Token ID
     # secret: secret
 
+  custom.css: |
+
+  custom.js: |
+
 
