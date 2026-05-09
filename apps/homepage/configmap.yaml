@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: homepage
+data:
+  settings.yaml: |
+    title: XD Net
+    language: en
+    headerStyle: boxed
+    hideVersion: true
+
+    layout:
+      Media:
+        style: row
+        columns: 3
+      Infra:
+        style: row
+        columns: 3
+
+  bookmarks.yaml: |
+    - Cluster:
+        - Argo CD:
+            href: https://argocd.net.ecksd.ee
+
+  services.yaml: |
+    - Media:
+        - Plex:
+            href: https://plex.net.ecksd.ee
+            description: Media server
+
+    - Infra:
+        - NGINX:
+            description: Example service
+
+  widgets.yaml: |
+    - search:
+        provider: google
+        target: _blank
+
