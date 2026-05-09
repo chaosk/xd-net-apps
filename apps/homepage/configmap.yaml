@@ -46,4 +46,9 @@ data:
     traefik: false
     gateway: true
 
+  docker.yaml: |
+    ---
+    # For configuration options and examples, please see:
+    # https://gethomepage.dev/configs/docker/
+
 
