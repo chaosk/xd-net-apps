@@ -38,3 +38,12 @@ data:
         provider: google
         target: _blank
 
+  kubernetes.yaml: |
+    mode: cluster
+
+    # Automatic service discovery sources
+    ingress: false
+    traefik: false
+    gateway: true
+
+
