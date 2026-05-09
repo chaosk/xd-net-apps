@@ -30,6 +30,8 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /app/config
+        - name: logs
+          mountPath: /app/config/logs
         resources:
           requests:
             memory: "128Mi"
@@ -41,4 +43,6 @@ spec:
       - name: config
         configMap:
           name: homepage-config
+      - name: logs
+        emptyDir: {}
 
