@@ -1,0 +1,51 @@
+fullnameOverride: plex
+
+ingress:
+  enabled: false
+
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: shared
+      namespace: gateway
+  hostnames:
+    - plex.net.ecksd.ee
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Media
+    gethomepage.dev/name: Plex
+    gethomepage.dev/description: Media server
+
+service:
+  type: ClusterIP
+  port: 32400
+
+nodeSelector:
+  "intel.feature.node.kubernetes.io/gpu": "true"
+
+pms:
+  configExistingClaim: plex-config
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+      gpu.intel.com/i915: 1
+    limits:
+      memory: 4Gi
+      cpu: "4"
+      gpu.intel.com/i915: 1
+
+extraEnv:
+  TZ: UTC
+  # VA-API uses the GPU passed through by the Intel GPU device plugin (gpu.intel.com/i915).
+  # In Plex: Settings → Transcoder → enable hardware acceleration.
+
+extraVolumes:
+  - name: media
+    persistentVolumeClaim:
+      claimName: plex-media
+
+extraVolumeMounts:
+  - name: media
+    # Library root inside the container (many examples use /data; this app uses /media).
+    mountPath: /media

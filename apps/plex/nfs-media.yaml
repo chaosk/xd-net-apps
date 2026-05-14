@@ -1,0 +1,34 @@
+# Static NFS volume for Plex libraries (movies, TV, music).
+# Edit server, path, and capacity before applying. Capacity only affects binding;
+# actual size is whatever the NFS export holds.
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: plex-media-pv
+spec:
+  capacity:
+    storage: 16Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - nfsvers=4.1
+    - hard
+  nfs:
+    server: nas.net.ecksd.ee
+    path: /volume1/malachit/media/
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plex-media
+  namespace: plex
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 16Ti
+  volumeName: plex-media-pv
+  storageClassName: ""
