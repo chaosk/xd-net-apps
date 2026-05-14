@@ -96,6 +96,18 @@ server:
   route:
     main:
       enabled: true
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Identity
+        gethomepage.dev/name: Authentik
+        gethomepage.dev/description: SSO & identity provider
+        gethomepage.dev/icon: si-authentik
+        gethomepage.dev/href: "https://authentik.net.ecksd.ee"
+        gethomepage.dev/widget.type: authentik
+        gethomepage.dev/widget.url: "http://authentik-server.authentik.svc.cluster.local"
+        gethomepage.dev/widget.headers.Host: "authentik.net.ecksd.ee"
+        gethomepage.dev/widget.version: "2"
+        gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_AUTHENTIK_TOKEN}}"
       parentRefs:
         - name: shared
           namespace: gateway

@@ -14,14 +14,14 @@ data:
       Media:
         style: row
         columns: 3
+      Identity:
+        style: row
+        columns: 3
       Infra:
         style: row
         columns: 3
 
-  bookmarks.yaml: |
-    - Cluster:
-        - Argo CD:
-            href: https://argocd.net.ecksd.ee
+  bookmarks.yaml: ""
 
   services.yaml: |
     - Media:
@@ -46,10 +46,7 @@ data:
     traefik: false
     gateway: true
 
-  docker.yaml: |
-    ---
-    # For configuration options and examples, please see:
-    # https://gethomepage.dev/configs/docker/
+  docker.yaml: ""
 
   proxmox.yaml: |
     ---

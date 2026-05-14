@@ -28,6 +28,12 @@ spec:
         env:
         - name: HOMEPAGE_ALLOWED_HOSTS
           value: net.ecksd.ee
+        - name: HOMEPAGE_VAR_AUTHENTIK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: homepage-authentik-widget
+              key: HOMEPAGE_VAR_AUTHENTIK_TOKEN
+              optional: true
         volumeMounts:
         - name: config
           mountPath: /app/config
