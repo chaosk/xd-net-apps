@@ -7,13 +7,17 @@ data:
   settings.yaml: |
     title: XD Net
     language: en
-    headerStyle: boxed
+    headerStyle: clean
     hideVersion: true
+    statusStyle: dot
 
     layout:
       Media:
+        icon: mdi-play-network-outline
         style: row
         columns: 3
+      Arr!:
+        icon: mdi-pirate
       Identity:
         style: row
         columns: 3
