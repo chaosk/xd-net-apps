@@ -1,0 +1,4 @@
+creation_rules:
+  - path_regex: secrets/.*\.yaml$
+    encrypted_comment_regex: sops:encrypt
+    age: age19q6ulkl4tzn5dg4gg3kn2l65ptxpz5jzsv9z7lqqz8jflqndw4tqvple7f

@@ -1,0 +1,13 @@
+# File storage for Authentik (AUTHENTIK_STORAGE__FILE__PATH default /data).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: authentik-data
+  namespace: authentik
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: synology
+  resources:
+    requests:
+      storage: 1Gi

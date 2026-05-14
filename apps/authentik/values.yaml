@@ -1,0 +1,103 @@
+# Official chart: https://github.com/goauthentik/helm
+# Docs: https://docs.goauthentik.io/docs/installation/kubernetes/
+
+fullnameOverride: authentik
+
+authentik:
+  postgresql:
+    host: authentik-db-rw
+    name: authentik
+    user: authentik
+
+global:
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    # No pod-level runAsNonRoot: initContainers use UID 0 for chown; main containers
+    # use server/worker containerSecurityContext.runAsNonRoot below.
+    fsGroup: 1000
+    supplementalGroups: [1000]
+    fsGroupChangePolicy: Always
+  volumes:
+    - name: authentik-data
+      persistentVolumeClaim:
+        claimName: authentik-data
+  volumeMounts:
+    - name: authentik-data
+      mountPath: /data
+  env:
+    # Must match external URL (TLS hostname on the Gateway). Edit with httproute hostnames.
+    - name: AUTHENTIK_HOST
+      value: "https://authentik.net.ecksd.ee"
+    - name: AUTHENTIK_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: authentik-secret-key
+          key: secret_key
+    # Same Secret as CNPG bootstrap (`postgres.yaml`); do not put the password in `authentik.postgresql`.
+    - name: AUTHENTIK_POSTGRESQL__PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: authentik-db
+          key: password
+
+postgresql:
+  enabled: false
+
+# GeoIP (MaxMind GeoLite2 updates on server + worker). See:
+# https://docs.goauthentik.io/sys-mgmt/ops/geoip/
+geoip:
+  enabled: true
+  editionIds: "GeoLite2-City GeoLite2-ASN"
+  updateInterval: 8
+  existingSecret:
+    secretName: authentik-geoip
+    accountId: account_id
+    licenseKey: license_key
+
+worker:
+  containerSecurityContext:
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+    seccompProfile:
+      type: RuntimeDefault
+
+server:
+  initContainers:
+    - name: authentik-data-chown
+      image: docker.io/library/busybox:1.36
+      command:
+        - sh
+        - -ec
+        - |
+          chown -R 1000:1000 /data
+          chmod -R u+rwX,g+rwX /data
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+          add: ["CHOWN", "DAC_OVERRIDE", "FOWNER"]
+        seccompProfile:
+          type: RuntimeDefault
+      volumeMounts:
+        - name: authentik-data
+          mountPath: /data
+  containerSecurityContext:
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ["ALL"]
+    seccompProfile:
+      type: RuntimeDefault
+  route:
+    main:
+      enabled: true
+      parentRefs:
+        - name: shared
+          namespace: gateway
+      hostnames:
+        - authentik.net.ecksd.ee
