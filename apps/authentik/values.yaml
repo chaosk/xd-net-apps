@@ -108,6 +108,7 @@ server:
         gethomepage.dev/widget.headers.Host: "authentik.net.ecksd.ee"
         gethomepage.dev/widget.version: "2"
         gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_AUTHENTIK_TOKEN}}"
+        gethomepage.dev/pod-selector: app.kubernetes.io/name=authentik,app.kubernetes.io/component=server
       parentRefs:
         - name: shared
           namespace: gateway
