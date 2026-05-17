@@ -7,7 +7,7 @@
 | File | Purpose |
 |------|---------|
 | `kustomization.yaml` | Namespace, **`pvc.yaml`**, Elasticsearch, Redis, Tube Archivist Deployment, Service, HTTPRoute. |
-| `namespace.yaml` | **`tubearchivist`** namespace. |
+| `namespace.yaml` | **`tubearchivist`** namespace; **Pod Security `privileged`** labels for Elasticsearch. |
 | `pvc.yaml` | **`tubearchivist-youtube`**: static **NFS** PV + claim (**ReadWriteMany**, **`Retain`**). **`tubearchivist-cache`**, **`tubearchivist-redis`**, **`tubearchivist-es`**: **Synology** `storageClass` **`synology`** (**ReadWriteOnce**). |
 | `elasticsearch.yaml` | **`archivist-es`** StatefulSet + Service (`bbilly1/tubearchivist-es:latest`, port **9200**). |
 | `redis.yaml` | **`archivist-redis`** StatefulSet + Service (`redis:7-alpine`, port **6379**). |

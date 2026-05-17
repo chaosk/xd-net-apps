@@ -30,6 +30,10 @@ spec:
               value: https://tubearchivist.net.ecksd.ee
             - name: TZ
               value: UTC
+            - name: TA_USERNAME
+              value: tubearchivist
+            - name: TA_PASSWORD
+              value: tubearchivist
             - name: ELASTIC_PASSWORD
               valueFrom:
                 secretKeyRef:
