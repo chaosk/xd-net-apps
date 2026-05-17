@@ -1,0 +1,26 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: tubearchivist
+  namespace: tubearchivist
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Media
+    gethomepage.dev/name: Tube Archivist
+    gethomepage.dev/description: YouTube archive
+    gethomepage.dev/icon: si-youtube
+    gethomepage.dev/pod-selector: app=tubearchivist
+spec:
+  parentRefs:
+    - name: shared
+      namespace: gateway
+  hostnames:
+    - tubearchivist.net.ecksd.ee
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: tubearchivist
+          port: 8000

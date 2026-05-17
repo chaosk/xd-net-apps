@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: archivist-redis
+  namespace: tubearchivist
+spec:
+  serviceName: archivist-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: archivist-redis
+  template:
+    metadata:
+      labels:
+        app: archivist-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+              name: redis
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 50m
+            limits:
+              memory: 512Mi
+              cpu: 500m
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: tubearchivist-redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: archivist-redis
+  namespace: tubearchivist
+spec:
+  selector:
+    app: archivist-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+      name: redis
