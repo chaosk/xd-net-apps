@@ -15,6 +15,7 @@ httpRoute:
     gethomepage.dev/group: Media
     gethomepage.dev/name: Plex
     gethomepage.dev/description: Media server
+    gethomepage.dev/icon: si-plex
     gethomepage.dev/pod-selector: app.kubernetes.io/name=plex-media-server
 
 service:
