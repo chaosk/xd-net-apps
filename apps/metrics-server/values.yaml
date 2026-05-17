@@ -1,0 +1,20 @@
+# https://github.com/kubernetes-sigs/metrics-server/tree/master/charts/metrics-server
+# Enables metrics.k8s.io (kubectl top, HPA, Homepage kubernetes widget).
+
+apiService:
+  create: true
+
+# Default chart args plus --kubelet-insecure-tls for common homelab / k3s kubelet certs.
+args:
+  - --kubelet-insecure-tls
+  - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+  - --kubelet-use-node-status-port
+  - --metric-resolution=15s
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
