@@ -48,6 +48,9 @@ spec:
             httpGet:
               path: /api/health/
               port: 8000
+              httpHeaders:
+                - name: Host
+                  value: tubearchivist.net.ecksd.ee
             initialDelaySeconds: 30
             periodSeconds: 120
             timeoutSeconds: 10
@@ -56,6 +59,9 @@ spec:
             httpGet:
               path: /api/health/
               port: 8000
+              httpHeaders:
+                - name: Host
+                  value: tubearchivist.net.ecksd.ee
             initialDelaySeconds: 15
             periodSeconds: 30
             timeoutSeconds: 10
