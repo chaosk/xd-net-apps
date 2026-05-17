@@ -34,6 +34,12 @@ spec:
               name: homepage-authentik-widget
               key: HOMEPAGE_VAR_AUTHENTIK_TOKEN
               optional: true
+        - name: HOMEPAGE_VAR_TUBEARCHIVIST_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homepage-tubearchivist-widget
+              key: HOMEPAGE_VAR_TUBEARCHIVIST_API_KEY
+              optional: true
         volumeMounts:
         - name: config
           mountPath: /app/config
