@@ -1,0 +1,9 @@
+# Install: pre-commit install
+default_install_hook_types:
+  - pre-push
+
+repos:
+  - repo: https://github.com/pre-commit-garage/pre-commit-metadata-hooks
+    rev: v0.1.5
+    hooks:
+      - id: require-signed-commits

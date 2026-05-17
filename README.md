@@ -1,32 +1,54 @@
 # xd-net-apps
 
-GitOps repository for xd-net Kubernetes cluster applications.
+GitOps manifests for workloads on the **xd-net** Kubernetes cluster. This
+repository is wired from **xd-net** via Argo CD (Terraform in `xd-net/apps`
+creates the `Application` and `ApplicationSet`).
 
-## Structure
+## Layout
 
-- `secrets/` - SOPS-encrypted secrets (deployed to synology-csi namespace)
-- `apps/` - Application manifests (each subdirectory becomes an ArgoCD Application)
+| Path | Role |
+|------|------|
+| `apps/<name>/` | Plain Kubernetes YAML; each directory becomes one Argo CD Application and (by convention) a namespace named `<name>`. |
+| `secrets/` | SOPS-encrypted YAML consumed by the **platform-secrets** Application. |
 
-## Adding a New App
+Cluster install order in **xd-net**: `infra/` → `app-manifests/` → `apps/`.
+This repo is only the Git source for Argo CD after `apps/` has been applied.
 
-1. Create a new directory under `apps/` (e.g., `apps/my-app/`)
-2. Add Kubernetes manifests to that directory
-3. ArgoCD will automatically detect and deploy it
-4. The namespace will be created automatically from the directory name
+## Argo CD behavior
 
-## Encrypting Secrets
+- **Application `platform-secrets`** syncs the `secrets/` path using the
+  **SOPS** config-management plugin. Set `metadata.namespace` on each
+  resource to the namespace where it should live.
+- **ApplicationSet `apps`** scans `apps/*` and deploys each subdirectory.
+  Automated sync uses `CreateNamespace=true`, so the namespace matches the
+  directory name unless you override in manifests.
+
+Synology CSI credentials may already be created by Terraform in **xd-net**
+(`apps/synology-csi.tf`). Use `secrets/` for additional or Git-managed
+secrets that should follow the SOPS workflow.
+
+## Add an application
+
+1. Create `apps/<app>/` (for example `apps/my-service/`).
+2. Add manifests (`Deployment`, `Service`, `Namespace`, and so on).
+3. Commit and push; Argo CD picks up the new path and creates an Application
+   named `<app>`.
+
+Optional: add `apps/<app>/kustomization.yaml` if you prefer Kustomize layout;
+the Application still uses directory sync from plain Git.
+
+## SOPS and secrets
+
+See `secrets/README.md` for directory-specific notes.
+
+## Git hooks
+
+Commits must be [GPG-signed](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work). [pre-commit](https://pre-commit.com/) runs [require-signed-commits](https://github.com/pre-commit-garage/pre-commit-metadata-hooks) on `git push` and rejects any commit missing a `gpgsig` header.
+
+One-time setup:
 
 ```bash
-# Encrypt a secret file
-sops --encrypt --in-place secrets/synology-secret.yaml
-
-# Edit an encrypted file
-sops secrets/synology-secret.yaml
+brew install pre-commit   # or: pip install pre-commit
+pre-commit install
+git config commit.gpgsign true
 ```
-
-## Notes
-
-- ArgoCD ApplicationSet automatically scans `apps/*` directories
-- Each app gets its own namespace (matching directory name)
-- Secrets are decrypted by ArgoCD using the SOPS plugin
-# xd-net-apps

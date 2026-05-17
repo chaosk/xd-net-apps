@@ -12,7 +12,6 @@ metadata:
     gethomepage.dev/href: "https://tubearchivist.net.ecksd.ee"
     gethomepage.dev/widget.type: tubearchivist
     gethomepage.dev/widget.url: "http://tubearchivist.tubearchivist.svc.cluster.local:8000"
-    gethomepage.dev/widget.headers.Host: "tubearchivist.net.ecksd.ee"
     gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_TUBEARCHIVIST_API_KEY}}"
     gethomepage.dev/pod-selector: app=tubearchivist
 spec:
