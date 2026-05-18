@@ -1,0 +1,9 @@
+# Gluetun reads /iptables/post-rules.txt after its own rules (one full iptables command per line).
+# Allows pod-gateway client_init.sh to ping the gateway pod IP while the firewall stays on.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vpn-gateway-gluetun-iptables
+data:
+  post-rules.txt: |
+    iptables -A INPUT -p icmp -j ACCEPT

@@ -5,6 +5,14 @@ namespace: vpn-gateway
 
 resources:
   - namespace.yaml
+  - gluetun-iptables-configmap.yaml
+
+patches:
+  - path: gluetun-iptables-patch.yaml
+    target:
+      kind: Deployment
+      name: vpn-gateway-pod-gateway-main
+      namespace: vpn-gateway
 
 helmCharts:
   - name: pod-gateway
