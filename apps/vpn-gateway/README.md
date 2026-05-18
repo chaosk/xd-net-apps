@@ -42,3 +42,7 @@ After changing `values-pod-gateway.yaml` or the VPN secret:
 1. Label the namespace **`allows-vpn-gateway: "true"`** and add it under **`routed_namespaces`** in `values-pod-gateway.yaml`.
 2. Add **`vpn-gateway: "true"`** to the pod template labels.
 3. Re-apply vpn-gateway and recreate the pod.
+
+## Troubleshooting
+
+**`gateway-init` BackOff, ping to gateway pod IP fails** — On Cilium set `settings.VXLAN_PORT: 4789`. Gluetun must use `FIREWALL: "off"` in `values-pod-gateway.yaml` so other pods can reach the shared pod IP (VXLAN/ICMP); otherwise `ping` in `client_init.sh` fails even when endpoints are correct. Re-apply vpn-gateway, restart the gateway deployment, delete the client pod.

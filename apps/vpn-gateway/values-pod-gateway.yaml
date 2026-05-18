@@ -11,6 +11,8 @@ DNSPolicy: None
 settings:
   NOT_ROUTED_TO_GATEWAY_CIDRS: "10.0.0.0/8 10.96.0.0/12 10.244.0.0/16 172.16.0.0/12 192.168.0.0/16 169.254.0.0/16"
   VXLAN_ID: 42
+  # Required on Cilium (default in image is 0). See pod-gateway config/settings.sh.
+  VXLAN_PORT: 4789
   VXLAN_IP_NETWORK: "172.16.0"
   VPN_INTERFACE: wg0
   VPN_BLOCK_OTHER_TRAFFIC: false
@@ -36,6 +38,8 @@ controllers:
           repository: ghcr.io/qdm12/gluetun
           tag: v3.40.0
         env:
+          # pod-gateway VXLAN/ICMP hits the pod IP; Gluetun firewall blocks it by default.
+          FIREWALL: "off"
           DOT: "off"
           VPN_TYPE: wireguard
         envFrom:
