@@ -36,7 +36,7 @@ spec:
                   name: tubearchivist
                   key: ELASTIC_PASSWORD
             - name: ES_JAVA_OPTS
-              value: "-Xms1g -Xmx1g"
+              value: "-Xms1536m -Xmx1536m"
             - name: xpack.security.enabled
               value: "true"
             - name: discovery.type
@@ -52,10 +52,10 @@ spec:
               mountPath: /usr/share/elasticsearch/data
           resources:
             requests:
-              memory: 2Gi
+              memory: 3Gi
               cpu: 500m
             limits:
-              memory: 2Gi
+              memory: 4Gi
               cpu: "2"
       volumes:
         - name: data
