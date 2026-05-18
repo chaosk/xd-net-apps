@@ -37,6 +37,15 @@ kubectl exec -n tubearchivist deploy/archivist-es -- wget -qO- https://api.ipify
 After changing `values-pod-gateway.yaml` or the VPN secret:  
 `kubectl rollout restart deployment -n vpn-gateway -l app.kubernetes.io/instance=vpn-gateway`
 
+## Cluster DNS from VPN pods
+
+Routed pods use gateway dnsmasq (`172.16.0.1`). `cluster.local` queries must be forwarded to **CoreDNS**, not Gluetun/VPN DNS. Set **`DNS_LOCAL_SERVER`** in `values-pod-gateway.yaml` to your kube-dns ClusterIP, and **`FIREWALL_OUTBOUND_SUBNETS`** on Gluetun so the gateway can reach Service/Pod networks.
+
+```bash
+kubectl get svc -n kube-system -l k8s-app=kube-dns -o jsonpath='{.items[0].spec.clusterIP}{"\n"}'
+kubectl exec -n tubearchivist deploy/tubearchivist -c tubearchivist -- getent hosts archivist-redis.tubearchivist.svc.cluster.local
+```
+
 ## Add another VPN-routed pod
 
 1. Label the namespace **`allows-vpn-gateway: "true"`** and add it under **`routed_namespaces`** in `values-pod-gateway.yaml`.

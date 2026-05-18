@@ -18,6 +18,9 @@ settings:
   VPN_BLOCK_OTHER_TRAFFIC: false
   VPN_LOCAL_CIDRS: "10.0.0.0/8 10.96.0.0/12 10.244.0.0/16 192.168.0.0/16 172.16.0.0/12"
   DNS_LOCAL_CIDRS: "cluster.local svc"
+  # Gluetun overwrites resolv.conf; pin CoreDNS so dnsmasq forwards cluster.local correctly.
+  # ClusterIP of kube-dns/coredns (kubectl get svc -n kube-system -l k8s-app=kube-dns).
+  DNS_LOCAL_SERVER: "10.96.0.10"
 
 webhook:
   namespaceSelector:
@@ -40,6 +43,8 @@ controllers:
         env:
           DOT: "off"
           VPN_TYPE: wireguard
+          # Allow gateway dnsmasq and VXLAN clients to reach cluster Service/Pod CIDRs.
+          FIREWALL_OUTBOUND_SUBNETS: "10.96.0.0/12,10.244.0.0/16,192.168.0.0/16,172.16.0.0/12"
         envFrom:
           - secretRef:
               name: vpn-gateway
