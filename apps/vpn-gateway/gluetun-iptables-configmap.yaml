@@ -1,5 +1,5 @@
 # Gluetun reads /iptables/post-rules.txt after its own rules (one full iptables command per line).
-# Allows pod-gateway client_init.sh to ping the gateway pod IP while the firewall stays on.
+# gateway_init iptables are flushed when Gluetun enables its firewall; re-apply pod-gateway needs here.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,3 +7,6 @@ metadata:
 data:
   post-rules.txt: |
     iptables -A INPUT -p icmp -j ACCEPT
+    iptables -t nat -A POSTROUTING -j MASQUERADE
+    iptables -A FORWARD -i vxlan0 -o wg0 -j ACCEPT
+    iptables -A FORWARD -i wg0 -o vxlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT

@@ -46,6 +46,17 @@ kubectl get svc -n kube-system -l k8s-app=kube-dns -o jsonpath='{.items[0].spec.
 kubectl exec -n tubearchivist deploy/tubearchivist -c tubearchivist -- getent hosts archivist-redis.tubearchivist.svc.cluster.local
 ```
 
+## Verify VPN egress
+
+Routed pods have no IPv6 default route; use **IPv4** when testing public egress:
+
+```bash
+kubectl exec -n tubearchivist deploy/tubearchivist -c tubearchivist -- curl -4 -sS --max-time 15 https://api.ipify.org
+kubectl exec -n tubearchivist deploy/archivist-es -- curl -4 -sS --max-time 15 https://api.ipify.org
+```
+
+The first command should print your VPN exit IP; the second should print your cluster/home IP.
+
 ## Add another VPN-routed pod
 
 1. Label the namespace **`allows-vpn-gateway: "true"`** and add it under **`routed_namespaces`** in `values-pod-gateway.yaml`.

@@ -41,7 +41,7 @@ controllers:
           repository: ghcr.io/qdm12/gluetun
           tag: v3.41.1
         env:
-          DOT: "off"
+          DNS_SERVER: "off"
           VPN_TYPE: wireguard
           # Allow gateway dnsmasq and VXLAN clients to reach cluster Service/Pod CIDRs.
           FIREWALL_OUTBOUND_SUBNETS: "10.96.0.0/12,10.244.0.0/16,192.168.0.0/16,172.16.0.0/12"
