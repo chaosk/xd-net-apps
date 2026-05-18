@@ -11,7 +11,7 @@ PostgreSQL is a **[CloudNativePG](https://cloudnative-pg.io/) `Cluster`** (`post
 | `kustomization.yaml` | Namespace, **`postgres.yaml`**, **`pvc-authentik-data.yaml`**, Helm chart `authentik`. |
 | `namespace.yaml` | `authentik` namespace. |
 | `postgres.yaml` | CNPG cluster **`authentik-db`** (single instance, **`local-path`** PVC, stock `postgresql` image). |
-| `pvc-authentik-data.yaml` | **`authentik-data`** PVC (**Synology** `StorageClass` **`synology`**, **ReadWriteMany**, **20Gi**) at **`/data`**. |
+| `pvc-authentik-data.yaml` | **`authentik-data`** PVC (**Synology** `storageClass` **`synology`**, **ReadWriteOnce**, **1Gi**) at **`/data`**. Server and worker are pinned to the same node via **`worker` podAffinity** in `values.yaml`. |
 | `values.yaml` | **`global.volumes`** / **`volumeMounts`** for `/data`, `AUTHENTIK_HOST`, **`AUTHENTIK_SECRET_KEY`**, Gateway **`server.route.main`**, external Postgres, **GeoIP**, Bitnami **disabled**. |
 
 ## Before you apply

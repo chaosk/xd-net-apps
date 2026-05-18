@@ -10,6 +10,10 @@ authentik:
     user: authentik
 
 global:
+  # RWO authentik-data: server and worker must share a node. Disable chart anti-affinity
+  # (soft spread across hosts); worker.required podAffinity to server is set below.
+  affinity:
+    podAntiAffinity: none
   securityContext:
     runAsUser: 1000
     runAsGroup: 1000
@@ -56,6 +60,15 @@ geoip:
     licenseKey: license_key
 
 worker:
+  # Schedule on the same node as server (required for ReadWriteOnce authentik-data).
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: authentik
+              app.kubernetes.io/component: server
+          topologyKey: kubernetes.io/hostname
   containerSecurityContext:
     runAsNonRoot: true
     allowPrivilegeEscalation: false

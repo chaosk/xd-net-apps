@@ -6,7 +6,7 @@ metadata:
   namespace: authentik
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   storageClassName: synology
   resources:
     requests:
