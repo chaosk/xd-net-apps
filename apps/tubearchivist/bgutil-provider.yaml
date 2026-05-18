@@ -15,6 +15,7 @@ spec:
     metadata:
       labels:
         app: bgutil-provider
+        vpn-gateway: "true"
     spec:
       containers:
         - name: bgutil-provider

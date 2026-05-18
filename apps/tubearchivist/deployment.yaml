@@ -14,6 +14,7 @@ spec:
     metadata:
       labels:
         app: tubearchivist
+        vpn-gateway: "true"
     spec:
       containers:
         - name: tubearchivist

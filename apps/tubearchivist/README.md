@@ -16,6 +16,10 @@
 | `service.yaml` | ClusterIP **`tubearchivist`** → port **8000** (HTTPRoute backend). |
 | `httproute.yaml` | Gateway **`shared`** in **`gateway`**; hostname **`tubearchivist.net.ecksd.ee`**. |
 
+## VPN egress
+
+YouTube-related pods use **[pod-gateway](https://github.com/angelnu/pod-gateway)** per-pod label **`vpn-gateway: "true"`** on `tubearchivist` and `bgutil-provider` only ([vpn-gateway](../vpn-gateway/README.md)). The namespace is labeled **`allows-vpn-gateway: "true"`** so the webhook can run there. Elasticsearch and Redis have no pod label and stay on normal cluster routing.
+
 ## PO token provider
 
 Tube Archivist talks to the provider over the cluster network. After sync, set **Settings → Application → PO Token Provider URL** to:
@@ -29,5 +33,6 @@ See [Application settings](https://docs.tubearchivist.com/settings/application/#
 ## Apply
 
 ```bash
+kubectl kustomize "$HOME/Projects/xd-net-apps/apps/vpn-gateway" --enable-helm | kubectl apply -f -
 kubectl apply -k "$HOME/Projects/xd-net-apps/apps/tubearchivist"
 ```

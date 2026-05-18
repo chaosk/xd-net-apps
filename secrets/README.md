@@ -69,3 +69,4 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `homepage-authentik-widget.yaml` | `homepage` | Authentik API token for Homepage widget via env `HOMEPAGE_VAR_AUTHENTIK_TOKEN` ([widget](https://gethomepage.dev/widgets/services/authentik/), [secrets](https://gethomepage.dev/installation/docker/#secrets)). |
 | `homepage-tubearchivist-widget.yaml` | `homepage` | Tube Archivist API token for Homepage widget via env `HOMEPAGE_VAR_TUBEARCHIVIST_API_KEY` ([widget](https://gethomepage.dev/widgets/services/tubearchivist/)). |
 | `tubearchivist.yaml` | `tubearchivist` | Elasticsearch (`tubearchivist`, keys `ELASTIC_PASSWORD`). See [env vars](https://docs.tubearchivist.com/installation/env-vars/). |
+| `vpn-gateway.yaml` | `vpn-gateway` | Gluetun VPN (`vpn-gateway`). See [vpn-gateway README](../apps/vpn-gateway/README.md). |

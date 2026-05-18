@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: vpn-gateway
+
+resources:
+  - namespace.yaml
+
+helmCharts:
+  - name: pod-gateway
+    repo: https://angelnu.github.io/helm-charts/
+    version: 7.1.1
+    releaseName: vpn-gateway
+    namespace: vpn-gateway
+    valuesFile: values-pod-gateway.yaml

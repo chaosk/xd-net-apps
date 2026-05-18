@@ -1,0 +1,47 @@
+# pod-gateway + Gluetun VPN gateway. Per-pod routing: label pods vpn-gateway: "true".
+# https://github.com/angelnu/pod-gateway
+clusterName: cluster.local
+
+routed_namespaces:
+  - tubearchivist
+
+DNS: 172.16.0.1
+DNSPolicy: None
+
+settings:
+  NOT_ROUTED_TO_GATEWAY_CIDRS: "10.0.0.0/8 10.96.0.0/12 10.244.0.0/16 172.16.0.0/12 192.168.0.0/16 169.254.0.0/16"
+  VXLAN_ID: 42
+  VXLAN_IP_NETWORK: "172.16.0"
+  VPN_INTERFACE: wg0
+  VPN_BLOCK_OTHER_TRAFFIC: false
+  VPN_LOCAL_CIDRS: "10.0.0.0/8 10.96.0.0/12 10.244.0.0/16 192.168.0.0/16 172.16.0.0/12"
+  DNS_LOCAL_CIDRS: "cluster.local svc"
+
+webhook:
+  namespaceSelector:
+    type: label
+    label: allows-vpn-gateway
+  gatewayDefault: false
+  gatewayLabel: vpn-gateway
+  gatewayLabelValue: "true"
+
+controllers:
+  main:
+    strategy: Recreate
+    replicas: 1
+    containers:
+      gluetun:
+        enabled: true
+        image:
+          repository: ghcr.io/qdm12/gluetun
+          tag: v3.40.0
+        env:
+          DOT: "off"
+          VPN_TYPE: wireguard
+        envFrom:
+          - secretRef:
+              name: vpn-gateway
+
+networkpolicies:
+  main:
+    enabled: false
