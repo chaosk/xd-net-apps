@@ -8,6 +8,7 @@ resources:
   - pvc.yaml
   - elasticsearch.yaml
   - redis.yaml
+  - bgutil-provider.yaml
   - deployment.yaml
   - service.yaml
   - httproute.yaml
