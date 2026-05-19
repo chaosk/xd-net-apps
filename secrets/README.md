@@ -70,3 +70,4 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `homepage-tubearchivist-widget.yaml` | `homepage` | Tube Archivist API token for Homepage widget via env `HOMEPAGE_VAR_TUBEARCHIVIST_API_KEY` ([widget](https://gethomepage.dev/widgets/services/tubearchivist/)). |
 | `tubearchivist.yaml` | `tubearchivist` | Elasticsearch (`tubearchivist`, keys `ELASTIC_PASSWORD`). See [env vars](https://docs.tubearchivist.com/installation/env-vars/). |
 | `vpn-gateway.yaml` | `vpn-gateway` | Gluetun VPN (`vpn-gateway`). See [vpn-gateway README](../apps/vpn-gateway/README.md). |
+| `tracearr-db.yaml` | `tracearr` | CNPG bootstrap + Tracearr Helm (`tracearr-db`: `username`, `password`, `DB_PASSWORD`, `JWT_SECRET`, `COOKIE_SECRET`; `DB_PASSWORD` must match `password`). |

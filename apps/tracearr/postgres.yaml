@@ -1,0 +1,47 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: tracearr-db
+spec:
+  instances: 1
+  imageCatalogRef:
+    apiGroup: postgresql.cnpg.io
+    kind: ImageCatalog
+    name: tracearr-timescaledb
+    major: 18
+  storage:
+    storageClass: local-path
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: "4"
+      memory: 4Gi
+  postgresql:
+    shared_preload_libraries:
+      - timescaledb
+    parameters:
+      timescaledb.license: timescale
+      timescaledb.max_tuples_decompressed_per_dml_transaction: "0"
+      max_locks_per_transaction: "4096"
+      timescaledb.telemetry_level: "off"
+      shared_buffers: 512MB
+      effective_cache_size: 2GB
+      work_mem: 16MB
+      maintenance_work_mem: 256MB
+      wal_buffers: 64MB
+      max_wal_size: 2GB
+      checkpoint_completion_target: "0.9"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+  bootstrap:
+    initdb:
+      database: tracearr
+      owner: tracearr
+      secret:
+        name: tracearr-db
+      postInitApplicationSQL:
+        - CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+        - CREATE EXTENSION IF NOT EXISTS pg_trgm;

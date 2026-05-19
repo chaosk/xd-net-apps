@@ -1,0 +1,32 @@
+# Overrides for official Tracearr Helm chart (vendored under vendor/).
+# Upstream defaults: https://github.com/connorgallopo/Tracearr/blob/main/docker/helm/tracearr/values.yaml
+# Install guide: https://docs.tracearr.com/getting-started/installation/kubernetes
+# PostgreSQL: CloudNativePG cluster tracearr-db (postgres.yaml), not chart Timescale StatefulSet.
+
+fullnameOverride: tracearr
+
+secrets:
+  autoGenerate: false
+  existingSecret: tracearr-db
+
+timescale:
+  enabled: false
+
+externalDatabase:
+  host: tracearr-db-rw
+  port: 5432
+  user: tracearr
+  database: tracearr
+
+redis:
+  persistence:
+    storageClass: synology
+
+tracearr:
+  backups:
+    storageClass: synology
+  imageCache:
+    storageClass: synology
+
+ingress:
+  enabled: false
