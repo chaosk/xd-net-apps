@@ -52,6 +52,12 @@ spec:
               name: homepage-plex-widget
               key: HOMEPAGE_VAR_PLEX_TOKEN
               optional: true
+        - name: HOMEPAGE_VAR_SONARR_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homepage-sonarr-widget
+              key: HOMEPAGE_VAR_SONARR_API_KEY
+              optional: true
         volumeMounts:
         - name: config
           mountPath: /app/config
