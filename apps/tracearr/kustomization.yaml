@@ -8,3 +8,13 @@ resources:
   - httproute.yaml
   - image-catalog.yaml
   - postgres.yaml
+
+helmGlobals:
+  chartHome: vendor/tracearr-0.1.0
+
+helmCharts:
+  - name: tracearr
+    releaseName: tracearr
+    namespace: tracearr
+    version: 0.1.0
+    valuesFile: values.yaml

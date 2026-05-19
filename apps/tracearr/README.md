@@ -6,7 +6,7 @@
 
 | Piece | Role |
 |--------|------|
-| `kustomization.yaml` | **Namespace**, **HTTPRoute**, **ImageCatalog**, and CNPG **`Cluster`**. |
+| `kustomization.yaml` | **Namespace**, **HTTPRoute**, **ImageCatalog**, CNPG **`Cluster`**, and **vendored Helm chart** (`helmCharts` + `values.yaml`). |
 | `namespace.yaml` | `tracearr` namespace. |
 | `httproute.yaml` | Gateway route + **[Homepage](https://gethomepage.dev/)** link annotations (Media group; no widget). |
 | `image-catalog.yaml` | CNPG **ImageCatalog** for `timescale/timescaledb:2.25.1-pg18` (PG 18 / Timescale 2.25, same lineage as the chart’s bundled image). |
@@ -23,9 +23,9 @@ The chart itself is maintained upstream; this directory is wiring for **xd-net**
 - **Gateway API** HTTPRoute parent `shared` in namespace `gateway` (same pattern as other apps in this repo).
 - **StorageClass** `local-path` for the database (`postgres.yaml`); **`synology`** for Redis/backups/cache in `values.yaml` (change to match your cluster).
 - **CloudNativePG operator** installed cluster-wide (see **xd-net** / `cnpg-system`).
-- **Helm 3** on the machine where you run install commands.
+- **Helm 3** (used by Kustomize to render the vendored chart under `vendor/tracearr-0.1.0/tracearr/`).
 
-Tracearr is not published as a public **Helm repo index** or **OCI** chart, so `kubectl kustomize --enable-helm` cannot pull it by `repo`/`version` alone the way charts on Artifact Hub do. Either use the **vendored path** below or an **Argo CD Helm** application with `repoURL` = `https://github.com/connorgallopo/Tracearr` and `path` = `docker/helm/tracearr` if you prefer not to vendor.
+The upstream chart is not on a public Helm repo index; this app **vendors** it so `kubectl kustomize --enable-helm` can install app + Redis alongside the HTTPRoute and CNPG cluster in one apply.
 
 ## Before you apply
 
@@ -49,21 +49,13 @@ Tracearr is not published as a public **Helm repo index** or **OCI** chart, so `
    kubectl apply -f secrets/tracearr-db.yaml   # after SOPS encrypt + real values
    ```
 
-2. **Cluster extras** (namespace, route, CNPG DB):
+2. **Apply** (namespace, CNPG, Helm app + Redis, HTTPRoute — needs `--enable-helm` so the `tracearr` Service exists for the route):
 
    ```bash
-   kubectl apply -k "$HOME/Projects/xd-net-apps/apps/tracearr"
+   kubectl kustomize "$HOME/Projects/xd-net-apps/apps/tracearr" --enable-helm | kubectl apply -f -
    ```
 
-   Wait until `kubectl cnpg status -n tracearr tracearr-db` reports the cluster ready.
-
-3. **Helm release** (app + Redis; DB is external CNPG):
-
-   ```bash
-   helm upgrade --install tracearr "$HOME/Projects/xd-net-apps/apps/tracearr/vendor/tracearr-0.1.0/tracearr" \
-     --namespace tracearr \
-     -f "$HOME/Projects/xd-net-apps/apps/tracearr/values.yaml"
-   ```
+   Wait until `kubectl cnpg status -n tracearr tracearr-db` reports the cluster ready and `kubectl get svc tracearr -n tracearr` exists.
 
 Back up `JWT_SECRET` and `COOKIE_SECRET` from `tracearr-db` after first install; changing them invalidates sessions. `timescaledb_toolkit` is optional (Tracearr enables it only when the extension is available on the server); the CNPG image includes TimescaleDB and `pg_trgm`, not the HA image’s preinstalled toolkit.
 
@@ -77,14 +69,12 @@ CNPG provisions the **database PVC** (**10Gi**, `local-path`) via `postgres.yaml
 
 ## Refreshing the vendored chart
 
-When [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) changes, re-copy `Chart.yaml`, `values.yaml`, and everything under `templates/` from `main` (or a release tag), then adjust the `vendor/tracearr-<Chart.Version>/` directory name if `Chart.yaml` `version` bumps. Re-run `helm upgrade` with the new path.
+When [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) changes, re-copy `Chart.yaml`, `values.yaml`, and everything under `templates/` from `main` (or a release tag), then adjust the `vendor/tracearr-<Chart.Version>/` directory name and `helmCharts.version` in `kustomization.yaml` if `Chart.yaml` `version` bumps. Re-apply with `kubectl kustomize … --enable-helm | kubectl apply -f -`.
 
 ## Upgrading the running release
 
 ```bash
-helm upgrade tracearr "$HOME/Projects/xd-net-apps/apps/tracearr/vendor/tracearr-0.1.0/tracearr" \
-  --namespace tracearr \
-  -f "$HOME/Projects/xd-net-apps/apps/tracearr/values.yaml"
+kubectl kustomize "$HOME/Projects/xd-net-apps/apps/tracearr" --enable-helm | kubectl apply -f -
 ```
 
 See upstream [Upgrading](https://docs.tracearr.com/getting-started/installation/kubernetes) notes for database password changes and chart behavior across versions.
