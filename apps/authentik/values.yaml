@@ -58,8 +58,22 @@ geoip:
     secretName: authentik-geoip
     accountId: account_id
     licenseKey: license_key
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
 
 worker:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
   # Schedule on the same node as server (required for ReadWriteOnce authentik-data).
   affinity:
     podAffinity:
@@ -78,6 +92,13 @@ worker:
       type: RuntimeDefault
 
 server:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
   initContainers:
     - name: authentik-data-chown
       image: docker.io/library/busybox:1.36

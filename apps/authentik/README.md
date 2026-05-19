@@ -12,7 +12,18 @@ PostgreSQL is a **[CloudNativePG](https://cloudnative-pg.io/) `Cluster`** (`post
 | `namespace.yaml` | `authentik` namespace. |
 | `postgres.yaml` | CNPG cluster **`authentik-db`** (single instance, **`local-path`** PVC, stock `postgresql` image). |
 | `pvc-authentik-data.yaml` | **`authentik-data`** PVC (**Synology** `storageClass` **`synology`**, **ReadWriteOnce**, **1Gi**) at **`/data`**. Server and worker are pinned to the same node via **`worker` podAffinity** in `values.yaml`. |
-| `values.yaml` | **`global.volumes`** / **`volumeMounts`** for `/data`, `AUTHENTIK_HOST`, **`AUTHENTIK_SECRET_KEY`**, Gateway **`server.route.main`**, external Postgres, **GeoIP**, Bitnami **disabled**. |
+| `values.yaml` | **`global.volumes`** / **`volumeMounts`** for `/data`, `AUTHENTIK_HOST`, **`AUTHENTIK_SECRET_KEY`**, Gateway **`server.route.main`**, external Postgres, **GeoIP**, Bitnami **disabled**, **memory requests/limits**. |
+
+## Resources
+
+Set in `values.yaml` and `postgres.yaml` from `kubectl top` (server ~450Mi, worker ~460Mi, CNPG ~330Mi). Server and worker were **BestEffort** before this and were OOM-killed on busy nodes.
+
+| Component | Request | Limit |
+|-----------|---------|-------|
+| `server` | 512Mi | 1Gi |
+| `worker` | 512Mi | 1Gi |
+| GeoIP sidecar | 64Mi | 256Mi |
+| `authentik-db` (CNPG) | 384Mi | 768Mi |
 
 ## Before you apply
 

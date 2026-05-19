@@ -16,6 +16,17 @@
 | `service.yaml` | ClusterIP **`tubearchivist`** → port **8000** (HTTPRoute backend). |
 | `httproute.yaml` | Gateway **`shared`** in **`gateway`**; hostname **`tubearchivist.net.ecksd.ee`**. |
 
+## Resources
+
+Memory requests/limits are set from [upstream compose](https://github.com/tubearchivist/tubearchivist/blob/master/docker-compose.yml) defaults and live `kubectl top` on the cluster (May 2026). Adjust if your index grows.
+
+| Workload | Request | Limit | Notes |
+|----------|---------|-------|--------|
+| `archivist-es` | 1536Mi | 3Gi | Heap **1g** (upstream); index **~35Mi** / 2.3k videos — prior 1536m heap was oversized, not index-driven |
+| `tubearchivist` | 768Mi | 1536Mi | ~730Mi observed |
+| `archivist-redis` | 64Mi | 256Mi | ~5Mi idle |
+| `bgutil-provider` | 128Mi | 384Mi | ~70Mi observed |
+
 ## VPN egress
 
 YouTube-related pods use **[pod-gateway](https://github.com/angelnu/pod-gateway)** per-pod label **`vpn-gateway: "true"`** on `tubearchivist` and `bgutil-provider` only ([vpn-gateway](../vpn-gateway/README.md)). The namespace is labeled **`allows-vpn-gateway: "true"`** so the webhook can run there. Elasticsearch and Redis have no pod label and stay on normal cluster routing.

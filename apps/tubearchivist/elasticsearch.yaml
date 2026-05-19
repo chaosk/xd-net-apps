@@ -36,7 +36,8 @@ spec:
                   name: tubearchivist
                   key: ELASTIC_PASSWORD
             - name: ES_JAVA_OPTS
-              value: "-Xms1536m -Xmx1536m"
+              # Upstream compose: 1g. Index ~35Mi store / ~2.3k videos (May 2026); heap used ~790Mi — 1g is enough for data.
+              value: "-Xms1g -Xmx1g"
             - name: xpack.security.enabled
               value: "true"
             - name: discovery.type
@@ -52,10 +53,10 @@ spec:
               mountPath: /usr/share/elasticsearch/data
           resources:
             requests:
-              memory: 3Gi
+              memory: 1536Mi
               cpu: 500m
             limits:
-              memory: 4Gi
+              memory: 3Gi
               cpu: "2"
       volumes:
         - name: data

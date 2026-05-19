@@ -21,8 +21,22 @@ externalDatabase:
 redis:
   persistence:
     storageClass: synology
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
 
 tracearr:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
   backups:
     storageClass: synology
   imageCache:

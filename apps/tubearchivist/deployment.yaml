@@ -68,10 +68,10 @@ spec:
             timeoutSeconds: 10
           resources:
             requests:
-              memory: 512Mi
+              memory: 768Mi
               cpu: 250m
             limits:
-              memory: 2Gi
+              memory: 1536Mi
               cpu: "2"
       volumes:
         - name: youtube

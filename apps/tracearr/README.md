@@ -11,7 +11,7 @@
 | `httproute.yaml` | Gateway route + **[Homepage](https://gethomepage.dev/)** link annotations (Media group; no widget). |
 | `image-catalog.yaml` | CNPG **ImageCatalog** for `timescale/timescaledb:2.25.1-pg18` (PG 18 / Timescale 2.25, same lineage as the chart’s bundled image). |
 | `postgres.yaml` | CNPG cluster **`tracearr-db`** (single instance, **10Gi** on **`local-path`**, Timescale + `pg_trgm` via `postInitApplicationSQL`). |
-| `values.yaml` | Helm overrides: **`timescale.enabled: false`**, **`externalDatabase.host: tracearr-db-rw`**, Redis/backups/cache storage, `ingress.enabled: false`. |
+| `values.yaml` | Helm overrides: **`timescale.enabled: false`**, **`externalDatabase.host: tracearr-db-rw`**, app/Redis **resources**, backups/cache storage, `ingress.enabled: false`. |
 | `vendor/tracearr-0.1.0/tracearr/` | Vendored copy of upstream [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) so `helm` does not need a separate `git clone`. |
 
 PostgreSQL is **[CloudNativePG](https://cloudnative-pg.io/)** (operator from **xd-net**), not the chart’s bundled TimescaleDB StatefulSet. The chart still deploys **Redis** and the Tracearr app.
