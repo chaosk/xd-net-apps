@@ -14,15 +14,13 @@ controllers:
             enabled: true
             custom: true
             spec:
-              httpGet:
-                path: /system/health
+              tcpSocket:
                 port: 6767
           readiness:
             enabled: true
             custom: true
             spec:
-              httpGet:
-                path: /system/health
+              tcpSocket:
                 port: 6767
         resources:
           requests:
