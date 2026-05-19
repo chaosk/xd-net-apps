@@ -1,0 +1,28 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: prowlarr
+  namespace: prowlarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Media
+    gethomepage.dev/name: Prowlarr
+    gethomepage.dev/description: Indexer manager
+    gethomepage.dev/icon: si-prowlarr
+    gethomepage.dev/href: "https://prowlarr.net.ecksd.ee"
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=prowlarr
+spec:
+  parentRefs:
+    - name: shared
+      namespace: gateway
+  hostnames:
+    - prowlarr.net.ecksd.ee
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: prowlarr
+          port: 9696

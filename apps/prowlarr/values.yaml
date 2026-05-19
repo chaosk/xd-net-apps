@@ -1,0 +1,52 @@
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/home-operations/prowlarr
+          tag: "2.3.6.5351"
+          pullPolicy: IfNotPresent
+        env:
+          TZ: UTC
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /ping
+                port: 9696
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /ping
+                port: 9696
+        resources:
+          requests:
+            cpu: 25m
+            memory: 256Mi
+          limits:
+            cpu: "2"
+            memory: 1Gi
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 9696
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: prowlarr-config
+    globalMounts:
+      - path: /config
+
+defaultPodOptions:
+  securityContext:
+    fsGroup: 568
+    fsGroupChangePolicy: OnRootMismatch
