@@ -69,7 +69,7 @@ CNPG provisions the **database PVC** (**10Gi**, `local-path`) via `postgres.yaml
 
 ## Refreshing the vendored chart
 
-When [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) changes, re-copy `Chart.yaml`, `values.yaml`, and everything under `templates/` from `main` (or a release tag), then adjust the `vendor/tracearr-<Chart.Version>/` directory name and `helmCharts.version` in `kustomization.yaml` if `Chart.yaml` `version` bumps. Re-apply with `kubectl kustomize … --enable-helm | kubectl apply -f -`.
+When [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) changes, replace the whole `vendor/tracearr-<Chart.Version>/tracearr/` tree from upstream (do not patch files in place). Adjust `helmCharts.version` in `kustomization.yaml` if `Chart.yaml` `version` bumps. Bump the app image in **`values.yaml`** (`tracearr.image.tag`), not in the vendored chart. Re-apply with `kubectl kustomize … --enable-helm | kubectl apply -f -`.
 
 ## Upgrading the running release
 

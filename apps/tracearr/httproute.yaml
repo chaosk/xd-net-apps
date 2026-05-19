@@ -4,6 +4,8 @@ metadata:
   name: tracearr
   namespace: tracearr
   annotations:
+    # After Helm Service exists; avoids Argo applying the route before tracearr Svc (stale BackendNotFound until reconcile).
+    argocd.argoproj.io/sync-wave: "10"
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Media
     gethomepage.dev/name: Tracearr

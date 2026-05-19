@@ -30,6 +30,8 @@ redis:
       memory: 512Mi
 
 tracearr:
+  image:
+    tag: "1.4.28"  # ghcr.io/connorgallopo/tracearr (vendored chart appVersion is not bumped)
   resources:
     requests:
       cpu: 250m
