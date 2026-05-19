@@ -58,6 +58,12 @@ spec:
               name: homepage-sonarr-widget
               key: HOMEPAGE_VAR_SONARR_API_KEY
               optional: true
+        - name: HOMEPAGE_VAR_RADARR_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homepage-radarr-widget
+              key: HOMEPAGE_VAR_RADARR_API_KEY
+              optional: true
         volumeMounts:
         - name: config
           mountPath: /app/config

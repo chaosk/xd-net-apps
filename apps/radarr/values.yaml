@@ -1,0 +1,57 @@
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/home-operations/radarr
+          tag: "6.1.2.10359"
+          pullPolicy: IfNotPresent
+        env:
+          TZ: UTC
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /ping
+                port: 7878
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /ping
+                port: 7878
+        resources:
+          requests:
+            cpu: 25m
+            memory: 256Mi
+          limits:
+            cpu: "2"
+            memory: 1Gi
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 7878
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: radarr-config
+    globalMounts:
+      - path: /config
+  media:
+    enabled: true
+    existingClaim: radarr-media
+    globalMounts:
+      - path: /data/media
+
+defaultPodOptions:
+  securityContext:
+    fsGroup: 568
+    fsGroupChangePolicy: OnRootMismatch
