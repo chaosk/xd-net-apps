@@ -1,0 +1,28 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: bazarr
+  namespace: bazarr
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Media
+    gethomepage.dev/name: Bazarr
+    gethomepage.dev/description: Subtitles for Sonarr and Radarr
+    gethomepage.dev/icon: si-bazarr
+    gethomepage.dev/href: "https://bazarr.net.ecksd.ee"
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=bazarr
+spec:
+  parentRefs:
+    - name: shared
+      namespace: gateway
+  hostnames:
+    - bazarr.net.ecksd.ee
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: bazarr
+          port: 6767
