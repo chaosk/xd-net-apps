@@ -13,6 +13,10 @@ metadata:
     gethomepage.dev/icon: mdi-chart-timeline-variant
     gethomepage.dev/href: "https://tracearr.net.ecksd.ee"
     gethomepage.dev/pod-selector: app.kubernetes.io/name=tracearr,app.kubernetes.io/instance=tracearr,app.kubernetes.io/component=server
+    # Plex widget on the Tracearr tile (library counts); Tracearr widget is on the Plex tile.
+    gethomepage.dev/widget.type: plex
+    gethomepage.dev/widget.url: "http://plex.plex.svc.cluster.local:32400"
+    gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_PLEX_TOKEN}}"
 spec:
   parentRefs:
     - name: shared

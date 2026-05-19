@@ -12,7 +12,7 @@
 | `namespace.yaml` | **`plex`** namespace. |
 | `pvc.yaml` | **`plex-config`** PVC (**Synology** `StorageClass` **`synology`**, **ReadWriteOnce**, **20Gi**) for Plex application data (`pms.configExistingClaim`). |
 | `nfs-media.yaml` | Static **NFS** PV **`plex-media-pv`** + claim **`plex-media`** (**ReadWriteMany**, empty `storageClassName`) bound for the chart mount at **`/media`**. |
-| `values.yaml` | **`fullnameOverride`**, **`httpRoute`** (Gateway **`parentRefs`**, **`hostnames`**, Homepage annotations), **`nodeSelector`**, **`pms.configExistingClaim`**, **`extraVolumes` / `extraVolumeMounts`** (NFS at **`/media`**), resource requests including **Intel GPU**. |
+| `values.yaml` | **`fullnameOverride`**, **`httpRoute`** (Gateway, Homepage link + **Tracearr** widget on this tile), **`nodeSelector`**, **`pms.configExistingClaim`**, **`extraVolumes` / `extraVolumeMounts`** (NFS at **`/media`**), resource requests including **Intel GPU**. |
 
 ## Before you apply
 

@@ -68,6 +68,8 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `immich-db.yaml` | `immich` | CNPG bootstrap + Immich connection (`immich-db`, keys `username`, `password`, `host`, `user`, `dbname`). |
 | `homepage-authentik-widget.yaml` | `homepage` | Authentik API token for Homepage widget via env `HOMEPAGE_VAR_AUTHENTIK_TOKEN` ([widget](https://gethomepage.dev/widgets/services/authentik/), [secrets](https://gethomepage.dev/installation/docker/#secrets)). |
 | `homepage-tubearchivist-widget.yaml` | `homepage` | Tube Archivist API token for Homepage widget via env `HOMEPAGE_VAR_TUBEARCHIVIST_API_KEY` ([widget](https://gethomepage.dev/widgets/services/tubearchivist/)). |
+| `homepage-tracearr-widget.yaml` | `homepage` | Tracearr API key for Homepage widget via env `HOMEPAGE_VAR_TRACEARR_API_KEY` ([widget](https://gethomepage.dev/widgets/services/tracearr/)); shown on the **Plex** tile. |
+| `homepage-plex-widget.yaml` | `homepage` | Plex token for Homepage widget via env `HOMEPAGE_VAR_PLEX_TOKEN` ([widget](https://gethomepage.dev/widgets/services/plex/)); shown on the **Tracearr** tile. |
 | `tubearchivist.yaml` | `tubearchivist` | Elasticsearch (`tubearchivist`, keys `ELASTIC_PASSWORD`). See [env vars](https://docs.tubearchivist.com/installation/env-vars/). |
 | `vpn-gateway.yaml` | `vpn-gateway` | Gluetun VPN (`vpn-gateway`). See [vpn-gateway README](../apps/vpn-gateway/README.md). |
 | `tracearr-db.yaml` | `tracearr` | CNPG bootstrap + Tracearr Helm (`tracearr-db`: `username`, `password`, `DB_PASSWORD`, `JWT_SECRET`, `COOKIE_SECRET`; `DB_PASSWORD` must match `password`). |

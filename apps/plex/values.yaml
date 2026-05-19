@@ -17,6 +17,12 @@ httpRoute:
     gethomepage.dev/description: Media server
     gethomepage.dev/icon: si-plex
     gethomepage.dev/pod-selector: app.kubernetes.io/name=plex-media-server
+    # Tracearr widget on the Plex tile (stream stats); Plex widget is on the Tracearr tile.
+    gethomepage.dev/widget.type: tracearr
+    gethomepage.dev/widget.url: "http://tracearr.tracearr.svc.cluster.local:3000"
+    gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_TRACEARR_API_KEY}}"
+    gethomepage.dev/widget.view: "both"
+    gethomepage.dev/widget.showEpisodeNumber: "true"
 
 service:
   type: ClusterIP

@@ -8,7 +8,7 @@
 |--------|------|
 | `kustomization.yaml` | **Namespace**, **HTTPRoute**, **ImageCatalog**, CNPG **`Cluster`**, and **vendored Helm chart** (`helmCharts` + `values.yaml`). |
 | `namespace.yaml` | `tracearr` namespace. |
-| `httproute.yaml` | Gateway route + **[Homepage](https://gethomepage.dev/)** link annotations (Media group; no widget). |
+| `httproute.yaml` | Gateway route + **[Homepage](https://gethomepage.dev/)** annotations (Media group; **Plex** widget on this tile). |
 | `image-catalog.yaml` | CNPG **ImageCatalog** for `timescale/timescaledb:2.25.1-pg18` (PG 18 / Timescale 2.25, same lineage as the chart’s bundled image). |
 | `postgres.yaml` | CNPG cluster **`tracearr-db`** (Timescale image, **`postgresUID`/`postgresGID` 70**, **10Gi** `local-path`, `postInitApplicationSQL` for Timescale + `pg_trgm`). |
 | `values.yaml` | Helm overrides: **`timescale.enabled: false`**, **`externalDatabase.host: tracearr-db-rw`**, app/Redis **resources**, backups/cache storage, `ingress.enabled: false`. |

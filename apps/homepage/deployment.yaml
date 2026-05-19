@@ -40,6 +40,18 @@ spec:
               name: homepage-tubearchivist-widget
               key: HOMEPAGE_VAR_TUBEARCHIVIST_API_KEY
               optional: true
+        - name: HOMEPAGE_VAR_TRACEARR_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homepage-tracearr-widget
+              key: HOMEPAGE_VAR_TRACEARR_API_KEY
+              optional: true
+        - name: HOMEPAGE_VAR_PLEX_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: homepage-plex-widget
+              key: HOMEPAGE_VAR_PLEX_TOKEN
+              optional: true
         volumeMounts:
         - name: config
           mountPath: /app/config
