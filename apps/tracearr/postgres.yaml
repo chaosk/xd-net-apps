@@ -4,6 +4,9 @@ metadata:
   name: tracearr-db
 spec:
   instances: 1
+  # CNPG defaults to UID 26 (RHEL-style); timescale/timescaledb image uses postgres:70.
+  postgresUID: 70
+  postgresGID: 70
   imageCatalogRef:
     apiGroup: postgresql.cnpg.io
     kind: ImageCatalog

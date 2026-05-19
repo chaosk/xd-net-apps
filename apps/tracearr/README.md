@@ -10,7 +10,7 @@
 | `namespace.yaml` | `tracearr` namespace. |
 | `httproute.yaml` | Gateway route + **[Homepage](https://gethomepage.dev/)** link annotations (Media group; no widget). |
 | `image-catalog.yaml` | CNPG **ImageCatalog** for `timescale/timescaledb:2.25.1-pg18` (PG 18 / Timescale 2.25, same lineage as the chart’s bundled image). |
-| `postgres.yaml` | CNPG cluster **`tracearr-db`** (single instance, **10Gi** on **`local-path`**, Timescale + `pg_trgm` via `postInitApplicationSQL`). |
+| `postgres.yaml` | CNPG cluster **`tracearr-db`** (Timescale image, **`postgresUID`/`postgresGID` 70**, **10Gi** `local-path`, `postInitApplicationSQL` for Timescale + `pg_trgm`). |
 | `values.yaml` | Helm overrides: **`timescale.enabled: false`**, **`externalDatabase.host: tracearr-db-rw`**, app/Redis **resources**, backups/cache storage, `ingress.enabled: false`. |
 | `vendor/tracearr-0.1.0/tracearr/` | Vendored copy of upstream [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) so `helm` does not need a separate `git clone`. |
 
