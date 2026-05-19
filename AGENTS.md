@@ -29,6 +29,12 @@ When the user asks to commit and the tree has **unrelated** changes, make multip
 
 Use the same standard as commit bodies: complete sentences, good grammar, and relevant detail only—enough for review without repeating the entire diff.
 
+## Vendored Helm charts
+
+Some apps ship an upstream chart under `apps/<app>/vendor/` (for example Tracearr). **Do not edit files inside `vendor/`** — treat that tree as a read-only copy from upstream.
+
+Put all cluster-specific and version overrides in **`values.yaml`**, `kustomization.yaml`, and other manifests **outside** `vendor/` (image `tag`, CNPG, HTTPRoute, resources). To refresh a chart, replace the vendor directory from upstream and re-apply your outer overrides only.
+
 ## App READMEs
 
 Document how to install and operate the app: prerequisites, secrets, apply order, and non-obvious wiring (storage classes, Gateway parents, CNPG image quirks worth encoding in manifests).
