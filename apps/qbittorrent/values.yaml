@@ -5,7 +5,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/home-operations/qbittorrent
-          tag: "5.0.4"
+          tag: "5.1.4"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -43,11 +43,6 @@ persistence:
     existingClaim: qbittorrent-config
     globalMounts:
       - path: /config
-  media:
-    enabled: true
-    existingClaim: qbittorrent-media
-    globalMounts:
-      - path: /data/media
   torrents:
     enabled: true
     existingClaim: qbittorrent-torrents

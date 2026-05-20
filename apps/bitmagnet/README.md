@@ -22,6 +22,7 @@ Self-hosted [Bitmagnet](https://bitmagnet.io/) DHT crawler and torrent search (W
 
 DHT and BitTorrent traffic use **[pod-gateway](../vpn-gateway/README.md)** (same as qBittorrent):
 
+- Namespace **`pod-security.kubernetes.io/enforce: privileged`** (pod-gateway requires `NET_ADMIN` / `NET_RAW`)
 - Namespace label **`allows-vpn-gateway: "true"`**
 - Pod label **`vpn-gateway: "true"`** on the Bitmagnet deployment
 - **`bitmagnet`** in `routed_namespaces` in `apps/vpn-gateway/values-pod-gateway.yaml`
