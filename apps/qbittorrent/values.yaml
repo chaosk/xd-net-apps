@@ -4,8 +4,8 @@ controllers:
     containers:
       main:
         image:
-          repository: ghcr.io/home-operations/radarr
-          tag: "6.1.2.10359"
+          repository: ghcr.io/home-operations/qbittorrent
+          tag: "5.0.4"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -14,49 +14,49 @@ controllers:
             enabled: true
             custom: true
             spec:
-              httpGet:
-                path: /ping
-                port: 7878
+              tcpSocket:
+                port: 8080
           readiness:
             enabled: true
             custom: true
             spec:
-              httpGet:
-                path: /ping
-                port: 7878
+              tcpSocket:
+                port: 8080
         resources:
           requests:
-            cpu: 25m
+            cpu: 50m
             memory: 256Mi
           limits:
-            cpu: "2"
-            memory: 1Gi
+            cpu: "4"
+            memory: 2Gi
 
 service:
   main:
     controller: main
     ports:
       http:
-        port: 7878
+        port: 8080
 
 persistence:
   config:
     enabled: true
-    existingClaim: radarr-config
+    existingClaim: qbittorrent-config
     globalMounts:
       - path: /config
   media:
     enabled: true
-    existingClaim: radarr-media
+    existingClaim: qbittorrent-media
     globalMounts:
       - path: /data/media
   torrents:
     enabled: true
-    existingClaim: radarr-torrents
+    existingClaim: qbittorrent-torrents
     globalMounts:
       - path: /data/torrents
 
 defaultPodOptions:
+  labels:
+    vpn-gateway: "true"
   securityContext:
     fsGroup: 568
     fsGroupChangePolicy: OnRootMismatch

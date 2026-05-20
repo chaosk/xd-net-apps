@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bitmagnet-config
+  namespace: bitmagnet
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: synology
+  resources:
+    requests:
+      storage: 5Gi

@@ -4,6 +4,8 @@ clusterName: cluster.local
 
 routed_namespaces:
   - tubearchivist
+  - qbittorrent
+  - bitmagnet
 
 DNS: 172.16.0.1
 DNSPolicy: None

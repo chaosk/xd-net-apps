@@ -51,6 +51,11 @@ persistence:
     existingClaim: sonarr-media
     globalMounts:
       - path: /data/media
+  torrents:
+    enabled: true
+    existingClaim: sonarr-torrents
+    globalMounts:
+      - path: /data/torrents
 
 defaultPodOptions:
   securityContext:

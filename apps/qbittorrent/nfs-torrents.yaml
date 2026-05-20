@@ -1,0 +1,32 @@
+# Ingest torrents export; separate PV per namespace.
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: qbittorrent-torrents-pv
+spec:
+  capacity:
+    storage: 8Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - nfsvers=4.1
+    - hard
+  nfs:
+    server: nas.net.ecksd.ee
+    path: /volume1/ingest/torrents
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qbittorrent-torrents
+  namespace: qbittorrent
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 8Ti
+  volumeName: qbittorrent-torrents-pv
+  storageClassName: ""

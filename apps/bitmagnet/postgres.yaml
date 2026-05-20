@@ -1,0 +1,27 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: bitmagnet-db
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.3
+  storage:
+    storageClass: local-path
+    size: 300Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  postgresql:
+    parameters:
+      shared_buffers: 256MB
+      max_connections: "100"
+  bootstrap:
+    initdb:
+      database: bitmagnet
+      owner: bitmagnet
+      secret:
+        name: bitmagnet-db

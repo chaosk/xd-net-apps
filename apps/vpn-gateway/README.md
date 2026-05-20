@@ -12,6 +12,12 @@
 tubearchivist / bgutil (vpn-gateway=true)
   → VXLAN → vpn-gateway-pod-gateway-main.vpn-gateway.svc → Gluetun → VPN
 
+qbittorrent (vpn-gateway=true)
+  → same path (torrent client egress only)
+
+bitmagnet (vpn-gateway=true)
+  → same path (DHT and torrent egress; Postgres stays in-cluster via bitmagnet-db-rw)
+
 archivist-es / archivist-redis (no label)
   → normal cluster routing
 ```
@@ -22,7 +28,7 @@ Helm release **`vpn-gateway`** (`angelnu-charts/pod-gateway`) via `kustomization
 
 1. SOPS-encrypt `secrets/vpn-gateway.yaml`, sync **platform-secrets**
 2. `kubectl kustomize apps/vpn-gateway --enable-helm | kubectl apply -f -`
-3. `kubectl apply -k apps/tubearchivist` (pods need **`vpn-gateway: "true"`** on template)
+3. Recreate opted-in pods (e.g. `kubectl apply -k apps/tubearchivist`, `kubectl apply` for qBittorrent) with **`vpn-gateway: "true"`** on the pod template
 
 ## Verify
 

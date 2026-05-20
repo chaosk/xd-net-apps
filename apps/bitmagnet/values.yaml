@@ -1,0 +1,90 @@
+# https://bitmagnet.io/setup/installation.html
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/bitmagnet-io/bitmagnet
+          tag: v0.10.0
+          pullPolicy: IfNotPresent
+        args:
+          - worker
+          - run
+          - --all
+        env:
+          TZ: UTC
+          POSTGRES_HOST:
+            value: bitmagnet-db-rw
+          POSTGRES_NAME:
+            value: bitmagnet
+          POSTGRES_USER:
+            valueFrom:
+              secretKeyRef:
+                name: bitmagnet-db
+                key: username
+          POSTGRES_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: bitmagnet-db
+                key: password
+          TMDB_API_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: bitmagnet
+                key: TMDB_API_KEY
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /status
+                port: 3333
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /status
+                port: 3333
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: "4"
+            memory: 2Gi
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 3333
+  torrent-tcp:
+    controller: main
+    ports:
+      bittorrent:
+        port: 3334
+        protocol: TCP
+  torrent-udp:
+    controller: main
+    ports:
+      bittorrent:
+        port: 3334
+        protocol: UDP
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: bitmagnet-config
+    globalMounts:
+      - path: /root/.config/bitmagnet
+
+defaultPodOptions:
+  labels:
+    vpn-gateway: "true"
+  securityContext:
+    fsGroup: 568
+    fsGroupChangePolicy: OnRootMismatch

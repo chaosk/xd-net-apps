@@ -1,0 +1,28 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: bitmagnet
+  namespace: bitmagnet
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Media
+    gethomepage.dev/name: Bitmagnet
+    gethomepage.dev/description: DHT indexer and torrent search
+    gethomepage.dev/icon: mdi-magnet-on
+    gethomepage.dev/href: "https://bitmagnet.net.ecksd.ee"
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=bitmagnet
+spec:
+  parentRefs:
+    - name: shared
+      namespace: gateway
+  hostnames:
+    - bitmagnet.net.ecksd.ee
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: bitmagnet-main
+          port: 3333
