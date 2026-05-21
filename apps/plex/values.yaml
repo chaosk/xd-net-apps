@@ -12,6 +12,7 @@ httpRoute:
   parentRefs:
     - name: shared
       namespace: gateway
+      sectionName: https
   hostnames:
     - plex.net.ecksd.ee
   annotations:

@@ -22,6 +22,7 @@ spec:
   parentRefs:
     - name: shared
       namespace: gateway
+      sectionName: https
   hostnames:
     - tracearr.net.ecksd.ee
   rules:

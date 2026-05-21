@@ -16,6 +16,7 @@ spec:
   parentRefs:
     - name: shared
       namespace: gateway
+      sectionName: https
   hostnames:
     - bazarr.net.ecksd.ee
   rules:

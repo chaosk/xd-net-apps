@@ -9,6 +9,7 @@ resources:
   - nfs-media.yaml
   - nfs-torrents.yaml
   - httproute.yaml
+  - securitypolicy-forward-auth.yaml
 
 helmCharts:
   - name: app-template

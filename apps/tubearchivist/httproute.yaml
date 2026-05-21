@@ -18,6 +18,7 @@ spec:
   parentRefs:
     - name: shared
       namespace: gateway
+      sectionName: https
   hostnames:
     - tubearchivist.net.ecksd.ee
   rules:

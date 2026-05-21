@@ -12,9 +12,14 @@
 | `elasticsearch.yaml` | **`archivist-es`** StatefulSet + Service (`bbilly1/tubearchivist-es:latest`, port **9200**). |
 | `redis.yaml` | **`archivist-redis`** StatefulSet + Service (`redis:7-alpine`, port **6379**). |
 | `bgutil-provider.yaml` | **[bgutil-ytdlp-pot-provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider)** (`brainicism/bgutil-ytdlp-pot-provider:1.3.1`, port **4416**). |
-| `deployment.yaml` | **`tubearchivist`** Deployment (`bbilly1/tubearchivist:v0.5.10`), mounts **`/youtube`** and **`/cache`**, **`Recreate`** strategy. |
+| `deployment.yaml` | **`tubearchivist`** Deployment (`bbilly1/tubearchivist:v0.5.10`), mounts **`/youtube`** and **`/cache`**, **`Recreate`** strategy; **`TA_ENABLE_AUTH_PROXY`** and Authentik username header for forward auth. |
 | `service.yaml` | ClusterIP **`tubearchivist`** → port **8000** (HTTPRoute backend). |
 | `httproute.yaml` | Gateway **`shared`** in **`gateway`**; hostname **`tubearchivist.net.ecksd.ee`**. |
+| `securitypolicy-forward-auth.yaml` | Envoy Gateway forward auth to Authentik for this HTTPRoute. |
+
+Forward auth needs **authentik** applied first (shared **ReferenceGrant** and outpost route). See **`apps/authentik/README.md`**. **`securitypolicy-forward-auth.yaml`** forwards **`X-Authentik-Username`** to the app; **`TA_AUTH_PROXY_LOGOUT_URL`** points at Authentik so logout does not immediately re-login.
+
+After the first forward-auth login, grant admin in **Settings → User** using the local **`TA_USERNAME`** / **`TA_PASSWORD`** account (see [forward auth](https://docs.tubearchivist.com/configuration/forward-auth/)).
 
 ## Resources
 

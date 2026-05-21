@@ -35,6 +35,12 @@ spec:
               value: tubearchivist
             - name: TA_PASSWORD
               value: tubearchivist
+            - name: TA_ENABLE_AUTH_PROXY
+              value: "true"
+            - name: TA_AUTH_PROXY_USERNAME_HEADER
+              value: X_AUTHENTIK_USERNAME
+            - name: TA_AUTH_PROXY_LOGOUT_URL
+              value: https://authentik.net.ecksd.ee
             - name: ELASTIC_PASSWORD
               valueFrom:
                 secretKeyRef:

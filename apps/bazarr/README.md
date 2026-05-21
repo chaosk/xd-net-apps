@@ -9,6 +9,9 @@ Subtitle management ([Bazarr](https://www.bazarr.media/)) via bjw-s `app-templat
 | `nfs-media.yaml` | RWX NFS library (same export as Plex). |
 | `values.yaml` | Image, health checks, mounts at `/config` and `/data/media`. |
 | `httproute.yaml` | `bazarr.net.ecksd.ee` via Gateway `shared`. |
+| `securitypolicy-forward-auth.yaml` | Envoy Gateway forward auth to Authentik for this HTTPRoute. |
+
+Forward auth needs **authentik** applied first (shared **ReferenceGrant** and outpost route). See **`apps/authentik/README.md`**.
 
 ## Apply
 

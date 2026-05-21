@@ -7,6 +7,7 @@ resources:
   - namespace.yaml
   - pvc-config.yaml
   - httproute.yaml
+  - securitypolicy-forward-auth.yaml
 
 helmCharts:
   - name: app-template

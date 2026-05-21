@@ -5,8 +5,9 @@ metadata:
   namespace: homepage
 spec:
   parentRefs:
-  - name: shared
-    namespace: gateway
+    - name: shared
+      namespace: gateway
+      sectionName: https
   hostnames:
   - net.ecksd.ee
   rules:

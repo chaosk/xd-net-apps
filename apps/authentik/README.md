@@ -12,7 +12,8 @@ PostgreSQL is a **[CloudNativePG](https://cloudnative-pg.io/) `Cluster`** (`post
 | `namespace.yaml` | `authentik` namespace. |
 | `postgres.yaml` | CNPG cluster **`authentik-db`** (single instance, **`local-path`** PVC, stock `postgresql` image). |
 | `pvc-authentik-data.yaml` | **`authentik-data`** PVC (**Synology** `storageClass` **`synology`**, **ReadWriteOnce**, **1Gi**) at **`/data`**. Server and worker are pinned to the same node via **`worker` podAffinity** in `values.yaml`. |
-| `values.yaml` | **`global.volumes`** / **`volumeMounts`** for `/data`, `AUTHENTIK_HOST`, **`AUTHENTIK_SECRET_KEY`**, Gateway **`server.route.main`**, external Postgres, **GeoIP**, Bitnami **disabled**, **memory requests/limits**. |
+| `referencegrant-forward-auth.yaml` | Shared **ReferenceGrant**: each app namespace with a forward-auth **SecurityPolicy** is listed under **`spec.from`**; all policies may call **`authentik-server`**. |
+| `values.yaml` | **`global.volumes`** / **`volumeMounts`** for `/data`, `AUTHENTIK_HOST`, **`AUTHENTIK_SECRET_KEY`**, Gateway **`server.route.main`** (includes `/outpost.goauthentik.io`), external Postgres, **GeoIP**, Bitnami **disabled**, **memory requests/limits**. |
 
 ## Resources
 
@@ -49,6 +50,12 @@ kubectl kustomize "$HOME/Projects/xd-net-apps/apps/authentik" --enable-helm | ku
 ```
 
 The Authentik chart no longer pulls Bitnami PostgreSQL (`postgresql.enabled: false`).
+
+## Forward auth (Envoy Gateway)
+
+Each protected app ships **`securitypolicy-forward-auth.yaml`** in its own namespace (targets that app’s **HTTPRoute**). This app supplies the shared **ReferenceGrant** and the **`/outpost.goauthentik.io`** route on **`authentik-server`** in `values.yaml`.
+
+To protect another app: copy Sonarr’s **SecurityPolicy**, add a **`spec.from`** entry for that namespace in **`referencegrant-forward-auth.yaml`**, re-apply **authentik** then the app. In the Authentik UI, one **domain-level** forward-auth **Proxy provider** (e.g. cookie domain **`net.ecksd.ee`**) on the **embedded outpost** is usually enough for all `*.net.ecksd.ee` hostnames.
 
 ## After install
 

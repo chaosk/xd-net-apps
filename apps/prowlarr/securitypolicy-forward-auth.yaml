@@ -1,0 +1,26 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: forward-auth
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: prowlarr
+  extAuth:
+    failOpen: false
+    headersToExtAuth:
+      - cookie
+      - authorization
+      - accept
+      - x-forwarded-proto
+      - x-forwarded-host
+      - x-forwarded-for
+    http:
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: authentik-server
+          namespace: authentik
+          port: 80
+      path: /outpost.goauthentik.io/auth/envoy

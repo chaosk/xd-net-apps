@@ -10,6 +10,9 @@ TV automation ([Sonarr](https://sonarr.tv/)) via [bjw-s app-template](https://bj
 | `nfs-torrents.yaml` | RWX NFS ingest at `/volume1/ingest/torrents` → `/data/torrents`. |
 | `values.yaml` | Container image, probes, mounts at `/config`, `/data/media`, and `/data/torrents`. |
 | `httproute.yaml` | `sonarr.net.ecksd.ee` via Gateway `shared`; Homepage **sonarr** widget (API key in `secrets/homepage-sonarr-widget.yaml`). |
+| `securitypolicy-forward-auth.yaml` | Envoy Gateway forward auth to Authentik for this HTTPRoute. |
+
+Forward auth needs **authentik** applied first (shared **ReferenceGrant** and outpost route). In Authentik, use a **domain-level** forward-auth **Proxy provider** on the **embedded outpost** (see **`apps/authentik/README.md`**).
 
 ## Apply
 

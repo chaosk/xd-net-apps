@@ -146,5 +146,14 @@ server:
       parentRefs:
         - name: shared
           namespace: gateway
+          sectionName: https
       hostnames:
         - authentik.net.ecksd.ee
+      additionalRules:
+        - matches:
+            - path:
+                type: PathPrefix
+                value: /outpost.goauthentik.io
+          backendRefs:
+            - name: authentik-server
+              port: 80

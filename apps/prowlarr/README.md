@@ -8,6 +8,9 @@ Indexer manager ([Prowlarr](https://prowlarr.com/)) via bjw-s `app-template` and
 | `pvc-config.yaml` | App data on StorageClass `synology` (5Gi). |
 | `values.yaml` | Image, probes, mount at `/config`. |
 | `httproute.yaml` | `prowlarr.net.ecksd.ee` via Gateway `shared`. |
+| `securitypolicy-forward-auth.yaml` | Envoy Gateway forward auth to Authentik for this HTTPRoute. |
+
+Forward auth needs **authentik** applied first (shared **ReferenceGrant** and outpost route). See **`apps/authentik/README.md`**.
 
 ## Apply
 

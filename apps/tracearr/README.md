@@ -61,7 +61,7 @@ Back up `JWT_SECRET` and `COOKIE_SECRET` from `tracearr-db` after first install;
 
 ## Networking
 
-Tracearr relies on **WebSockets** and **SSE**. Your Gateway (or any ingress in front of it) must allow **HTTP upgrade** and timeouts long enough for idle streams. The upstream doc shows **nginx** annotations as an example; translate that to whatever controls idle timeouts on your path (`tracearr.net.ecksd.ee` → Gateway → Service `tracearr`).
+Tracearr relies on **WebSockets** and **SSE**. Your Gateway must allow **HTTP upgrade** and timeouts long enough for idle streams. The upstream doc shows **nginx** annotations as an example; tune timeouts on the Envoy Gateway path in **xd-net** if streams drop.
 
 ## Storage
 
