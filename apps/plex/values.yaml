@@ -1,5 +1,9 @@
 fullnameOverride: plex
 
+# Pin PMS image (chart 1.5.0 defaults to 1.43.0.10492-121068a07).
+image:
+  tag: "1.43.2.10687-563d026ea"
+
 ingress:
   enabled: false
 
