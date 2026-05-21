@@ -23,6 +23,14 @@ spec:
     - matches:
         - path:
             type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
             value: /
       backendRefs:
         - name: bazarr

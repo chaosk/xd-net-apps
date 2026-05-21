@@ -40,7 +40,7 @@ spec:
             - name: TA_AUTH_PROXY_USERNAME_HEADER
               value: X_AUTHENTIK_USERNAME
             - name: TA_AUTH_PROXY_LOGOUT_URL
-              value: https://authentik.net.ecksd.ee
+              value: https://tubearchivist.net.ecksd.ee/outpost.goauthentik.io/sign_out
             - name: ELASTIC_PASSWORD
               valueFrom:
                 secretKeyRef:

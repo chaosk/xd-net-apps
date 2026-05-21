@@ -53,9 +53,14 @@ The Authentik chart no longer pulls Bitnami PostgreSQL (`postgresql.enabled: fal
 
 ## Forward auth (Envoy Gateway)
 
-Each protected app ships **`securitypolicy-forward-auth.yaml`** in its own namespace (targets that app’s **HTTPRoute**). This app supplies the shared **ReferenceGrant** and the **`/outpost.goauthentik.io`** route on **`authentik-server`** in `values.yaml`.
+Two mechanisms work together:
 
-To protect another app: copy Sonarr’s **SecurityPolicy**, add a **`spec.from`** entry for that namespace in **`referencegrant-forward-auth.yaml`**, re-apply **authentik** then the app. In the Authentik UI, one **domain-level** forward-auth **Proxy provider** (e.g. cookie domain **`net.ecksd.ee`**) on the **embedded outpost** is usually enough for all `*.net.ecksd.ee` hostnames.
+1. **HTTPRoute** — On each protected app hostname and on **`authentik.net.ecksd.ee`**, paths under **`/outpost.goauthentik.io`** go to **`authentik-server`** (browser callbacks and outpost UI). App routes list this rule **before** the catch-all **`/`** rule to the app Service.
+2. **SecurityPolicy** — Envoy calls **`authentik-server`** in-cluster at **`/outpost.goauthentik.io/auth/envoy`** to allow or deny each request before it reaches the app.
+
+Each protected app ships **`securitypolicy-forward-auth.yaml`** and the outpost rule on its **HTTPRoute**. This app supplies the shared **ReferenceGrant** (for both **SecurityPolicy** and cross-namespace **HTTPRoute** backend refs) and **`additionalRules`** on the Authentik chart route in `values.yaml`.
+
+To protect another app: copy Sonarr’s **SecurityPolicy** and outpost **HTTPRoute** rule, add **`spec.from`** entries for that namespace in **`referencegrant-forward-auth.yaml`**, re-apply **authentik** then the app. In the Authentik UI, one **domain-level** forward-auth **Proxy provider** (cookie domain **`net.ecksd.ee`**) on the **embedded outpost** is usually enough for all `*.net.ecksd.ee` hostnames; **single-application** providers require the outpost path on that app’s hostname as above.
 
 ## After install
 
