@@ -12,6 +12,7 @@ immich:
     library:
       existingClaim: immich-library
   # Chart mounts secrets/immich-config.yaml (platform-secrets); do not set immich.configuration here.
+  configurationKind: Secret
   existingConfiguration: immich-config
 
 # GPU and DB env: server-only block below; top-level controllers still apply shared env to all components.
