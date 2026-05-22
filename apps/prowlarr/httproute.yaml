@@ -6,7 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "10"
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Media
+    gethomepage.dev/group: "Arr!"
     gethomepage.dev/name: Prowlarr
     gethomepage.dev/description: Indexer manager
     gethomepage.dev/icon: si-prowlarr

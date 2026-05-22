@@ -27,7 +27,21 @@ data:
 
   bookmarks.yaml: ""
 
-  services.yaml: ""
+  services.yaml: |
+    - Arr!:
+        - Upcoming:
+            description: TV show episodes
+            widget:
+              type: calendar
+              view: agenda
+              maxEvents: 7
+              integrations:
+                - type: sonarr
+                  service_group: Media
+                  service_name: Sonarr
+                  color: teal
+                  params:
+                    unmonitored: true
 
   widgets.yaml: |
     - kubernetes:
@@ -36,7 +50,7 @@ data:
           cpu: true
           memory: true
           showLabel: true
-          label: "cluster"
+          label: cluster
         nodes:
           show: true
           cpu: true
@@ -53,15 +67,8 @@ data:
 
   docker.yaml: ""
 
-  proxmox.yaml: |
-    ---
-    # pve:
-    # url: https://proxmox.host.or.ip:8006
-    # token: username@pam!Token ID
-    # secret: secret
+  proxmox.yaml: ""
 
-  custom.css: |
+  custom.css: ""
 
-  custom.js: |
-
-
+  custom.js: ""
