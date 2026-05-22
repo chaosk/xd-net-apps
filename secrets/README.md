@@ -72,6 +72,7 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `homepage-plex-widget.yaml` | `homepage` | Plex token for Homepage widget via env `HOMEPAGE_VAR_PLEX_TOKEN` ([widget](https://gethomepage.dev/widgets/services/plex/)); shown on the **Tracearr** tile. |
 | `homepage-sonarr-widget.yaml` | `homepage` | Sonarr API key for Homepage widget via env `HOMEPAGE_VAR_SONARR_API_KEY` ([widget](https://gethomepage.dev/widgets/services/sonarr/)); shown on the **Sonarr** tile. |
 | `homepage-radarr-widget.yaml` | `homepage` | Radarr API key for Homepage widget via env `HOMEPAGE_VAR_RADARR_API_KEY` ([widget](https://gethomepage.dev/widgets/services/radarr/)); shown on the **Radarr** tile. |
+| `homepage-immich-widget.yaml` | `homepage` | Immich API key for Homepage widget via env `HOMEPAGE_VAR_IMMICH_API_KEY` ([widget](https://gethomepage.dev/widgets/services/immich/)); shown on the **Immich** tile. |
 | `tubearchivist.yaml` | `tubearchivist` | Elasticsearch (`tubearchivist`, keys `ELASTIC_PASSWORD`). See [env vars](https://docs.tubearchivist.com/installation/env-vars/). |
 | `vpn-gateway.yaml` | `vpn-gateway` | Gluetun VPN (`vpn-gateway`). See [vpn-gateway README](../apps/vpn-gateway/README.md). |
 | `tracearr-db.yaml` | `tracearr` | CNPG bootstrap + Tracearr Helm (`tracearr-db`: `username`, `password`, `DB_PASSWORD`, `JWT_SECRET`, `COOKIE_SECRET`; `DB_PASSWORD` must match `password`). |

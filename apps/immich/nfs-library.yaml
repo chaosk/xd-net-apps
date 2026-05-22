@@ -1,0 +1,33 @@
+# NFS volume for Immich library (uploads / originals). Edit server, path, and capacity.
+# RWX so server and future workers can share the library if you scale out.
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-library-pv
+spec:
+  capacity:
+    storage: 4Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - nfsvers=4.1
+    - hard
+  nfs:
+    server: nas.net.ecksd.ee
+    path: /volume1/malachit/photos/
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-library
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 4Ti
+  volumeName: immich-library-pv
+  storageClassName: ""

@@ -1,0 +1,82 @@
+# Official Immich Helm chart — https://docs.immich.app/install/kubernetes/
+# Chart source: https://github.com/immich-app/immich-charts
+#
+# Requires Secret `immich-db` in namespace `immich` (CNPG bootstrap + app): see README.
+
+valkey:
+  enabled: true
+
+immich:
+  persistence:
+    library:
+      existingClaim: immich-library
+  configuration:
+    ffmpeg:
+      accel: qsv
+      accelDecode: true
+
+# GPU and DB env: server-only block below; top-level controllers still apply shared env to all components.
+server:
+  controllers:
+    main:
+      pod:
+        nodeSelector:
+          intel.feature.node.kubernetes.io/gpu: "true"
+      containers:
+        main:
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+              gpu.intel.com/i915: 1
+            limits:
+              memory: 8Gi
+              gpu.intel.com/i915: 1
+
+# OpenVINO backend for Intel Arc / Iris — https://docs.immich.app/features/ml-hardware-acceleration
+machine-learning:
+  controllers:
+    main:
+      pod:
+        nodeSelector:
+          intel.feature.node.kubernetes.io/gpu: "true"
+      containers:
+        main:
+          image:
+            tag: v2.7.5-openvino
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+              gpu.intel.com/i915: 1
+            limits:
+              memory: 6Gi
+              gpu.intel.com/i915: 1
+
+controllers:
+  main:
+    containers:
+      main:
+        image:
+          tag: v2.7.5
+        env:
+          DB_HOSTNAME:
+            valueFrom:
+              secretKeyRef:
+                name: immich-db
+                key: host
+          DB_USERNAME:
+            valueFrom:
+              secretKeyRef:
+                name: immich-db
+                key: user
+          DB_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: immich-db
+                key: password
+          DB_DATABASE_NAME:
+            valueFrom:
+              secretKeyRef:
+                name: immich-db
+                key: dbname
