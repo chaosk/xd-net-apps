@@ -24,6 +24,9 @@ spec:
       owner: immich
       secret:
         name: immich-db
+      # https://docs.immich.app/administration/postgres-standalone/#with-superuser-permission
+      postInitSQL:
+        - ALTER USER immich WITH SUPERUSER;
       postInitApplicationSQL:
         - CREATE EXTENSION vchord CASCADE;
         - CREATE EXTENSION earthdistance CASCADE;

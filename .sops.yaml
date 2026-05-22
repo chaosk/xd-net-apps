@@ -1,4 +1,8 @@
 creation_rules:
+  # Immich config is one multiline stringData key; # sops:encrypt inside the block is literal text, not a SOPS marker.
+  - path_regex: secrets/immich-config\.yaml$
+    encrypted_regex: ^immich-config\.yaml$
+    age: age19q6ulkl4tzn5dg4gg3kn2l65ptxpz5jzsv9z7lqqz8jflqndw4tqvple7f
   - path_regex: secrets/.*\.yaml$
     encrypted_comment_regex: sops:encrypt
     age: age19q6ulkl4tzn5dg4gg3kn2l65ptxpz5jzsv9z7lqqz8jflqndw4tqvple7f

@@ -2,6 +2,7 @@
 # Chart source: https://github.com/immich-app/immich-charts
 #
 # Requires Secret `immich-db` in namespace `immich` (CNPG bootstrap + app): see README.
+# App settings (OAuth, storage template, ffmpeg): Secret `immich-config` in secrets/ (SOPS).
 
 valkey:
   enabled: true
@@ -10,10 +11,8 @@ immich:
   persistence:
     library:
       existingClaim: immich-library
-  configuration:
-    ffmpeg:
-      accel: qsv
-      accelDecode: true
+  # Chart mounts secrets/immich-config.yaml (platform-secrets); do not set immich.configuration here.
+  existingConfiguration: immich-config
 
 # GPU and DB env: server-only block below; top-level controllers still apply shared env to all components.
 server:

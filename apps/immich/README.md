@@ -2,7 +2,7 @@
 
 Deploys [Immich](https://immich.app/) with the **official Helm chart** ([Kubernetes install docs](https://docs.immich.app/install/kubernetes/), chart repo [immich-charts](https://github.com/immich-app/immich-charts)).
 
-PostgreSQL is a **[CloudNativePG](https://cloudnative-pg.io/) `Cluster`** (`postgres.yaml`) using **[VectorChord](https://github.com/tensorchord/cloudnative-vectorchord)** (same pattern as [immich-charts `local/cloudnative-pg.yaml`](https://github.com/immich-app/immich-charts/blob/main/local/cloudnative-pg.yaml)). The CNPG operator is installed from **xd-net**.
+PostgreSQL is a **[CloudNativePG](https://cloudnative-pg.io/) `Cluster`** (`postgres.yaml`) using **[VectorChord](https://github.com/tensorchord/cloudnative-vectorchord)** with `shared_preload_libraries: vchord.so`, extensions `vchord` and `earthdistance`, and **`ALTER USER immich WITH SUPERUSER`** at bootstrap ([Immich pre-existing Postgres — with superuser](https://docs.immich.app/administration/postgres-standalone/#with-superuser-permission)). The CNPG operator is installed from **xd-net**.
 
 ## Before sync
 
@@ -22,11 +22,13 @@ PostgreSQL is a **[CloudNativePG](https://cloudnative-pg.io/) `Cluster`** (`post
 
    Encrypt with **SOPS** under `secrets/` and set **`metadata.namespace: immich`** ([`secrets/README.md`](../../secrets/README.md)).
 
-4. **Chart version** — `kustomization.yaml` pins `helmCharts.version`. Bump after checking [immich-charts releases](https://github.com/immich-app/immich-charts/releases). Override **`controllers.main.containers.main.image.tag`** in `values.yaml` when you want a newer Immich app version than the chart default.
+4. **Application settings** — Non-default options live in **`secrets/immich-config.yaml`** (Secret **`immich-config`**, key **`immich-config.yaml`**; whole key SOPS-encrypted — see **`secrets/README.md`**). The Helm chart mounts it via **`immich.existingConfiguration`** in `values.yaml`. Edit with `sops secrets/immich-config.yaml`. Compared to defaults: **OAuth** with Authentik, **storage template** enabled, **`server.externalDomain`** `https://photos.net.ecksd.ee`, **`ffmpeg.accel: qsv`** on GPU nodes.
 
-5. **Hardware transcoding** — `values.yaml` schedules **`immich-server`** on Intel GPU nodes (`intel.feature.node.kubernetes.io/gpu`, `gpu.intel.com/i915`) like Plex, with **`ffmpeg.accel: qsv`** in `immich.configuration`. The GPU node must reach the NFS library export. Confirm in **Administration → Video transcoding** after deploy; see [Immich hardware transcoding](https://docs.immich.app/features/hardware-transcoding/).
+5. **Chart version** — `kustomization.yaml` pins `helmCharts.version`. Bump after checking [immich-charts releases](https://github.com/immich-app/immich-charts/releases). Override **`controllers.main.containers.main.image.tag`** in `values.yaml` when you want a newer Immich app version than the chart default.
 
-6. **Hardware-accelerated ML (Intel Arc)** — **`immich-machine-learning`** uses image tag **`v2.7.5-openvino`** (OpenVINO for Intel discrete/integrated GPUs) on the same GPU nodes and **`gpu.intel.com/i915`** resource as Plex. Bump the **`-openvino`** tag together with **`controllers.main.containers.main.image.tag`** when upgrading Immich. After deploy, check ML logs for `Available ORT providers` including OpenVINO; see [hardware-accelerated ML](https://docs.immich.app/features/ml-hardware-acceleration). Plex, server transcoding, and ML may contend for one GPU — ensure the node exposes enough **`gpu.intel.com/i915`** capacity or accept serialized load.
+6. **Hardware transcoding** — `values.yaml` schedules **`immich-server`** on Intel GPU nodes (`intel.feature.node.kubernetes.io/gpu`, `gpu.intel.com/i915`) like Plex, with **`ffmpeg.accel: qsv`** in `immich.configuration`. The GPU node must reach the NFS library export. Confirm in **Administration → Video transcoding** after deploy; see [Immich hardware transcoding](https://docs.immich.app/features/hardware-transcoding/).
+
+7. **Hardware-accelerated ML (Intel Arc)** — **`immich-machine-learning`** uses image tag **`v2.7.5-openvino`** (OpenVINO for Intel discrete/integrated GPUs) on the same GPU nodes and **`gpu.intel.com/i915`** resource as Plex. Bump the **`-openvino`** tag together with **`controllers.main.containers.main.image.tag`** when upgrading Immich. After deploy, check ML logs for `Available ORT providers` including OpenVINO; see [hardware-accelerated ML](https://docs.immich.app/features/ml-hardware-acceleration). Plex, server transcoding, and ML may contend for one GPU — ensure the node exposes enough **`gpu.intel.com/i915`** capacity or accept serialized load.
 
 ## Apply (local test)
 

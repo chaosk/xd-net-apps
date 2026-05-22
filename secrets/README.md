@@ -10,11 +10,17 @@ before you push.
    `metadata.name` and `metadata.namespace` for the app (see the table below for
    conventions).
 2. Put values in `stringData` (or `data`) as usual. **Only lines you mark are
-   encrypted:** add a **trailing** inline comment `# sops:encrypt` on each scalar that
-   should become ciphertext (see [`.sops.yaml`](../.sops.yaml):
+   encrypted:** add a **trailing** inline comment `# sops:encrypt` on each **top-level
+   Secret key** scalar (see [`.sops.yaml`](../.sops.yaml):
    `encrypted_comment_regex: sops:encrypt`). Anything without that marker stays
    plaintext in the decrypted file (useful for non-secrets like hostnames or usernames
    you want readable in-cluster after sync).
+
+   **Exception — nested config in one key** (`secrets/immich-config.yaml`):
+   the Immich settings live under a single multiline `immich-config.yaml:` block.
+   `# sops:encrypt` *inside* that block is just text in the config file, not a SOPS
+   directive. That file uses `encrypted_regex: ^immich-config\.yaml$` in `.sops.yaml`
+   so the **entire** block is ciphertext in git. Edit with `sops secrets/immich-config.yaml`.
 
 3. Encrypt before you push (never commit plaintext credentials to a shared remote):
 
@@ -66,6 +72,7 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `authentik-db.yaml` | `authentik` | CNPG bootstrap + Authentik DB password (`authentik-db`, keys `username`, `password`). |
 | `authentik-geoip.yaml` | `authentik` | MaxMind GeoLite2 updater (`authentik-geoip`, keys `account_id`, `license_key`). See [GeoIP](https://docs.goauthentik.io/sys-mgmt/ops/geoip/). |
 | `immich-db.yaml` | `immich` | CNPG bootstrap + Immich connection (`immich-db`, keys `username`, `password`, `host`, `user`, `dbname`). |
+| `immich-config.yaml` | `immich` | Immich config file for Helm (`immich-config`, key `immich-config.yaml`; whole key SOPS-encrypted). See `apps/immich/README.md`. |
 | `homepage-authentik-widget.yaml` | `homepage` | Authentik API token for Homepage widget via env `HOMEPAGE_VAR_AUTHENTIK_TOKEN` ([widget](https://gethomepage.dev/widgets/services/authentik/), [secrets](https://gethomepage.dev/installation/docker/#secrets)). |
 | `homepage-tubearchivist-widget.yaml` | `homepage` | Tube Archivist API token for Homepage widget via env `HOMEPAGE_VAR_TUBEARCHIVIST_API_KEY` ([widget](https://gethomepage.dev/widgets/services/tubearchivist/)). |
 | `homepage-tracearr-widget.yaml` | `homepage` | Tracearr API key for Homepage widget via env `HOMEPAGE_VAR_TRACEARR_API_KEY` ([widget](https://gethomepage.dev/widgets/services/tracearr/)); shown on the **Plex** tile. |
