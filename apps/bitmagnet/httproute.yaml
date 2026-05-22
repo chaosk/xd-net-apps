@@ -6,7 +6,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "10"
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Media
+    gethomepage.dev/group: Misc
+    gethomepage.dev/weight: "100"
     gethomepage.dev/name: Bitmagnet
     gethomepage.dev/description: DHT indexer and torrent search
     gethomepage.dev/icon: mdi-magnet-on

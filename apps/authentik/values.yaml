@@ -132,7 +132,8 @@ server:
       enabled: true
       annotations:
         gethomepage.dev/enabled: "true"
-        gethomepage.dev/group: Identity
+        gethomepage.dev/group: Management
+        gethomepage.dev/weight: "30"
         gethomepage.dev/name: Authentik
         gethomepage.dev/description: SSO & identity provider
         gethomepage.dev/icon: si-authentik

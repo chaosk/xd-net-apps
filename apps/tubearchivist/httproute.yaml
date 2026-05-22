@@ -5,7 +5,8 @@ metadata:
   namespace: tubearchivist
   annotations:
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Media
+    gethomepage.dev/group: Data storage
+    gethomepage.dev/weight: "30"
     gethomepage.dev/name: Tube Archivist
     gethomepage.dev/description: YouTube archive
     gethomepage.dev/icon: si-youtube

@@ -6,7 +6,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "10"
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Media
+    gethomepage.dev/group: Data storage
+    gethomepage.dev/weight: "20"
     gethomepage.dev/name: Immich
     gethomepage.dev/description: Photo and video library
     gethomepage.dev/icon: si-immich

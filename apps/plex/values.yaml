@@ -18,6 +18,7 @@ httpRoute:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Media
+    gethomepage.dev/weight: "0"
     gethomepage.dev/name: Plex
     gethomepage.dev/description: Media server
     gethomepage.dev/icon: si-plex

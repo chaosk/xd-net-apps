@@ -7,7 +7,8 @@ metadata:
     # After Helm Service exists; avoids Argo applying the route before tracearr Svc (stale BackendNotFound until reconcile).
     argocd.argoproj.io/sync-wave: "10"
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Media
+    gethomepage.dev/group: Misc
+    gethomepage.dev/weight: "0"
     gethomepage.dev/name: Tracearr
     gethomepage.dev/description: Plex monitoring
     gethomepage.dev/icon: mdi-chart-timeline-variant

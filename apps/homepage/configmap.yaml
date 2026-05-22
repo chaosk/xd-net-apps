@@ -10,6 +10,7 @@ data:
     headerStyle: clean
     hideVersion: true
     statusStyle: dot
+    maxGroupColumns: 4
 
     layout:
       Media:
@@ -18,12 +19,12 @@ data:
         columns: 3
       Arr!:
         icon: mdi-pirate
-      Identity:
-        style: row
-        columns: 3
-      Infra:
-        style: row
-        columns: 3
+      Management:
+        icon: mdi-tools
+      Data storage:
+        icon: mdi-database-outline
+      Misc:
+        icon: mdi-dots-horizontal
 
   bookmarks.yaml: ""
 
@@ -31,6 +32,7 @@ data:
     - Arr!:
         - Upcoming:
             description: TV show episodes
+            weight: -1
             widget:
               type: calendar
               view: agenda
@@ -42,6 +44,21 @@ data:
                   color: teal
                   params:
                     unmonitored: true
+    - Management:
+        - UniFi:
+            href: https://unifi.net.ecksd.ee
+            description: UniFi controller
+            icon: si-ubiquiti
+        - DSM:
+            description: Synology UI
+            href: https://nas.net.ecksd.ee/
+            icon: si-synology
+            widget:
+              type: diskstation
+              url: https://nas.net.ecksd.ee/
+              username: "{{HOMEPAGE_VAR_DSM_USERNAME}}"
+              password: "{{HOMEPAGE_VAR_DSM_PASSWORD}}"
+              volume: volume_1
 
   widgets.yaml: |
     - kubernetes:

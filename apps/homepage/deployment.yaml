@@ -70,6 +70,18 @@ spec:
               name: homepage-immich-widget
               key: HOMEPAGE_VAR_IMMICH_API_KEY
               optional: true
+        - name: HOMEPAGE_VAR_DSM_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: homepage-dsm-widget
+              key: HOMEPAGE_VAR_DSM_USERNAME
+              optional: true
+        - name: HOMEPAGE_VAR_DSM_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: homepage-dsm-widget
+              key: HOMEPAGE_VAR_DSM_PASSWORD
+              optional: true
         volumeMounts:
         - name: config
           mountPath: /app/config

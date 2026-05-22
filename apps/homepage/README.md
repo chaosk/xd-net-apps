@@ -14,6 +14,7 @@ To customize, edit `apps/homepage/configmap.yaml` keys:
 
 - `settings.yaml`
 - `bookmarks.yaml`
-- `services.yaml`
+- `services.yaml` — manual tiles (Upcoming calendar, external apps not on Gateway discovery)
 - `widgets.yaml`
 
+**Service order:** Homepage sorts by `weight` (lower first). Discovered apps use `gethomepage.dev/weight` on HTTPRoutes; manual entries in `services.yaml` can set `weight` too. The Arr! calendar uses `weight: 0`; keep Bazarr/Prowlarr/Flood above `0` (currently `10`/`20`/`30`).
