@@ -28,7 +28,7 @@ spec:
             - name: REDIS_CON
               value: redis://archivist-redis.tubearchivist.svc.cluster.local:6379
             - name: TA_HOST
-              value: https://tubearchivist.net.ecksd.ee
+              value: https://tubearchivist.net.ecksd.ee http://tubearchivist.tubearchivist.svc.cluster.local:8000
             - name: TZ
               value: UTC
             - name: TA_USERNAME
