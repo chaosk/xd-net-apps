@@ -30,11 +30,3 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana/folder: Platform
-  - name: grafana-dashboard-loki
-    files:
-      - loki.json
-    options:
-      labels:
-        grafana_dashboard: "1"
-      annotations:
-        grafana/folder: Logs

@@ -27,7 +27,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `tracearr-db`, `bitmagnet-db`. |
 | `scrape-apps.yaml` | Authentik server PodMonitor; Immich and Bitmagnet ServiceMonitors. |
 | `scrape-platform.yaml` | Envoy Gateway controller + dataplane; Cilium agent ServiceMonitor. |
-| `dashboards/` | CNPG, Cilium, Envoy, and Loki Grafana dashboards (ConfigMaps for sidecar). |
+| `dashboards/` | CNPG, Cilium, and Envoy Grafana dashboards (ConfigMaps for sidecar). |
 
 Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: kube-prometheus-stack`** so the stack’s Prometheus picks them up (`serviceMonitorSelectorNilUsesHelmValues` is left at the chart default).
 
@@ -54,9 +54,10 @@ kube-prometheus-stack ships the usual Kubernetes, node, and Prometheus dashboard
 | *(default)* | **CloudNativePG** | [Grafana 20417](https://grafana.com/grafana/dashboards/20417-cloudnativepg/) (`dashboards/cnpg.json`) | CNPG PodMonitors (`scrape-cnpg.yaml`) |
 | **Platform** | **Cilium Agent Metrics** | [Grafana 16611](https://grafana.com/grafana/dashboards/16611-cilium-metrics/) | `cilium-agent` ServiceMonitor |
 | **Platform** | **Envoy global** | [Grafana 7253](https://grafana.com/grafana/dashboards/7253-envoy-global/) | Envoy dataplane PodMonitor |
-| **Logs** | **Logs / App** | [Grafana 13639](https://grafana.com/grafana/dashboards/13639-loki-dashboard-quick-search/) | Loki datasource (Alloy pod logs) |
 
-JSON dashboards live under `dashboards/`; Kustomize builds ConfigMaps with label **`grafana_dashboard=1`** for the Grafana sidecar. Datasource placeholders are rewritten to **`Prometheus`** and **`Loki`**.
+JSON dashboards live under `dashboards/`; Kustomize builds ConfigMaps with label **`grafana_dashboard=1`** for the Grafana sidecar. Datasource placeholders are rewritten to **`Prometheus`**.
+
+Use **Explore → Loki** for log queries (`{namespace="homepage"}`, etc.).
 
 Dashboard ConfigMaps use **`argocd.argoproj.io/sync-options: ServerSideApply=true`** so Argo CD does not store the full manifest in `last-applied-configuration` (that annotation has a 256KiB limit and breaks large boards like CloudNativePG and Cilium).
 
