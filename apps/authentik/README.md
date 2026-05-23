@@ -8,12 +8,13 @@ PostgreSQL is a **[CloudNativePG](https://cloudnative-pg.io/) `Cluster`** (`post
 
 | File | Purpose |
 |------|---------|
-| `kustomization.yaml` | Namespace, **`postgres.yaml`**, **`pvc-authentik-data.yaml`**, Helm chart `authentik`. |
+| `kustomization.yaml` | Namespace, **`postgres.yaml`**, **`pvc-authentik-data.yaml`**, **`httproute-pangolin.yaml`**, Helm chart `authentik`. |
 | `namespace.yaml` | `authentik` namespace. |
 | `postgres.yaml` | CNPG cluster **`authentik-db`** (single instance, **`local-path`** PVC, stock `postgresql` image). |
 | `pvc-authentik-data.yaml` | **`authentik-data`** PVC (**Synology** `storageClass` **`synology`**, **ReadWriteOnce**, **1Gi**) at **`/data`**. Server and worker are pinned to the same node via **`worker` podAffinity** in `values.yaml`. |
 | `referencegrant-forward-auth.yaml` | Shared **ReferenceGrant**: each app namespace with a forward-auth **SecurityPolicy** is listed under **`spec.from`**; all policies may call **`authentik-server`**. |
 | `values.yaml` | **`global.volumes`** / **`volumeMounts`** for `/data`, `AUTHENTIK_HOST`, **`AUTHENTIK_SECRET_KEY`**, Gateway **`server.route.main`** (includes `/outpost.goauthentik.io`), external Postgres, **GeoIP**, Bitnami **disabled**, **memory requests/limits**. |
+| `httproute-pangolin.yaml` | **`auth.ecksd.ee`** only; **`pangolin-operator/site-ref: xd-net`** (separate from Helm route so Pangolin gets one public resource). |
 
 ## Resources
 
@@ -42,6 +43,8 @@ Set in `values.yaml` and `postgres.yaml` from `kubectl top` (server ~450Mi, work
    Create it under `secrets/` with **`metadata.namespace: authentik`**, then **SOPS-encrypt** and commit ([`secrets/README.md`](../../secrets/README.md)). The Argo CD **platform-secrets** app must sync this file so the Secret exists when the `Cluster` reconciles.
 
 4. **Secret `authentik-geoip`** (namespace **`authentik`**) — required for **`geoip.enabled: true`**. Create a [MaxMind GeoLite2](https://www.maxmind.com/en/geolite2/signup) account and add a Secret with keys **`account_id`** and **`license_key`** (see [GeoIP](https://docs.goauthentik.io/sys-mgmt/ops/geoip/)). The chart mounts the GeoIP updater sidecar on server and worker; databases land under **`/geoip`** and Authentik reloads when files change. Encrypt with **SOPS** under `secrets/` like the other secrets.
+
+5. **Pangolin** — **`NewtSite`** **`xd-net`** (xd-net). **`httproute-pangolin.yaml`** is the only route with **`site-ref`**; do not add Pangolin annotations on the Helm HTTPRoute or you will get duplicate public resources. Point **`auth.ecksd.ee`** DNS at the Pangolin edge (not the homelab Gateway LB). Homelab stays on **`authentik.net.ecksd.ee`**; **`AUTHENTIK_HOST`** in `values.yaml` still targets that URL. If logins over Pangolin redirect to the wrong host, set **`AUTHENTIK_HOST`** to **`https://auth.ecksd.ee`** or add an Authentik **Brand** for **`auth.ecksd.ee`**. Forward-auth providers scoped to **`net.ecksd.ee`** do not apply to **`auth.ecksd.ee`**; homelab apps keep using **`authentik.net.ecksd.ee`** for the outpost.
 
 ## Apply
 

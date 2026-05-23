@@ -8,6 +8,7 @@ resources:
   - postgres.yaml
   - pvc-authentik-data.yaml
   - referencegrant-forward-auth.yaml
+  - httproute-pangolin.yaml
 
 helmCharts:
   - name: authentik
