@@ -28,7 +28,8 @@ httpRoute:
     gethomepage.dev/widget.url: "http://tracearr.tracearr.svc.cluster.local:3000"
     gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_TRACEARR_API_KEY}}"
     gethomepage.dev/widget.view: "details"
-    gethomepage.dev/widget.expandOneStreamToTwoRows: "false"
+    gethomepage.dev/widget.enableUser: "true"
+    gethomepage.dev/widget.expandOneStreamToTwoRows: "true"
     gethomepage.dev/widget.showEpisodeNumber: "true"
 
 service:
