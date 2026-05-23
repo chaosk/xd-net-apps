@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: monitoring
+
+resources:
+  - namespace.yaml
+  - httproute.yaml
+  - scrape-cnpg.yaml
+  - scrape-apps.yaml
+  - scrape-platform.yaml
+
+helmCharts:
+  - name: kube-prometheus-stack
+    repo: https://prometheus-community.github.io/helm-charts
+    version: 85.3.0
+    releaseName: kube-prometheus-stack
+    namespace: monitoring
+    valuesFile: values-prometheus.yaml
+  - name: loki
+    repo: https://grafana.github.io/helm-charts
+    version: 7.0.0
+    releaseName: loki
+    namespace: monitoring
+    valuesFile: values-loki.yaml
+  - name: alloy
+    repo: https://grafana.github.io/helm-charts
+    version: 1.8.1
+    releaseName: alloy
+    namespace: monitoring
+    valuesFile: values-alloy.yaml

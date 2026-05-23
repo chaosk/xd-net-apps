@@ -1,0 +1,69 @@
+# CNPG postgres_exporter on port "metrics" (9187).
+# https://cloudnative-pg.io/documentation/current/monitoring/
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cnpg-authentik-db
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - authentik
+  selector:
+    matchLabels:
+      cnpg.io/cluster: authentik-db
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cnpg-immich-db
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - immich
+  selector:
+    matchLabels:
+      cnpg.io/cluster: immich-db
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cnpg-tracearr-db
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - tracearr
+  selector:
+    matchLabels:
+      cnpg.io/cluster: tracearr-db
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cnpg-bitmagnet-db
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - bitmagnet
+  selector:
+    matchLabels:
+      cnpg.io/cluster: bitmagnet-db
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 30s

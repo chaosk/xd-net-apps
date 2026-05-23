@@ -86,3 +86,4 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `tracearr-db.yaml` | `tracearr` | CNPG bootstrap + Tracearr Helm (`tracearr-db`: `username`, `password`, `DB_PASSWORD`, `JWT_SECRET`, `COOKIE_SECRET`; `DB_PASSWORD` must match `password`). |
 | `bitmagnet-db.yaml` | `bitmagnet` | CNPG bootstrap (`bitmagnet-db`, keys `username`, `password`; owner/database `bitmagnet` in `apps/bitmagnet/postgres.yaml`). |
 | `bitmagnet.yaml` | `bitmagnet` | TMDB API key (`bitmagnet`, key `TMDB_API_KEY`) for metadata enrichment. |
+| `grafana-admin.yaml` | `monitoring` | Grafana admin login (`grafana-admin`, keys `admin-user`, `admin-password`) for kube-prometheus-stack. See `apps/monitoring/README.md`. |
