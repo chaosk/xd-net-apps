@@ -9,6 +9,7 @@ resources:
   - scrape-cnpg.yaml
   - scrape-apps.yaml
   - scrape-platform.yaml
+  - dashboards/
 
 helmCharts:
   - name: kube-prometheus-stack
@@ -29,3 +30,8 @@ helmCharts:
     releaseName: alloy
     namespace: monitoring
     valuesFile: values-alloy.yaml
+  - name: cluster
+    repo: https://cloudnative-pg.github.io/grafana-dashboards
+    version: 0.0.5
+    releaseName: cnpg-grafana-cluster
+    namespace: monitoring
