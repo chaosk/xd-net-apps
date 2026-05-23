@@ -64,6 +64,8 @@ For CloudNativePG, use the **Namespace** and **Cluster** variables (for example 
 
 Generic Postgres dashboards (for example Grafana **9628**) target `postgres_exporter` and will not match CNPG.
 
+The Cilium board (Grafana **16611**) originally filtered on in-metric label `k8s_app="cilium"`. Scrapes via ServiceMonitor expose `job`, `pod`, and `service` instead; `dashboards/cilium.json` drops that filter so panels match Prometheus.
+
 ## Prerequisites
 
 1. **Secret `grafana-admin`** in namespace `monitoring` — see `secrets/grafana-admin.yaml`. Generate a password, add `# sops:encrypt` on `admin-password`, then `sops --encrypt --in-place secrets/grafana-admin.yaml` and sync **platform-secrets** before the stack can start.

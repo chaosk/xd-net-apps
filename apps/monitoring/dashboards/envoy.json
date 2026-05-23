@@ -27,7 +27,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_PROMETHEUS_DOCKER\u6d4b\u8bd5\u73af\u5883}",
+      "datasource": "Prometheus",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -103,7 +103,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS_DOCKER\u6d4b\u8bd5\u73af\u5883}",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 6,
@@ -189,7 +189,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS_DOCKER\u6d4b\u8bd5\u73af\u5883}",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 6,
@@ -276,7 +276,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS_DOCKER\u6d4b\u8bd5\u73af\u5883}",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 6,
@@ -372,7 +372,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": "${DS_PROMETHEUS_DOCKER\u6d4b\u8bd5\u73af\u5883}",
+      "datasource": "Prometheus",
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -449,7 +449,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS_DOCKER\u6d4b\u8bd5\u73af\u5883}",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 6,
@@ -542,7 +542,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS_DOCKER\u6d4b\u8bd5\u73af\u5883}",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 6,
@@ -644,7 +644,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS_DOCKER\u6d4b\u8bd5\u73af\u5883}",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 6,
@@ -736,7 +736,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS_DOCKER\u6d4b\u8bd5\u73af\u5883}",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 10,
@@ -842,7 +842,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_PROMETHEUS_DOCKER\u6d4b\u8bd5\u73af\u5883}",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 10,
@@ -980,5 +980,5 @@
   "title": "Envoy global - by Fangdd.com",
   "uid": "f70lysFik",
   "version": 10,
-  "description": "envoy global\u770b\u677f"
+  "description": "envoy global看板"
 }

@@ -2332,8 +2332,8 @@
         },
         {
           "datasource": {
-            "type": "__expr__",
-            "uid": "${DS_EXPRESSION}"
+            "type": "prometheus",
+            "uid": "Prometheus"
           },
           "expression": "$RECONCILE_ERRORS_BACKUP + $RECONCILE_ERRORS_CLUSTER * 10 + $RECONCILE_ERRORS_POOLER * 100 + $RECONCILE_ERRORS_SCHEDULED_BACKUP * 1000",
           "hide": false,
