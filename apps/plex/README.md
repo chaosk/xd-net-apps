@@ -8,11 +8,12 @@
 
 | File | Purpose |
 |------|---------|
-| `kustomization.yaml` | Namespace, **`pvc.yaml`**, **`nfs-media.yaml`**, Helm chart **`plex-media-server`**. |
+| `kustomization.yaml` | Namespace, **`pvc.yaml`**, **`nfs-media.yaml`**, **`httproute-pangolin.yaml`**, Helm chart **`plex-media-server`**. |
 | `namespace.yaml` | **`plex`** namespace. |
 | `pvc.yaml` | **`plex-config`** PVC (**Synology** `StorageClass` **`synology`**, **ReadWriteOnce**, **20Gi**) for Plex application data (`pms.configExistingClaim`). |
 | `nfs-media.yaml` | Static **NFS** PV **`plex-media-pv`** + claim **`plex-media`** (**ReadWriteMany**, empty `storageClassName`) bound for the chart mount at **`/media`**. |
-| `values.yaml` | **`fullnameOverride`**, **`httpRoute`** (Gateway, Homepage link + **Tracearr** widget on this tile), **`nodeSelector`**, **`pms.configExistingClaim`**, **`extraVolumes` / `extraVolumeMounts`** (NFS at **`/media`**), resource requests including **Intel GPU**. |
+| `values.yaml` | **`fullnameOverride`**, **`httpRoute`** (**`plex.net.ecksd.ee`** on gateway **shared**, Homepage + **Tracearr** widget), **`nodeSelector`**, **`pms`**, NFS mounts, Intel GPU. |
+| `httproute-pangolin.yaml` | **`plex.ecksd.ee`** only; **`pangolin-operator/site-ref: xd-net`** (separate from Helm route so Pangolin gets one public resource). |
 
 ## Before you apply
 
@@ -23,6 +24,8 @@
 3. **`values.yaml`** — Align **`httpRoute.hostnames`** and Gateway **`parentRefs`** with your cluster gateway and TLS names. **`nodeSelector`** and **`pms.resources`** must match nodes where Plex is allowed to run and how GPU is exposed; remove or replace **`gpu.intel.com/i915`** if you do not use the Intel plugin.
 
 4. **NFS reachability** — Every node that can schedule Plex must reach the NFS export, or tighten **`nodeSelector`** / affinity so the pod only lands on allowed nodes.
+
+5. **Pangolin** — **`NewtSite`** **`xd-net`** (xd-net). **`httproute-pangolin.yaml`** is the only route with **`site-ref`**; do not add Pangolin annotations on the Helm HTTPRoute or you will get duplicate public resources.
 
 ## Apply
 

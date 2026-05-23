@@ -1,0 +1,25 @@
+# Pangolin only (pangolin-operator/site-ref → NewtSite xd-net). One hostname → one public resource.
+# Homelab ingress: Helm HTTPRoute in values.yaml (plex.net.ecksd.ee on gateway shared).
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: plex-pangolin
+  namespace: plex
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    pangolin-operator/site-ref: xd-net
+spec:
+  parentRefs:
+    - name: shared
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - plex.ecksd.ee
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: plex
+          port: 32400
