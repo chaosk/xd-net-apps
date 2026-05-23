@@ -7,8 +7,6 @@ Prometheus, Grafana, and Loki for the xd-net cluster, installed with upstream He
 | [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) | 85.3.0 | Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics |
 | [loki](https://github.com/grafana/loki/tree/main/production/helm/loki) | 7.0.0 | Log storage (SingleBinary, Synology PVC) |
 | [alloy](https://github.com/grafana/alloy/tree/main/operations/helm/charts/alloy) | 1.8.1 | Pod log collection |
-| [cnpg-grafana/cluster](https://github.com/cloudnative-pg/grafana-dashboards) | 0.0.5 | CloudNativePG Grafana dashboard (ConfigMap) |
-
 ## Access
 
 - **Grafana:** `https://grafana.net.ecksd.ee` (shared Gateway TLS covers `*.net.ecksd.ee`)
@@ -21,7 +19,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | File | Purpose |
 |------|---------|
 | `namespace.yaml` | **`monitoring`** namespace; Pod Security **`privileged`** (node-exporter). |
-| `kustomization.yaml` | Namespace, HTTPRoute, four Helm releases, dashboard ConfigMaps. |
+| `kustomization.yaml` | Namespace, HTTPRoute, three Helm releases, dashboard ConfigMaps. |
 | `values-prometheus.yaml` | Retention, Synology PVCs for Prometheus and Alertmanager, Grafana admin Secret reference. |
 | `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
@@ -29,7 +27,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `tracearr-db`, `bitmagnet-db`. |
 | `scrape-apps.yaml` | Authentik server PodMonitor; Immich and Bitmagnet ServiceMonitors. |
 | `scrape-platform.yaml` | Envoy Gateway controller + dataplane; Cilium agent ServiceMonitor. |
-| `dashboards/` | Cilium, Envoy, and Loki Grafana dashboards (ConfigMaps for sidecar). |
+| `dashboards/` | CNPG, Cilium, Envoy, and Loki Grafana dashboards (ConfigMaps for sidecar). |
 
 Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: kube-prometheus-stack`** so the stack’s Prometheus picks them up (`serviceMonitorSelectorNilUsesHelmValues` is left at the chart default).
 
@@ -53,12 +51,14 @@ kube-prometheus-stack ships the usual Kubernetes, node, and Prometheus dashboard
 
 | Folder | Dashboard | Source | Metrics / logs |
 |--------|-----------|--------|----------------|
-| *(default)* | **CloudNativePG** | [cnpg-grafana/cluster](https://grafana.com/grafana/dashboards/20417-cloudnativepg/) Helm chart | CNPG PodMonitors (`scrape-cnpg.yaml`) |
+| *(default)* | **CloudNativePG** | [Grafana 20417](https://grafana.com/grafana/dashboards/20417-cloudnativepg/) (`dashboards/cnpg.json`) | CNPG PodMonitors (`scrape-cnpg.yaml`) |
 | **Platform** | **Cilium Agent Metrics** | [Grafana 16611](https://grafana.com/grafana/dashboards/16611-cilium-metrics/) | `cilium-agent` ServiceMonitor |
 | **Platform** | **Envoy global** | [Grafana 7253](https://grafana.com/grafana/dashboards/7253-envoy-global/) | Envoy dataplane PodMonitor |
 | **Logs** | **Logs / App** | [Grafana 13639](https://grafana.com/grafana/dashboards/13639-loki-dashboard-quick-search/) | Loki datasource (Alloy pod logs) |
 
-JSON for the three imported dashboards lives under `dashboards/`; Kustomize builds ConfigMaps with label **`grafana_dashboard=1`** for the Grafana sidecar. Datasource placeholders are rewritten to **`Prometheus`** and **`Loki`**.
+JSON dashboards live under `dashboards/`; Kustomize builds ConfigMaps with label **`grafana_dashboard=1`** for the Grafana sidecar. Datasource placeholders are rewritten to **`Prometheus`** and **`Loki`**.
+
+Dashboard ConfigMaps use **`argocd.argoproj.io/sync-options: ServerSideApply=true`** so Argo CD does not store the full manifest in `last-applied-configuration` (that annotation has a 256KiB limit and breaks large boards like CloudNativePG and Cilium).
 
 For CloudNativePG, use the **Namespace** and **Cluster** variables (for example `immich` / `immich-db`).
 

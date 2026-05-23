@@ -3,7 +3,17 @@ kind: Kustomization
 
 namespace: monitoring
 
+# Avoid kubectl last-applied-configuration on large JSON (Argo 256KiB annotation limit).
+commonAnnotations:
+  argocd.argoproj.io/sync-options: ServerSideApply=true
+
 configMapGenerator:
+  - name: grafana-dashboard-cnpg
+    files:
+      - cnpg.json
+    options:
+      labels:
+        grafana_dashboard: "1"
   - name: grafana-dashboard-cilium
     files:
       - cilium.json
