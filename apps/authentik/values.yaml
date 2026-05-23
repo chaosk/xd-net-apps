@@ -140,7 +140,6 @@ server:
         gethomepage.dev/href: "https://authentik.net.ecksd.ee"
         gethomepage.dev/widget.type: authentik
         gethomepage.dev/widget.url: "http://authentik-server.authentik.svc.cluster.local"
-        gethomepage.dev/widget.headers.Host: "authentik.net.ecksd.ee"
         gethomepage.dev/widget.version: "2"
         gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_AUTHENTIK_TOKEN}}"
         gethomepage.dev/pod-selector: app.kubernetes.io/name=authentik,app.kubernetes.io/component=server

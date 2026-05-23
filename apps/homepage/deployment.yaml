@@ -28,6 +28,9 @@ spec:
         env:
         - name: HOMEPAGE_ALLOWED_HOSTS
           value: net.ecksd.ee
+        # Avoid ~500ms IPv6 attempt per widget proxy call on dual-stack Talos nodes.
+        - name: HOMEPAGE_PROXY_DISABLE_IPV6
+          value: "true"
         - name: HOMEPAGE_VAR_AUTHENTIK_TOKEN
           valueFrom:
             secretKeyRef:
