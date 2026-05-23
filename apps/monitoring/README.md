@@ -19,9 +19,10 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 
 | File | Purpose |
 |------|---------|
+| `namespace.yaml` | **`monitoring`** namespace; Pod Security **`privileged`** (node-exporter). |
 | `kustomization.yaml` | Namespace, HTTPRoute, three Helm releases in `monitoring`. |
 | `values-prometheus.yaml` | Retention, Synology PVCs for Prometheus and Alertmanager, Grafana admin Secret reference. |
-| `values-loki.yaml` | SingleBinary Loki on Synology PVC. |
+| `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
 | `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `tracearr-db`, `bitmagnet-db`. |
@@ -49,6 +50,7 @@ Sonarr/Radarr expose `/metrics` only with app-side auth and are not scraped here
 1. **Secret `grafana-admin`** in namespace `monitoring` — see `secrets/grafana-admin.yaml`. Generate a password, add `# sops:encrypt` on `admin-password`, then `sops --encrypt --in-place secrets/grafana-admin.yaml` and sync **platform-secrets** before the stack can start.
 2. **Metrics Server** — `apps/metrics-server` (for node/pod metrics in Grafana).
 3. **Synology `storageClass`** — `synology` (same as other apps).
+4. **Pod Security** — namespace uses **`privileged`** so `prometheus-node-exporter` can use host network, hostPath, and port 9100 (cluster default is baseline).
 
 ## Apply
 

@@ -43,13 +43,20 @@ backend:
 gateway:
   enabled: false
 
+# Memcached for distributed mode; not needed for SingleBinary on a small cluster.
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+
+lokiCanary:
+  enabled: false
+
 monitoring:
   selfMonitoring:
     enabled: false
     grafanaAgent:
       installOperator: false
-  lokiCanary:
-    enabled: false
 
 test:
   enabled: false
