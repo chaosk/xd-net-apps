@@ -27,7 +27,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `tracearr-db`, `bitmagnet-db`. |
 | `scrape-apps.yaml` | Authentik server PodMonitor; Immich and Bitmagnet ServiceMonitors. |
 | `scrape-platform.yaml` | Envoy Gateway controller + dataplane; Cilium agent ServiceMonitor. |
-| `dashboards/` | CNPG, Cilium, and Envoy Grafana dashboards (ConfigMaps for sidecar). |
+| `dashboards/` | CNPG, Cilium, and Envoy Gateway Grafana dashboards (ConfigMaps for sidecar). |
 
 Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: kube-prometheus-stack`** so the stack’s Prometheus picks them up (`serviceMonitorSelectorNilUsesHelmValues` is left at the chart default).
 
@@ -53,7 +53,10 @@ kube-prometheus-stack ships the usual Kubernetes, node, and Prometheus dashboard
 |--------|-----------|--------|----------------|
 | *(default)* | **CloudNativePG** | [Grafana 20417](https://grafana.com/grafana/dashboards/20417-cloudnativepg/) (`dashboards/cnpg.json`) | CNPG PodMonitors (`scrape-cnpg.yaml`) |
 | **Platform** | **Cilium Agent Metrics** | [Grafana 16611](https://grafana.com/grafana/dashboards/16611-cilium-metrics/) | `cilium-agent` ServiceMonitor |
-| **Platform** | **Envoy global** | [Grafana 7253](https://grafana.com/grafana/dashboards/7253-envoy-global/) | Envoy dataplane PodMonitor |
+| **Platform** | **Envoy Gateway Global** | [envoy-gateway-global.json](https://github.com/envoyproxy/gateway/blob/main/charts/gateway-addons-helm/dashboards/envoy-gateway-global.json) | Envoy Gateway controller (`scrape-platform.yaml`) |
+| **Platform** | **Envoy Global** | [envoy-proxy-global.json](https://github.com/envoyproxy/gateway/blob/main/charts/gateway-addons-helm/dashboards/envoy-proxy-global.json) | Shared Gateway dataplane PodMonitor |
+| **Platform** | **Envoy Clusters** | [envoy-clusters.json](https://github.com/envoyproxy/gateway/blob/main/charts/gateway-addons-helm/dashboards/envoy-clusters.json) | Per-route upstream cluster stats from the dataplane |
+| **Platform** | **Resources Monitor** | [resources-monitor.gen.json](https://github.com/envoyproxy/gateway/blob/main/charts/gateway-addons-helm/dashboards/resources-monitor.gen.json) | Controller and dataplane CPU/memory (`container_*` metrics) |
 
 JSON dashboards live under `dashboards/`; Kustomize builds ConfigMaps with label **`grafana_dashboard=1`** for the Grafana sidecar. Datasource placeholders are rewritten to **`Prometheus`**.
 
@@ -66,6 +69,8 @@ For CloudNativePG, use the **Namespace** and **Cluster** variables (for example 
 Generic Postgres dashboards (for example Grafana **9628**) target `postgres_exporter` and will not match CNPG.
 
 The Cilium board (Grafana **16611**) originally filtered on in-metric label `k8s_app="cilium"`. Scrapes via ServiceMonitor expose `job`, `pod`, and `service` instead; `dashboards/cilium.json` drops that filter so panels match Prometheus.
+
+Envoy Gateway addon dashboards live under `dashboards/` with upstream filenames (except `envoy-resources-monitor.json`, from `resources-monitor.gen.json`). **Global Ratelimit** is omitted because no ratelimit service is deployed.
 
 ## Prerequisites
 

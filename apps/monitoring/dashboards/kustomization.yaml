@@ -24,7 +24,10 @@ configMapGenerator:
         grafana/folder: Platform
   - name: grafana-dashboard-envoy
     files:
-      - envoy.json
+      - envoy-gateway-global.json
+      - envoy-clusters.json
+      - envoy-proxy-global.json
+      - envoy-resources-monitor.json
     options:
       labels:
         grafana_dashboard: "1"
