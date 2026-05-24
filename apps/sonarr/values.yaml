@@ -6,7 +6,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/home-operations/sonarr
-          tag: "4.0.17.2967"
+          tag: "4.0.17"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -32,31 +32,28 @@ controllers:
           limits:
             cpu: "2"
             memory: 1Gi
-
 service:
   main:
     controller: main
     ports:
       http:
         port: 8989
-
 persistence:
   config:
     enabled: true
     existingClaim: sonarr-config
     globalMounts:
-      - path: /config
+    - path: /config
   media:
     enabled: true
     existingClaim: sonarr-media
     globalMounts:
-      - path: /data/media
+    - path: /data/media
   torrents:
     enabled: true
     existingClaim: sonarr-torrents
     globalMounts:
-      - path: /data/torrents
-
+    - path: /data/torrents
 defaultPodOptions:
   securityContext:
     fsGroup: 568
