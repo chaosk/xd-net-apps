@@ -85,6 +85,12 @@ spec:
               name: homepage-speedtest-tracker-widget
               key: HOMEPAGE_VAR_SPEEDTEST_TRACKER_API_KEY
               optional: true
+        - name: HOMEPAGE_VAR_MINIFLUX_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homepage-miniflux-widget
+              key: HOMEPAGE_VAR_MINIFLUX_API_KEY
+              optional: true
         - name: HOMEPAGE_VAR_DSM_USERNAME
           valueFrom:
             secretKeyRef:

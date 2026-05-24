@@ -92,4 +92,7 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `speedtest-tracker-db.yaml` | `speedtest-tracker` | CNPG bootstrap (`speedtest-tracker-db`, keys `username`, `password`; owner `speedtest`, database `speedtest_tracker` in `apps/speedtest-tracker/postgres.yaml`). |
 | `speedtest-tracker.yaml` | `speedtest-tracker` | Laravel app key (`speedtest-tracker`, key `APP_KEY`). |
 | `homepage-speedtest-tracker-widget.yaml` | `homepage` | Speedtest Tracker API token for Homepage widget via env `HOMEPAGE_VAR_SPEEDTEST_TRACKER_API_KEY` ([widget](https://gethomepage.dev/widgets/services/speedtest-tracker/)). |
+| `miniflux-db.yaml` | `miniflux` | CNPG bootstrap (`miniflux-db`, keys `username`, `password`; owner/database `miniflux` in `apps/miniflux/postgres.yaml`). |
+| `miniflux.yaml` | `miniflux` | `DATABASE_URL`, `OAUTH2_CLIENT_ID`, and `OAUTH2_CLIENT_SECRET` for Miniflux (`miniflux`; DB password must match `miniflux-db`). |
+| `homepage-miniflux-widget.yaml` | `homepage` | Miniflux API key for Homepage widget via env `HOMEPAGE_VAR_MINIFLUX_API_KEY` ([widget](https://gethomepage.dev/widgets/services/miniflux/)). |
 | `grafana-admin.yaml` | `monitoring` | Grafana admin login (`grafana-admin`, keys `admin-user`, `admin-password`) for kube-prometheus-stack. See `apps/monitoring/README.md`. |

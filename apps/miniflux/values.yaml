@@ -1,0 +1,71 @@
+# bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+# Miniflux — https://miniflux.app/docs/docker.html
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: miniflux/miniflux
+          tag: "2.3.0"
+          pullPolicy: IfNotPresent
+        env:
+          TZ: UTC
+          BASE_URL: https://miniflux.net.ecksd.ee
+          RUN_MIGRATIONS: "1"
+          OAUTH2_PROVIDER: oidc
+          OAUTH2_REDIRECT_URL: https://miniflux.net.ecksd.ee/oauth2/oidc/callback
+          OAUTH2_OIDC_DISCOVERY_ENDPOINT: https://authentik.net.ecksd.ee/application/o/miniflux/
+          OAUTH2_USER_CREATION: "1"
+          DATABASE_URL:
+            valueFrom:
+              secretKeyRef:
+                name: miniflux
+                key: DATABASE_URL
+          OAUTH2_CLIENT_ID:
+            valueFrom:
+              secretKeyRef:
+                name: miniflux
+                key: OAUTH2_CLIENT_ID
+          OAUTH2_CLIENT_SECRET:
+            valueFrom:
+              secretKeyRef:
+                name: miniflux
+                key: OAUTH2_CLIENT_SECRET
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              exec:
+                command:
+                  - /usr/bin/miniflux
+                  - -healthcheck
+                  - auto
+              initialDelaySeconds: 30
+              periodSeconds: 60
+              timeoutSeconds: 10
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /healthcheck
+                port: 8080
+              initialDelaySeconds: 15
+              periodSeconds: 30
+              timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: "1"
+            memory: 256Mi
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8080
