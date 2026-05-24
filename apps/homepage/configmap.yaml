@@ -46,13 +46,17 @@ data:
                     unmonitored: true
     - Management:
         - UniFi:
-            href: https://unifi.net.ecksd.ee
+            href: https://unifi.ui.com
             description: UniFi controller
             icon: si-ubiquiti
+            siteMonitor: https://unifi.net.ecksd.ee
+            statusStyle: ""
         - DSM:
             description: Synology UI
             href: https://nas.net.ecksd.ee/
             icon: si-synology
+            siteMonitor: https://nas.net.ecksd.ee
+            statusStyle: ""
             widget:
               type: diskstation
               url: https://nas.net.ecksd.ee/
