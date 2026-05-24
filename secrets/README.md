@@ -86,4 +86,7 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `tracearr-db.yaml` | `tracearr` | CNPG bootstrap + Tracearr Helm (`tracearr-db`: `username`, `password`, `DB_PASSWORD`, `JWT_SECRET`, `COOKIE_SECRET`; `DB_PASSWORD` must match `password`). |
 | `bitmagnet-db.yaml` | `bitmagnet` | CNPG bootstrap (`bitmagnet-db`, keys `username`, `password`; owner/database `bitmagnet` in `apps/bitmagnet/postgres.yaml`). |
 | `bitmagnet.yaml` | `bitmagnet` | TMDB API key (`bitmagnet`, key `TMDB_API_KEY`) for metadata enrichment. |
+| `paperless-db.yaml` | `paperless-ngx` | CNPG bootstrap (`paperless-db`, keys `username`, `password`; owner/database `paperless` in `apps/paperless-ngx/postgres.yaml`). |
+| `paperless.yaml` | `paperless-ngx` | Django secret and first-run admin (`paperless`, keys `PAPERLESS_SECRET_KEY`). |
+| `homepage-paperless-widget.yaml` | `homepage` | Paperless API token for Homepage widget via env `HOMEPAGE_VAR_PAPERLESS_API_TOKEN` ([widget](https://gethomepage.dev/widgets/services/paperlessngx/)). |
 | `grafana-admin.yaml` | `monitoring` | Grafana admin login (`grafana-admin`, keys `admin-user`, `admin-password`) for kube-prometheus-stack. See `apps/monitoring/README.md`. |

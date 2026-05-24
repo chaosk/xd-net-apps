@@ -1,0 +1,95 @@
+# bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+# Paperless-ngx — https://docs.paperless-ngx.com/setup/
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/paperless-ngx/paperless-ngx
+          tag: "2.20.15"
+          pullPolicy: IfNotPresent
+        env:
+          TZ: UTC
+          PAPERLESS_URL: https://paperless.net.ecksd.ee
+          PAPERLESS_CSRF_TRUSTED_ORIGINS: https://paperless.net.ecksd.ee
+          PAPERLESS_REDIS: redis://paperless-redis.paperless-ngx.svc.cluster.local:6379
+          PAPERLESS_DBHOST: paperless-db-rw
+          PAPERLESS_DBNAME: paperless
+          PAPERLESS_DBUSER: paperless
+          PAPERLESS_DBENGINE: postgresql
+          PAPERLESS_OCR_LANGUAGE: eng+pol
+          PAPERLESS_OCR_LANGUAGES: pol
+          PAPERLESS_TIME_ZONE: UTC
+          PAPERLESS_ENABLE_HTTP_REMOTE_USER: "true"
+          PAPERLESS_HTTP_REMOTE_USER_HEADER_NAME: HTTP_X_AUTHENTIK_USERNAME
+          USERMAP_UID: "1000"
+          USERMAP_GID: "1000"
+          PAPERLESS_DBPASS:
+            valueFrom:
+              secretKeyRef:
+                name: paperless-db
+                key: password
+          PAPERLESS_SECRET_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: paperless
+                key: PAPERLESS_SECRET_KEY
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8000
+                httpHeaders:
+                  - name: Host
+                    value: paperless.net.ecksd.ee
+              initialDelaySeconds: 60
+              periodSeconds: 60
+              timeoutSeconds: 10
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8000
+                httpHeaders:
+                  - name: Host
+                    value: paperless.net.ecksd.ee
+              initialDelaySeconds: 30
+              periodSeconds: 30
+              timeoutSeconds: 10
+        resources:
+          requests:
+            cpu: 250m
+            memory: 1Gi
+          limits:
+            cpu: "4"
+            memory: 4Gi
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8000
+
+persistence:
+  data:
+    enabled: true
+    existingClaim: paperless-data
+    globalMounts:
+      - path: /usr/src/paperless/data
+  media:
+    enabled: true
+    existingClaim: paperless-media
+    globalMounts:
+      - path: /usr/src/paperless/media
+
+defaultPodOptions:
+  securityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch

@@ -73,6 +73,12 @@ spec:
               name: homepage-immich-widget
               key: HOMEPAGE_VAR_IMMICH_API_KEY
               optional: true
+        - name: HOMEPAGE_VAR_PAPERLESS_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: homepage-paperless-widget
+              key: HOMEPAGE_VAR_PAPERLESS_API_TOKEN
+              optional: true
         - name: HOMEPAGE_VAR_DSM_USERNAME
           valueFrom:
             secretKeyRef:

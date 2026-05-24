@@ -1,0 +1,42 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: paperless-ngx
+  namespace: paperless-ngx
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Data storage
+    gethomepage.dev/weight: "10"
+    gethomepage.dev/name: Paperless
+    gethomepage.dev/description: Document archive and OCR
+    gethomepage.dev/icon: si-paperlessngx
+    gethomepage.dev/href: "https://paperless.net.ecksd.ee"
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=paperless-ngx
+    gethomepage.dev/widget.type: paperlessngx
+    gethomepage.dev/widget.url: "http://paperless-ngx.paperless-ngx.svc.cluster.local:8000"
+    gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_PAPERLESS_API_TOKEN}}"
+    gethomepage.dev/widget.fields: '["total", "inbox"]'
+spec:
+  parentRefs:
+    - name: shared
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - paperless.net.ecksd.ee
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: paperless-ngx
+          port: 8000

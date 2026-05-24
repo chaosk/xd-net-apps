@@ -35,6 +35,12 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: tubearchivist
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: paperless-ngx
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: paperless-ngx
   to:
     - group: ""
       kind: Service
