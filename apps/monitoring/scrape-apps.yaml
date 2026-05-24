@@ -53,3 +53,24 @@ spec:
     - port: http
       path: /metrics
       interval: 30s
+---
+# Enable Prometheus under Settings → Data platforms in Speedtest Tracker; allow scrape from the cluster (e.g. 10.0.0.0/8).
+# https://docs.speedtest-tracker.dev/settings/data-platforms/prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: speedtest-tracker
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - speedtest-tracker
+  selector:
+    matchLabels:
+      app.kubernetes.io/service: speedtest-tracker
+  endpoints:
+    - port: http
+      path: /prometheus
+      interval: 5m
+      scrapeTimeout: 10s

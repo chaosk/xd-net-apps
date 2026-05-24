@@ -89,4 +89,7 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `paperless-db.yaml` | `paperless-ngx` | CNPG bootstrap (`paperless-db`, keys `username`, `password`; owner/database `paperless` in `apps/paperless-ngx/postgres.yaml`). |
 | `paperless.yaml` | `paperless-ngx` | Django secret and first-run admin (`paperless`, keys `PAPERLESS_SECRET_KEY`). |
 | `homepage-paperless-widget.yaml` | `homepage` | Paperless API token for Homepage widget via env `HOMEPAGE_VAR_PAPERLESS_API_TOKEN` ([widget](https://gethomepage.dev/widgets/services/paperlessngx/)). |
+| `speedtest-tracker-db.yaml` | `speedtest-tracker` | CNPG bootstrap (`speedtest-tracker-db`, keys `username`, `password`; owner `speedtest`, database `speedtest_tracker` in `apps/speedtest-tracker/postgres.yaml`). |
+| `speedtest-tracker.yaml` | `speedtest-tracker` | Laravel app key (`speedtest-tracker`, key `APP_KEY`). |
+| `homepage-speedtest-tracker-widget.yaml` | `homepage` | Speedtest Tracker API token for Homepage widget via env `HOMEPAGE_VAR_SPEEDTEST_TRACKER_API_KEY` ([widget](https://gethomepage.dev/widgets/services/speedtest-tracker/)). |
 | `grafana-admin.yaml` | `monitoring` | Grafana admin login (`grafana-admin`, keys `admin-user`, `admin-password`) for kube-prometheus-stack. See `apps/monitoring/README.md`. |

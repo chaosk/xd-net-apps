@@ -1,0 +1,89 @@
+# bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+# Speedtest Tracker — https://docs.speedtest-tracker.dev/
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: lscr.io/linuxserver/speedtest-tracker
+          tag: v1.14.2-ls153
+          pullPolicy: IfNotPresent
+        env:
+          TZ: UTC
+          DISPLAY_TIMEZONE: UTC
+          PUID: "1000"
+          PGID: "1000"
+          APP_URL: https://speedtest.net.ecksd.ee
+          PUBLIC_DASHBOARD: "true"
+          DB_CONNECTION: pgsql
+          DB_HOST: speedtest-tracker-db-rw
+          DB_PORT: "5432"
+          DB_DATABASE: speedtest_tracker
+          DB_USERNAME: speedtest
+          SPEEDTEST_SCHEDULE: "*/5 * * * *"
+          SPEEDTEST_SERVERS: "7202,23677,14139"
+          PRUNE_RESULTS_OLDER_THAN: "90"
+          APP_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: speedtest-tracker
+                key: APP_KEY
+          DB_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: speedtest-tracker-db
+                key: password
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 80
+                httpHeaders:
+                  - name: Host
+                    value: speedtest.net.ecksd.ee
+              initialDelaySeconds: 60
+              periodSeconds: 60
+              timeoutSeconds: 10
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 80
+                httpHeaders:
+                  - name: Host
+                    value: speedtest.net.ecksd.ee
+              initialDelaySeconds: 30
+              periodSeconds: 30
+              timeoutSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: "2"
+            memory: 1Gi
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 80
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: speedtest-tracker-config
+    globalMounts:
+      - path: /config
+
+defaultPodOptions:
+  securityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch

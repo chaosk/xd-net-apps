@@ -84,3 +84,20 @@ spec:
   podMetricsEndpoints:
     - port: metrics
       interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cnpg-speedtest-tracker-db
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - speedtest-tracker
+  selector:
+    matchLabels:
+      cnpg.io/cluster: speedtest-tracker-db
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 30s

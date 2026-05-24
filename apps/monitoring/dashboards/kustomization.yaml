@@ -33,3 +33,11 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana/folder: Platform
+  - name: grafana-dashboard-speedtest-tracker
+    files:
+      - speedtest-tracker.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana/folder: Misc

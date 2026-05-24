@@ -24,8 +24,8 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
-| `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`. |
-| `scrape-apps.yaml` | Authentik server PodMonitor; Immich and Bitmagnet ServiceMonitors. |
+| `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`. |
+| `scrape-apps.yaml` | Authentik server PodMonitor; Immich, Bitmagnet, and Speedtest Tracker ServiceMonitors. |
 | `scrape-platform.yaml` | Envoy Gateway controller + dataplane; Cilium agent ServiceMonitor. |
 | `dashboards/` | CNPG, Cilium, and Envoy Gateway Grafana dashboards (ConfigMaps for sidecar). |
 
@@ -39,6 +39,7 @@ Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: ku
 | Authentik server | `scrape-apps.yaml` | `/metrics` on pod port `metrics` (9300), not the HTTP Service. |
 | Immich server | `scrape-apps.yaml` | `/metrics` on Service port `http` (2283). |
 | Bitmagnet | `scrape-apps.yaml` | `/metrics` on Service port `http` (3333). Postgres via `scrape-cnpg.yaml` (`bitmagnet-db`). |
+| Speedtest Tracker | `scrape-apps.yaml` | `/prometheus` on Service port `http` (80), interval 5m. Enable in app **Settings → Data platforms → Prometheus** ([docs](https://docs.speedtest-tracker.dev/settings/data-platforms/prometheus)); allow cluster scrape sources (e.g. `10.0.0.0/8`). Postgres via `scrape-cnpg.yaml` (`speedtest-tracker-db`). |
 | Envoy Gateway controller | `scrape-platform.yaml` | Service `envoy-gateway:19001/metrics`. |
 | Envoy dataplane (`shared`) | `scrape-platform.yaml` | Pod port `metrics`, path `/stats/prometheus`. |
 | Cilium agent | `scrape-platform.yaml` | Service `cilium-agent` port `metrics` in `kube-system`. |
@@ -71,6 +72,8 @@ Generic Postgres dashboards (for example Grafana **9628**) target `postgres_expo
 The Cilium board (Grafana **16611**) originally filtered on in-metric label `k8s_app="cilium"`. Scrapes via ServiceMonitor expose `job`, `pod`, and `service` instead; `dashboards/cilium.json` drops that filter so panels match Prometheus.
 
 Envoy Gateway addon dashboards live under `dashboards/` with upstream filenames (except `envoy-resources-monitor.json`, from `resources-monitor.gen.json`). **Global Ratelimit** is omitted because no ratelimit service is deployed.
+
+| **Misc** | **Speedtest Tracker** | [CrazyWolf13/Speedtest-Tracker-Prometheus](https://github.com/CrazyWolf13/Speedtest-Tracker-Prometheus) (`dashboards/speedtest-tracker.json`; [Grafana 24608](https://grafana.com/grafana/dashboards/24608-speedtest-tracker/)) | Speedtest Tracker `/prometheus` (`scrape-apps.yaml`) |
 
 ## Prerequisites
 
