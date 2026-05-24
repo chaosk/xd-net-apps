@@ -1,0 +1,30 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: actual-budget
+  namespace: actual-budget
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Data storage
+    gethomepage.dev/weight: "30"
+    gethomepage.dev/name: Actual
+    gethomepage.dev/description: Personal finance and envelope budgeting
+    gethomepage.dev/icon: mdi-wallet
+    gethomepage.dev/href: "https://actual.net.ecksd.ee"
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=actual-budget
+spec:
+  parentRefs:
+    - name: shared
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - actual.net.ecksd.ee
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: actual-budget
+          port: 5006
