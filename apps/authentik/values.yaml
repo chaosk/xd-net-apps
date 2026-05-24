@@ -10,6 +10,9 @@ authentik:
     user: authentik
 
 global:
+  image:
+    # CalVer; Image Updater bumps to the newest stable YYYY.M.P on GHCR (2026.x, 2027.x, …).
+    tag: "2026.5.0"
   # RWO authentik-data: server and worker must share a node. Disable chart anti-affinity
   # (soft spread across hosts); worker.required podAffinity to server is set below.
   affinity:

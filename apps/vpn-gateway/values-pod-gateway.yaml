@@ -37,6 +37,10 @@ controllers:
     strategy: Recreate
     replicas: 1
     containers:
+      main:
+        image:
+          repository: ghcr.io/angelnu/pod-gateway
+          tag: v1.13.0
       gluetun:
         enabled: true
         image:
@@ -50,6 +54,13 @@ controllers:
         envFrom:
           - secretRef:
               name: vpn-gateway
+
+  webhook:
+    containers:
+      main:
+        image:
+          repository: ghcr.io/angelnu/gateway-admision-controller
+          tag: v3.12.0
 
 networkpolicies:
   main:

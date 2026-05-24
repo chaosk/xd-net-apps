@@ -9,6 +9,7 @@ creates the `Application` and `ApplicationSet`).
 | Path | Role |
 |------|------|
 | `apps/<name>/` | Plain Kubernetes YAML; each directory becomes one Argo CD Application and (by convention) a namespace named `<name>`. |
+| `apps/argocd-image-updater/` | Argo CD Image Updater controller (`argocd` namespace). Opt-in apps are listed in `image-updater.yaml`. |
 | `secrets/` | SOPS-encrypted YAML consumed by the **platform-secrets** Application. |
 
 Cluster install order in **xd-net**: `infra/` → `app-manifests/` → `apps/`.
@@ -22,6 +23,8 @@ This repo is only the Git source for Argo CD after `apps/` has been applied.
 - **ApplicationSet `apps`** scans `apps/*` and deploys each subdirectory.
   Automated sync uses `CreateNamespace=true`, so the namespace matches the
   directory name unless you override in manifests.
+- Optional **image auto-updates** — add the app to `apps/argocd-image-updater/image-updater.yaml`
+  (see `apps/argocd-image-updater/README.md`).
 
 Synology CSI credentials may already be created by Terraform in **xd-net**
 (`apps/synology-csi.tf`). Use `secrets/` for additional or Git-managed

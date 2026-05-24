@@ -1,0 +1,251 @@
+# ImageUpdater CR: per-app image rules live here (not on Argo CD Application annotations).
+# Git credentials: Secret argocd/argocd-image-updater-git (xd-net Terraform).
+# Commit signing: Secret argocd/argocd-image-updater-signing + values.yaml git.* settings.
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: xd-net-apps
+spec:
+  writeBackConfig:
+    method: git:secret:argocd/argocd-image-updater-git
+    gitConfig:
+      repository: git@github.com:chaosk/xd-net-apps.git
+      branch: master
+      writeBackTarget: helmvalues:values.yaml
+  commonUpdateSettings:
+    forceUpdate: true
+  applicationRefs:
+    - namePattern: actual-budget
+      images:
+        - alias: actual
+          imageName: ghcr.io/actualbudget/actual-server
+          commonUpdateSettings:
+            updateStrategy: alphabetical
+            allowTags: "regexp:^[0-9]+\\.[0-9]+\\.[0-9]+$"
+            ignoreTags: ["latest", "nightly", "edge", "sha-*", "*alpine*"]
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: authentik
+      images:
+        - alias: authentik
+          imageName: ghcr.io/goauthentik/server
+          commonUpdateSettings:
+            updateStrategy: alphabetical
+            allowTags: "regexp:^20[0-9]{2}\\.[0-9]+\\.[0-9]+$"
+            ignoreTags: ["*-rc*", "*-beta*", "*dev*", "latest"]
+          manifestTargets:
+            helm:
+              name: global.image.repository
+              tag: global.image.tag
+
+    - namePattern: bazarr
+      images:
+        - alias: bazarr
+          imageName: ghcr.io/home-operations/bazarr:~1.5
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: bitmagnet
+      images:
+        - alias: bitmagnet
+          imageName: ghcr.io/bitmagnet-io/bitmagnet:~0.10
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: homepage
+      writeBackConfig:
+        method: git
+        gitConfig:
+          writeBackTarget: kustomization
+      images:
+        - alias: homepage
+          imageName: ghcr.io/gethomepage/homepage:>=v1.0.0
+          commonUpdateSettings:
+            updateStrategy: semver
+          manifestTargets:
+            kustomize:
+              name: ghcr.io/gethomepage/homepage
+
+    - namePattern: immich
+      images:
+        - alias: server
+          imageName: ghcr.io/immich-app/immich-server:~v2
+          commonUpdateSettings:
+            updateStrategy: semver
+            allowTags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+            ignoreTags: ["*dev*", "*pr-*", "*staging*", "latest"]
+          manifestTargets:
+            helm:
+              tag: controllers.main.containers.main.image.tag
+        # ML tags are v2.x.y-openvino; ~v2 semver does not match that suffix — filter with allowTags + alphabetical.
+        - alias: ml
+          imageName: ghcr.io/immich-app/immich-machine-learning
+          commonUpdateSettings:
+            updateStrategy: alphabetical
+            allowTags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+-openvino$"
+            ignoreTags: ["*dev*", "*pr-*", "*staging*", "latest"]
+          manifestTargets:
+            helm:
+              tag: machine-learning.controllers.main.containers.main.image.tag
+
+    - namePattern: mealie
+      images:
+        - alias: mealie
+          imageName: ghcr.io/mealie-recipes/mealie:~v3
+          commonUpdateSettings:
+            updateStrategy: semver
+            allowTags: "regexp:^v3\\.[0-9]+\\.[0-9]+$"
+            ignoreTags: ["*-rc*", "*-beta*", "*dev*", "latest"]
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: metrics-server
+      images:
+        - alias: metrics-server
+          imageName: registry.k8s.io/metrics-server/metrics-server:~v0.7
+          manifestTargets:
+            helm:
+              name: image.repository
+              tag: image.tag
+
+    - namePattern: miniflux
+      images:
+        - alias: miniflux
+          imageName: miniflux/miniflux:~2
+          commonUpdateSettings:
+            updateStrategy: semver
+            allowTags: "regexp:^2\\.[0-9]+\\.[0-9]+$"
+            ignoreTags: ["*-rc*", "*-beta*", "*dev*", "latest"]
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: paperless-ngx
+      images:
+        - alias: paperless
+          imageName: ghcr.io/paperless-ngx/paperless-ngx:~2
+          commonUpdateSettings:
+            updateStrategy: semver
+            allowTags: "regexp:^2\\.[0-9]+\\.[0-9]+$"
+            ignoreTags: ["*-rc*", "*-beta*", "*dev*", "latest"]
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: plex
+      images:
+        - alias: plex
+          imageName: docker.io/plexinc/pms-docker:~1
+          commonUpdateSettings:
+            updateStrategy: alphabetical
+            allowTags: "regexp:^1\\.[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+-[0-9a-f0-9]+$"
+            ignoreTags: ["*beta*", "*dev*", "latest"]
+          manifestTargets:
+            helm:
+              name: image.repository
+              tag: image.tag
+
+    - namePattern: prowlarr
+      images:
+        - alias: prowlarr
+          imageName: ghcr.io/home-operations/prowlarr:~2.3
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: qbittorrent
+      images:
+        - alias: qbittorrent
+          imageName: ghcr.io/home-operations/qbittorrent:~5.1
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: radarr
+      images:
+        - alias: radarr
+          imageName: ghcr.io/home-operations/radarr:~6.1
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: sonarr
+      images:
+        - alias: sonarr
+          imageName: ghcr.io/home-operations/sonarr:~4.0
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: speedtest-tracker
+      images:
+        - alias: speedtest
+          imageName: lscr.io/linuxserver/speedtest-tracker
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^v1\\.[0-9]+\\.[0-9]+(-ls[0-9]+)?$"
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
+    - namePattern: tracearr
+      images:
+        - alias: tracearr
+          imageName: ghcr.io/connorgallopo/tracearr:~1.4
+          manifestTargets:
+            helm:
+              name: tracearr.image.repository
+              tag: tracearr.image.tag
+
+    - namePattern: tubearchivist
+      writeBackConfig:
+        method: git
+        gitConfig:
+          writeBackTarget: kustomization
+      images:
+        - alias: tubearchivist
+          imageName: bbilly1/tubearchivist:~v0.5
+          manifestTargets:
+            kustomize:
+              name: bbilly1/tubearchivist
+
+    - namePattern: vpn-gateway
+      writeBackConfig:
+        method: git
+        gitConfig:
+          writeBackTarget: helmvalues:values-pod-gateway.yaml
+      images:
+        - alias: gluetun
+          imageName: ghcr.io/qdm12/gluetun:~v3
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.gluetun.image.repository
+              tag: controllers.main.containers.gluetun.image.tag
+        - alias: gateway
+          imageName: ghcr.io/angelnu/pod-gateway:~v1
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+        - alias: admission
+          imageName: ghcr.io/angelnu/gateway-admision-controller:~v3
+          manifestTargets:
+            helm:
+              name: controllers.webhook.containers.main.image.repository
+              tag: controllers.webhook.containers.main.image.tag

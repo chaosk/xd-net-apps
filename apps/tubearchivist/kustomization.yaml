@@ -13,3 +13,9 @@ resources:
   - service.yaml
   - httproute.yaml
   - securitypolicy-forward-auth.yaml
+
+# Main app image only (ES/redis/bgutil are pinned separately in their manifests).
+images:
+  - name: bbilly1/tubearchivist
+    newTag: v0.5.10
+

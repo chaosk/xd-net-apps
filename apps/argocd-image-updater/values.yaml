@@ -1,0 +1,44 @@
+# https://github.com/argoproj/argo-helm/tree/main/charts/argocd-image-updater
+# https://argocd-image-updater.readthedocs.io/en/stable/
+
+createClusterRoles: true
+
+rbac:
+  enabled: true
+
+config:
+  argocd.namespace: argocd
+  log.level: info
+  interval: 2m
+  git.commit-message-template: |
+    {{- if eq (len .AppChanges) 1 -}}
+    Bump {{ .AppName }} ({{ (index .AppChanges 0).Image }}) to {{ (index .AppChanges 0).NewTag }}
+    {{- else -}}
+    Bump {{ .AppName }} images
+
+    {{- range .AppChanges }}
+    - {{ .Image }}: {{ .NewTag }}
+    {{- end }}
+    {{- end }}
+  git.user: "ecksd-ee"
+  git.email: "287506808+ecksd-ee@users.noreply.github.com"
+  git.commit-signing-method: ssh
+  git.commit-signing-key: /app/git-signing/sshSigningKey
+
+volumes:
+  - name: git-signing
+    secret:
+      secretName: argocd-image-updater-signing
+
+volumeMounts:
+  - name: git-signing
+    mountPath: /app/git-signing
+    readOnly: true
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
