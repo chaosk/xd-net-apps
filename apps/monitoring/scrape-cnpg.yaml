@@ -118,3 +118,20 @@ spec:
   podMetricsEndpoints:
     - port: metrics
       interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cnpg-mealie-db
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - mealie
+  selector:
+    matchLabels:
+      cnpg.io/cluster: mealie-db
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 30s

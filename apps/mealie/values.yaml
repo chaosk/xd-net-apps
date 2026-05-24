@@ -1,0 +1,91 @@
+# bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+# Mealie — https://docs.mealie.io/documentation/getting-started/installation/
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/mealie-recipes/mealie
+          tag: v3.18.0
+          pullPolicy: IfNotPresent
+        env:
+          TZ: UTC
+          PUID: "1000"
+          PGID: "1000"
+          BASE_URL: https://mealie.net.ecksd.ee
+          ALLOW_SIGNUP: "false"
+          MAX_WORKERS: "1"
+          WEB_CONCURRENCY: "1"
+          OIDC_AUTH_ENABLED: "true"
+          OIDC_PROVIDER_NAME: Authentik
+          OIDC_CONFIGURATION_URL: https://authentik.net.ecksd.ee/application/o/mealie/.well-known/openid-configuration
+          OIDC_ADMIN_GROUP: mealie-admins
+          OIDC_AUTO_REDIRECT: "true"
+          OIDC_CLIENT_ID:
+            valueFrom:
+              secretKeyRef:
+                name: mealie
+                key: OIDC_CLIENT_ID
+          OIDC_CLIENT_SECRET:
+            valueFrom:
+              secretKeyRef:
+                name: mealie
+                key: OIDC_CLIENT_SECRET
+          DB_ENGINE: postgres
+          POSTGRES_SERVER: mealie-db-rw
+          POSTGRES_PORT: "5432"
+          POSTGRES_DB: mealie
+          POSTGRES_USER: mealie
+          POSTGRES_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: mealie-db
+                key: password
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/app/about
+                port: 9000
+              initialDelaySeconds: 60
+              periodSeconds: 60
+              timeoutSeconds: 10
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/app/about
+                port: 9000
+              initialDelaySeconds: 30
+              periodSeconds: 30
+              timeoutSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: "2"
+            memory: 1Gi
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 9000
+
+persistence:
+  data:
+    enabled: true
+    existingClaim: mealie-data
+    globalMounts:
+      - path: /app/data
+
+defaultPodOptions:
+  securityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
