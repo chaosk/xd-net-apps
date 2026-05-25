@@ -52,6 +52,12 @@ data:
             icon: si-ubiquiti
             siteMonitor: https://unifi.net.ecksd.ee
             statusStyle: ""
+            widget:
+              type: unifi
+              url: https://unifi.net.ecksd.ee
+              username: "{{HOMEPAGE_VAR_UNIFI_USERNAME}}"
+              password: "{{HOMEPAGE_VAR_UNIFI_PASSWORD}}"
+              fields: ["uptime", "wan", "lan_users", "wlan_users"]
         - Pangolin:
             description: Remote access edge
             weight: 35

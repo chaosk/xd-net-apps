@@ -103,6 +103,18 @@ spec:
               name: homepage-dsm-widget
               key: HOMEPAGE_VAR_DSM_PASSWORD
               optional: true
+        - name: HOMEPAGE_VAR_UNIFI_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: homepage-unifi-widget
+              key: HOMEPAGE_VAR_UNIFI_USERNAME
+              optional: true
+        - name: HOMEPAGE_VAR_UNIFI_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: homepage-unifi-widget
+              key: HOMEPAGE_VAR_UNIFI_PASSWORD
+              optional: true
         - name: HOMEPAGE_VAR_PANGOLIN_API_URL
           valueFrom:
             secretKeyRef:
