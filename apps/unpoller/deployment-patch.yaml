@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unpoller
+spec:
+  template:
+    spec:
+      containers:
+        - name: unpoller
+          env:
+            - name: UP_UNIFI_DEFAULT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: unpoller-unifi
+                  key: unifi-url
+            - name: UP_UNIFI_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: unpoller-unifi
+                  key: unifi-user
+            - name: UP_UNIFI_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: unpoller-unifi
+                  key: password
+            - name: UP_UNIFI_DEFAULT_VERIFY_SSL
+              value: "false"
+            - name: UP_UNIFI_DEFAULT_SAVE_SITES
+              value: "true"
+            - name: UP_UNIFI_DEFAULT_SAVE_DPI
+              value: "true"
+            - name: UP_UNIFI_DEFAULT_SITE_0
+              value: all

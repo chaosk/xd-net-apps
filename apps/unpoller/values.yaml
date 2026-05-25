@@ -1,0 +1,36 @@
+# https://github.com/unpoller/helm-chart
+# https://unpoller.com/docs/install/configuration/
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/unpoller/unpoller
+  tag: v3.2.0
+
+dashboards:
+  create: false
+  grafana:
+    create: false
+
+# UniFi controller URL, user, and password come from Secret unpoller-unifi via deployment-patch.yaml (UP_UNIFI_DEFAULT_*).
+upConfig: |
+  [poller]
+  debug = false
+  quiet = false
+  [prometheus]
+  disable = false
+  http_listen = "0.0.0.0:9130"
+  report_errors = false
+  [influxdb]
+  disable = true
+  [unifi]
+  dynamic = false
+  [loki]
+  disable = true
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    memory: 256Mi

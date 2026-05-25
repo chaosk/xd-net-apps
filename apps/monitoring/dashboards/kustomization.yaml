@@ -41,3 +41,15 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana/folder: Misc
+  - name: grafana-dashboard-unpoller
+    files:
+      - unpoller-network-sites.json
+      - unpoller-usw-insights.json
+      - unpoller-usg-insights.json
+      - unpoller-uap-insights.json
+      - unpoller-client-insights.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana/folder: UniFi
