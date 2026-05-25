@@ -57,6 +57,8 @@ data:
             weight: 35
             href: "{{HOMEPAGE_VAR_PANGOLIN_DASHBOARD_URL}}"
             icon: mdi-shield-link-variant-outline
+            siteMonitor: "{{HOMEPAGE_VAR_PANGOLIN_DASHBOARD_URL}}"
+            statusStyle: ""
             widget:
               type: pangolin
               url: "{{HOMEPAGE_VAR_PANGOLIN_API_URL}}"
