@@ -1,0 +1,86 @@
+# bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+# PeaNUT — https://github.com/Brandawg93/PeaNUT (NUT client UI + Prometheus /api/v1/metrics)
+controllers:
+  main:
+    strategy: Recreate
+    initContainers:
+      seed-settings:
+        dependsOn: []
+        image:
+          repository: docker.io/library/busybox
+          tag: "1.36.1"
+          pullPolicy: IfNotPresent
+        command:
+          - sh
+          - -c
+          - |
+            if [ ! -f /config/settings.yml ]; then
+              cp /seed/settings.yml /config/settings.yml
+              chown 1000:1000 /config/settings.yml
+            fi
+        securityContext:
+          runAsUser: 0
+    containers:
+      main:
+        image:
+          repository: docker.io/brandawg93/peanut
+          tag: "6.0.0"
+          pullPolicy: IfNotPresent
+        env:
+          WEB_PORT: "8080"
+          # UI behind Gateway only; metrics and Homepage widget use in-cluster HTTP.
+          AUTH_DISABLED: "true"
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8080
+              initialDelaySeconds: 30
+              periodSeconds: 60
+              timeoutSeconds: 10
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8080
+              initialDelaySeconds: 10
+              periodSeconds: 30
+              timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8080
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: peanut-config
+    globalMounts:
+      - path: /config
+  nut-settings:
+    type: secret
+    name: peanut
+    globalMounts:
+      - path: /seed
+        readOnly: true
+
+defaultPodOptions:
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch

@@ -28,7 +28,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`, `miniflux-db`, `mealie-db`, `grafana-db`. |
 | `scrape-apps.yaml` | Authentik server PodMonitor; Immich, Bitmagnet, and Speedtest Tracker ServiceMonitors. |
 | `scrape-platform.yaml` | Envoy Gateway controller + dataplane; Cilium agent ServiceMonitor. |
-| `dashboards/` | CNPG, Cilium, Envoy Gateway, Speedtest Tracker, and UniFi Poller Grafana dashboards (ConfigMaps for sidecar). |
+| `dashboards/` | CNPG, Cilium, Envoy Gateway, Speedtest Tracker, PeaNUT, and UniFi Poller Grafana dashboards (ConfigMaps for sidecar). |
 
 Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: kube-prometheus-stack`** so the stack’s Prometheus picks them up (`serviceMonitorSelectorNilUsesHelmValues` is left at the chart default).
 
@@ -45,6 +45,7 @@ Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: ku
 | Envoy dataplane (`shared`) | `scrape-platform.yaml` | Pod port `metrics`, path `/stats/prometheus`. |
 | Cilium agent | `scrape-platform.yaml` | Service `cilium-agent` port `metrics` in `kube-system`. |
 | UniFi Poller | `apps/unpoller` PodMonitor | Pod port `tcp` (9130), path `/metrics` (default). Requires `secrets/unpoller.yaml`. |
+| PeaNUT | `apps/peanut` ServiceMonitor | `/api/v1/metrics` on Service `peanut:8080`. Enable Prometheus in PeaNUT UI; Synology NUT must allow the pod IP. |
 
 Sonarr/Radarr expose `/metrics` only with app-side auth and are not scraped here.
 
@@ -76,6 +77,7 @@ The Cilium board (Grafana **16611**) originally filtered on in-metric label `k8s
 Envoy Gateway addon dashboards live under `dashboards/` with upstream filenames (except `envoy-resources-monitor.json`, from `resources-monitor.gen.json`). **Global Ratelimit** is omitted because no ratelimit service is deployed.
 
 | **Misc** | **Speedtest Tracker** | [CrazyWolf13/Speedtest-Tracker-Prometheus](https://github.com/CrazyWolf13/Speedtest-Tracker-Prometheus) (`dashboards/speedtest-tracker.json`; [Grafana 24608](https://grafana.com/grafana/dashboards/24608-speedtest-tracker/)) | Speedtest Tracker `/prometheus` (`scrape-apps.yaml`) |
+| **Misc** | **PeaNUT** | [Brandawg93/PeaNUT](https://github.com/Brandawg93/PeaNUT/blob/main/examples/prometheus/grafana/provisioning/dashboards/PeaNUT.json) (`dashboards/peanut.json`) | `apps/peanut` ServiceMonitor (`/api/v1/metrics`) |
 | **UniFi** | **Network Sites** | [Grafana 11311](https://grafana.com/grafana/dashboards/11311-unifi-poller-network-sites-prometheus/) (`unpoller-network-sites.json`) | UniFi Poller (`apps/unpoller` PodMonitor) |
 | **UniFi** | **USW Insights** | [Grafana 11312](https://grafana.com/grafana/dashboards/11312-unifi-poller-usw-insights-prometheus/) (`unpoller-usw-insights.json`) | UniFi Poller |
 | **UniFi** | **USG Insights** | [Grafana 11313](https://grafana.com/grafana/dashboards/11313-unifi-poller-usg-insights-prometheus/) (`unpoller-usg-insights.json`) | UniFi Poller |

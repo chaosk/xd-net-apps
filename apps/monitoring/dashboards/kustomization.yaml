@@ -41,6 +41,14 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana/folder: Misc
+  - name: grafana-dashboard-peanut
+    files:
+      - peanut.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana/folder: Misc
   - name: grafana-dashboard-unpoller
     files:
       - unpoller-network-sites.json

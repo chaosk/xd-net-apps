@@ -16,11 +16,11 @@ before you push.
    plaintext in the decrypted file (useful for non-secrets like hostnames or usernames
    you want readable in-cluster after sync).
 
-   **Exception — nested config in one key** (`secrets/immich-config.yaml`):
-   the Immich settings live under a single multiline `immich-config.yaml:` block.
-   `# sops:encrypt` *inside* that block is just text in the config file, not a SOPS
-   directive. That file uses `encrypted_regex: ^immich-config\.yaml$` in `.sops.yaml`
-   so the **entire** block is ciphertext in git. Edit with `sops secrets/immich-config.yaml`.
+   **Exception — nested config in one key** (`secrets/immich-config.yaml`,
+   `secrets/peanut.yaml`): multiline `stringData` blocks (`immich-config.yaml:`,
+   `settings.yml:`). `# sops:encrypt` *inside* those blocks is literal text in the
+   config file, not a SOPS directive. `.sops.yaml` uses `encrypted_regex` on the key
+   name so the **entire** block is ciphertext in git. Edit with `sops secrets/<file>.yaml`.
 
 3. Encrypt before you push (never commit plaintext credentials to a shared remote):
 
@@ -82,6 +82,7 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `homepage-immich-widget.yaml` | `homepage` | Immich API key for Homepage widget via env `HOMEPAGE_VAR_IMMICH_API_KEY` ([widget](https://gethomepage.dev/widgets/services/immich/)); shown on the **Immich** tile. |
 | `homepage-dsm-widget.yaml` | `homepage` | Synology DSM Disk Station widget credentials via env `HOMEPAGE_VAR_DSM_USERNAME` and `HOMEPAGE_VAR_DSM_PASSWORD` ([widget](https://gethomepage.dev/widgets/services/diskstation/)); used on the **DSM** tile in `services.yaml`. |
 | `homepage-unifi-widget.yaml` | `homepage` | UniFi controller widget via env `HOMEPAGE_VAR_UNIFI_USERNAME` and `HOMEPAGE_VAR_UNIFI_PASSWORD` ([widget](https://gethomepage.dev/widgets/services/unifi-controller/)); use the same local admin as **`unpoller-unifi`**. |
+| `peanut.yaml` | `peanut` | PeaNUT `settings.yml` (Synology NUT host `nas.net.ecksd.ee:3493`, credentials). See `apps/peanut/README.md`. |
 | `homepage-pangolin-widget.yaml` | `homepage` | Pangolin Integration API for Homepage widget via env `HOMEPAGE_VAR_PANGOLIN_API_URL`, `HOMEPAGE_VAR_PANGOLIN_DASHBOARD_URL`, `HOMEPAGE_VAR_PANGOLIN_ORG`, and `HOMEPAGE_VAR_PANGOLIN_API_KEY` ([widget](https://gethomepage.dev/widgets/services/pangolin/)); used on the **Pangolin** tile in `services.yaml`. |
 | `tubearchivist.yaml` | `tubearchivist` | Elasticsearch (`tubearchivist`, keys `ELASTIC_PASSWORD`). See [env vars](https://docs.tubearchivist.com/installation/env-vars/). |
 | `vpn-gateway.yaml` | `vpn-gateway` | Gluetun VPN (`vpn-gateway`). See [vpn-gateway README](../apps/vpn-gateway/README.md). |
