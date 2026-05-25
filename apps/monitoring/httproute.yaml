@@ -3,6 +3,15 @@ kind: HTTPRoute
 metadata:
   name: grafana
   namespace: monitoring
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Management
+    gethomepage.dev/weight: "40"
+    gethomepage.dev/name: Grafana
+    gethomepage.dev/description: Metrics and dashboards
+    gethomepage.dev/icon: si-grafana
+    gethomepage.dev/href: "https://grafana.net.ecksd.ee"
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=grafana
 spec:
   parentRefs:
     - name: shared
