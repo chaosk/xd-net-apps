@@ -98,3 +98,4 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `mealie-db.yaml` | `mealie` | CNPG bootstrap (`mealie-db`, keys `username`, `password`; owner/database `mealie` in `apps/mealie/postgres.yaml`). |
 | `mealie.yaml` | `mealie` | `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` for Mealie Authentik OIDC (`mealie`). |
 | `grafana-admin.yaml` | `monitoring` | Grafana admin login (`grafana-admin`, keys `admin-user`, `admin-password`) for kube-prometheus-stack. See `apps/monitoring/README.md`. |
+| `grafana-db.yaml` | `monitoring` | CNPG bootstrap (`grafana-db`, keys `username`, `password`; owner/database `grafana` in `apps/monitoring/postgres.yaml`). |

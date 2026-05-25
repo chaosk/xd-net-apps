@@ -135,3 +135,20 @@ spec:
   podMetricsEndpoints:
     - port: metrics
       interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cnpg-grafana-db
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  selector:
+    matchLabels:
+      cnpg.io/cluster: grafana-db
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 30s

@@ -5,6 +5,7 @@ namespace: monitoring
 
 resources:
   - namespace.yaml
+  - postgres.yaml
   - httproute.yaml
   - scrape-cnpg.yaml
   - scrape-apps.yaml

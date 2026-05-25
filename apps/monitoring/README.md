@@ -19,12 +19,13 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | File | Purpose |
 |------|---------|
 | `namespace.yaml` | **`monitoring`** namespace; Pod Security **`privileged`** (node-exporter). |
+| `postgres.yaml` | CNPG cluster **`grafana-db`** (Grafana internal metadata on `local-path`). |
 | `kustomization.yaml` | Namespace, HTTPRoute, three Helm releases, dashboard ConfigMaps. |
-| `values-prometheus.yaml` | Retention, Synology PVCs for Prometheus and Alertmanager, Grafana admin Secret reference. |
+| `values-prometheus.yaml` | Retention, Synology PVCs for Prometheus and Alertmanager, Grafana Postgres + admin Secret. |
 | `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
-| `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`, `miniflux-db`, `mealie-db`. |
+| `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`, `miniflux-db`, `mealie-db`, `grafana-db`. |
 | `scrape-apps.yaml` | Authentik server PodMonitor; Immich, Bitmagnet, and Speedtest Tracker ServiceMonitors. |
 | `scrape-platform.yaml` | Envoy Gateway controller + dataplane; Cilium agent ServiceMonitor. |
 | `dashboards/` | CNPG, Cilium, and Envoy Gateway Grafana dashboards (ConfigMaps for sidecar). |
@@ -78,9 +79,10 @@ Envoy Gateway addon dashboards live under `dashboards/` with upstream filenames 
 ## Prerequisites
 
 1. **Secret `grafana-admin`** in namespace `monitoring` — see `secrets/grafana-admin.yaml`. Generate a password, add `# sops:encrypt` on `admin-password`, then `sops --encrypt --in-place secrets/grafana-admin.yaml` and sync **platform-secrets** before the stack can start.
-2. **Metrics Server** — `apps/metrics-server` (for node/pod metrics in Grafana).
-3. **Synology `storageClass`** — `synology` (same as other apps).
-4. **Pod Security** — namespace uses **`privileged`** so `prometheus-node-exporter` can use host network, hostPath, and port 9100 (cluster default is baseline).
+2. **Secret `grafana-db`** in namespace `monitoring` — CNPG bootstrap for `postgres.yaml` (`username`, `password`; owner/database `grafana`). See `secrets/grafana-db.yaml`. Encrypt with SOPS and sync **platform-secrets** before the **`grafana-db`** cluster and Grafana pod start.
+3. **Metrics Server** — `apps/metrics-server` (for node/pod metrics in Grafana).
+4. **Synology `storageClass`** — `synology` (same as other apps).
+5. **Pod Security** — namespace uses **`privileged`** so `prometheus-node-exporter` can use host network, hostPath, and port 9100 (cluster default is baseline).
 
 ## Apply
 
@@ -92,6 +94,7 @@ The prometheus-community chart installs **Prometheus Operator CRDs**. On first s
 
 ## Notes
 
+- **Grafana database:** Internal state (users, preferences, secure values) uses **PostgreSQL** via CNPG (`grafana-db`).
 - **No Authentik forward-auth** on Grafana in this manifest — login uses Grafana’s built-in admin user from `grafana-admin`. Add a `SecurityPolicy` + HTTPRoute outpost rule later if you want SSO on `grafana.net.ecksd.ee`.
 - **Resource use:** Prometheus and Loki each request a **50Gi** RWO volume; adjust `values-*.yaml` if your NAS exports are smaller.
 - **Homepage:** optional `gethomepage.dev/*` annotations on `httproute.yaml` can be added once the stack is up.

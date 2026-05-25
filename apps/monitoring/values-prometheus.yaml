@@ -34,12 +34,29 @@ grafana:
     passwordKey: admin-password
   ingress:
     enabled: false
+  # Internal metadata DB (users, prefs, secure values) — not metrics storage.
+  persistence:
+    enabled: false
+  extraSecretMounts:
+    - name: grafana-db-credentials
+      secretName: grafana-db
+      defaultMode: 0440
+      mountPath: /etc/secrets/grafana-db
+      readOnly: true
+  grafana.ini:
+    database:
+      type: postgres
+      host: grafana-db-rw.monitoring.svc.cluster.local:5432
+      name: grafana
+      user: grafana
+      ssl_mode: disable
+      password: $__file{/etc/secrets/grafana-db/password}
   resources:
     requests:
       cpu: 100m
-      memory: 256Mi
+      memory: 384Mi
     limits:
-      memory: 512Mi
+      memory: 768Mi
   additionalDataSources:
     - name: Loki
       type: loki
