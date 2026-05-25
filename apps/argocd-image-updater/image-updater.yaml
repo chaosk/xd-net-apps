@@ -61,7 +61,7 @@ spec:
 
     - namePattern: homepage
       writeBackConfig:
-        method: git
+        method: git:secret:argocd/argocd-image-updater-git
         gitConfig:
           writeBackTarget: kustomization
       images:
@@ -215,7 +215,7 @@ spec:
 
     - namePattern: tubearchivist
       writeBackConfig:
-        method: git
+        method: git:secret:argocd/argocd-image-updater-git
         gitConfig:
           writeBackTarget: kustomization
       images:
@@ -227,7 +227,7 @@ spec:
 
     - namePattern: vpn-gateway
       writeBackConfig:
-        method: git
+        method: git:secret:argocd/argocd-image-updater-git
         gitConfig:
           writeBackTarget: helmvalues:values-pod-gateway.yaml
       images:

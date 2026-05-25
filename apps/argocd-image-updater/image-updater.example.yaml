@@ -15,7 +15,7 @@
 #
 #     - namePattern: my-kustomize-app
 #       writeBackConfig:
-#         method: git
+#         method: git:secret:argocd/argocd-image-updater-git
 #         gitConfig:
 #           writeBackTarget: kustomization
 #       images:
