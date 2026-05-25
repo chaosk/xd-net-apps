@@ -48,11 +48,24 @@ data:
         - UniFi:
             href: https://unifi.ui.com
             description: UniFi controller
+            weight: 10
             icon: si-ubiquiti
             siteMonitor: https://unifi.net.ecksd.ee
             statusStyle: ""
+        - Pangolin:
+            description: Remote access edge
+            weight: 35
+            href: "{{HOMEPAGE_VAR_PANGOLIN_DASHBOARD_URL}}"
+            icon: mdi-shield-link-variant-outline
+            widget:
+              type: pangolin
+              url: "{{HOMEPAGE_VAR_PANGOLIN_API_URL}}"
+              key: "{{HOMEPAGE_VAR_PANGOLIN_API_KEY}}"
+              org: "{{HOMEPAGE_VAR_PANGOLIN_ORG}}"
+              fields: ["sites", "resources", "targets", "traffic"]
         - DSM:
             description: Synology UI
+            weight: 45
             href: https://nas.net.ecksd.ee/
             icon: si-synology
             siteMonitor: https://nas.net.ecksd.ee

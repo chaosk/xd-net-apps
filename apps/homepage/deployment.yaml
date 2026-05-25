@@ -103,6 +103,30 @@ spec:
               name: homepage-dsm-widget
               key: HOMEPAGE_VAR_DSM_PASSWORD
               optional: true
+        - name: HOMEPAGE_VAR_PANGOLIN_API_URL
+          valueFrom:
+            secretKeyRef:
+              name: homepage-pangolin-widget
+              key: HOMEPAGE_VAR_PANGOLIN_API_URL
+              optional: true
+        - name: HOMEPAGE_VAR_PANGOLIN_DASHBOARD_URL
+          valueFrom:
+            secretKeyRef:
+              name: homepage-pangolin-widget
+              key: HOMEPAGE_VAR_PANGOLIN_DASHBOARD_URL
+              optional: true
+        - name: HOMEPAGE_VAR_PANGOLIN_ORG
+          valueFrom:
+            secretKeyRef:
+              name: homepage-pangolin-widget
+              key: HOMEPAGE_VAR_PANGOLIN_ORG
+              optional: true
+        - name: HOMEPAGE_VAR_PANGOLIN_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homepage-pangolin-widget
+              key: HOMEPAGE_VAR_PANGOLIN_API_KEY
+              optional: true
         volumeMounts:
         - name: config
           mountPath: /app/config
