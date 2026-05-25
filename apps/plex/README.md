@@ -37,6 +37,10 @@ kubectl kustomize "$HOME/Projects/xd-net-apps/apps/plex" --enable-helm | kubectl
 
 Open the URL from **`httpRoute.hostnames`**, complete Plex server setup, and add libraries under **`/media`** (for example **`/media/Movies`**). In **Settings → Transcoder**, enable **hardware acceleration** when the GPU path is working.
 
+## Logs in Grafana (Loki)
+
+Plex writes **`Plex Media Server.log`** on the config volume, not to stdout. A **`log-tailer`** sidecar tails that file so cluster **Alloy** can forward it to Loki. Alloy parses Plex’s timestamp (UTC) and **`level`** (`DEBUG`, `INFO`, `WARN`, `ERROR`). In Grafana **Explore → Loki**, use `{namespace="plex", container="log-tailer"}` or `{namespace="plex", container="log-tailer", level="ERROR"}`.
+
 ## Upgrades
 
 Bump **`helmCharts.version`** in **`kustomization.yaml`** to a published chart version from the **`pms-docker`** chart index, then re-apply. Read upstream release notes for image or value changes that affect your cluster.

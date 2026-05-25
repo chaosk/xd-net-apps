@@ -62,7 +62,7 @@ kube-prometheus-stack ships the usual Kubernetes, node, and Prometheus dashboard
 
 JSON dashboards live under `dashboards/`; Kustomize builds ConfigMaps with label **`grafana_dashboard=1`** for the Grafana sidecar. Datasource placeholders are rewritten to **`Prometheus`**.
 
-Use **Explore → Loki** for log queries (`{namespace="homepage"}`, etc.).
+Use **Explore → Loki** for log queries (`{namespace="homepage"}`, etc.). Apps that log to files only (for example **Plex**) need a sidecar so lines reach container stdout; Plex uses `{namespace="plex", container="log-tailer"}` with timestamp and **`level`** parsing in `values-alloy.yaml`.
 
 Dashboard ConfigMaps use **`argocd.argoproj.io/sync-options: ServerSideApply=true`** so Argo CD does not store the full manifest in `last-applied-configuration` (that annotation has a 256KiB limit and breaks large boards like CloudNativePG and Cilium).
 

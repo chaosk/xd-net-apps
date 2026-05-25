@@ -51,7 +51,32 @@ alloy:
 
       loki.source.kubernetes "pods" {
         targets    = discovery.relabel.pods.output
+        forward_to = [loki.process.pods.receiver]
+      }
+
+      loki.process "pods" {
         forward_to = [loki.write.loki.receiver]
+
+        // Plex log-tailer emits file lines; use the timestamp in the log body (PMS logs in UTC).
+        stage.match {
+          selector = "{namespace=\"plex\", container=\"log-tailer\"} |~ \"^[A-Z][a-z]{2} [0-9]{1,2}, [0-9]{4}\""
+
+          stage.regex {
+            expression = "^(?P<plex_ts>[A-Z][a-z]{2} [0-9]{1,2}, [0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}) \\[[0-9]+\\] (?P<level>DEBUG|INFO|WARN|ERROR|FATAL) - "
+          }
+
+          stage.timestamp {
+            source   = "plex_ts"
+            format   = "Jan 2, 2006 15:04:05.000"
+            location = "UTC"
+          }
+
+          stage.labels {
+            values = {
+              level = "",
+            }
+          }
+        }
       }
 
       loki.write "loki" {

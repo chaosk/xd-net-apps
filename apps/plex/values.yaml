@@ -65,3 +65,29 @@ extraVolumeMounts:
   - name: media
     # Library root inside the container (many examples use /data; this app uses /media).
     mountPath: /media
+
+# PMS logs to files under /config, not stdout. Alloy (monitoring) ships container logs to Loki.
+extraContainers:
+  - name: log-tailer
+    image: busybox:1.37
+    command:
+      - sh
+      - -c
+      - |
+        set -eu
+        logdir="/config/Library/Application Support/Plex Media Server/Logs"
+        until [ -f "$logdir/Plex Media Server.log" ]; do
+          echo "log-tailer: waiting for Plex Media Server.log"
+          sleep 5
+        done
+        exec tail -n 500 -F "$logdir/Plex Media Server.log"
+    resources:
+      requests:
+        cpu: 5m
+        memory: 16Mi
+      limits:
+        memory: 64Mi
+    volumeMounts:
+      - name: pms-config
+        mountPath: /config
+        readOnly: true
