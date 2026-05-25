@@ -6,16 +6,17 @@ Deploys [Argo CD Image Updater](https://argocd-image-updater.readthedocs.io/) in
 
 Use a **dedicated GitHub account** (not your personal one). You need **two SSH key pairs** on that account:
 
-| Key | Where the public key goes | Private key → |
-|-----|---------------------------|---------------|
-| **Deploy** | Repo **Deploy keys** ([xd-net-apps settings](https://github.com/chaosk/xd-net-apps/settings/keys)), **Allow write access** | xd-net `git_image_updater_ssh_private_key` → Secret `argocd-image-updater-git` |
-| **Signing** | Bot profile → **Settings → SSH and GPG keys → Signing keys** | xd-net `git_image_updater_signing_ssh_private_key` → Secret `argocd-image-updater-signing` |
+| Key / token | Where it goes | xd-net → Secret |
+|-------------|---------------|-----------------|
+| **Deploy** | Repo **Deploy keys** ([xd-net-apps settings](https://github.com/chaosk/xd-net-apps/settings/keys)), **Allow write access** | `git_image_updater_ssh_private_key` → `argocd-image-updater-git` |
+| **Signing** | Bot profile → **Settings → SSH and GPG keys → Signing keys** | `git_image_updater_signing_ssh_private_key` → `argocd-image-updater-signing` |
+| **GHCR PAT** | Bot profile → **Settings → Developer settings → PAT** with **read:packages** | `ghcr_image_updater_token` (+ `ghcr_image_updater_username`) → `argocd-image-updater-ghcr` (`creds` = `user:token`) |
 
 ## Layout
 
 | File | Purpose |
 |------|---------|
-| `values.yaml` | Helm chart: RBAC, Argo CD namespace, Git user/email, commit signing mount |
+| `values.yaml` | Helm chart: RBAC, Argo CD namespace, GHCR registry creds, Git user/email, commit signing mount |
 | `image-updater.yaml` | `ImageUpdater` CR: git write-back + one `applicationRefs` entry per opted-in app |
 | `image-updater.example.yaml` | Copy-paste templates for new apps (Helm vs Kustomize) |
 

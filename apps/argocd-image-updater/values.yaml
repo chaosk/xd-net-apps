@@ -10,6 +10,13 @@ config:
   argocd.namespace: argocd
   log.level: info
   interval: 2m
+  # GHCR creds: Secret argocd/argocd-image-updater-ghcr (xd-net Terraform, bot PAT read:packages).
+  registries:
+    - name: GitHub Container Registry
+      prefix: ghcr.io
+      api_url: https://ghcr.io
+      credentials: secret:argocd/argocd-image-updater-ghcr#creds
+      credsexpire: 12h
   git.commit-message-template: |
     {{- if eq (len .AppChanges) 1 -}}
     Bump {{ .AppName }} ({{ (index .AppChanges 0).Image }}) to {{ (index .AppChanges 0).NewTag }}
