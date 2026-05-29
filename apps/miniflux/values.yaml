@@ -7,7 +7,7 @@ controllers:
       main:
         image:
           repository: miniflux/miniflux
-          tag: "2.3.0"
+          tag: "2.3.1"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -39,9 +39,9 @@ controllers:
             spec:
               exec:
                 command:
-                  - /usr/bin/miniflux
-                  - -healthcheck
-                  - auto
+                - /usr/bin/miniflux
+                - -healthcheck
+                - auto
               initialDelaySeconds: 30
               periodSeconds: 60
               timeoutSeconds: 10
@@ -62,7 +62,6 @@ controllers:
           limits:
             cpu: "1"
             memory: 256Mi
-
 service:
   main:
     controller: main
