@@ -7,7 +7,7 @@ controllers:
       main:
         image:
           repository: lscr.io/linuxserver/speedtest-tracker
-          tag: v1.14.3-ls154
+          tag: v1.14.3-ls155
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
