@@ -12,6 +12,31 @@ resources:
   - scrape-platform.yaml
   - dashboards/
 
+# kube-prometheus-stack renders hostNetwork: false explicitly; the API/operator often
+# omits false defaults on read. Strip them so Git matches live state (Argo CD diff).
+patchesJson6902:
+  - target:
+      group: monitoring.coreos.com
+      kind: Alertmanager
+      name: kube-prometheus-stack-alertmanager
+    patch: |
+      - op: remove
+        path: /spec/hostNetwork
+  - target:
+      group: monitoring.coreos.com
+      kind: Prometheus
+      name: kube-prometheus-stack-prometheus
+    patch: |
+      - op: remove
+        path: /spec/hostNetwork
+  - target:
+      group: apps
+      kind: Deployment
+      name: kube-prometheus-stack-kube-state-metrics
+    patch: |
+      - op: remove
+        path: /spec/template/spec/hostNetwork
+
 helmCharts:
   - name: kube-prometheus-stack
     repo: https://prometheus-community.github.io/helm-charts
