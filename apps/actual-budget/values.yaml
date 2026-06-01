@@ -7,7 +7,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/actualbudget/actual-server
-          tag: "26.5.2"
+          tag: "26.6.0"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -40,17 +40,15 @@ controllers:
           limits:
             cpu: "1"
             memory: 512Mi
-
 service:
   main:
     controller: main
     ports:
       http:
         port: 5006
-
 persistence:
   data:
     enabled: true
     existingClaim: actual-budget-data
     globalMounts:
-      - path: /data
+    - path: /data
