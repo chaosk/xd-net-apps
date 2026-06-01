@@ -24,3 +24,5 @@ spec:
           namespace: authentik
           port: 80
       path: /outpost.goauthentik.io/auth/envoy
+      headersToBackend:
+        - authorization
