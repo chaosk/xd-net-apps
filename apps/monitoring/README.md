@@ -77,7 +77,7 @@ The Cilium board (Grafana **16611**) originally filtered on in-metric label `k8s
 Envoy Gateway addon dashboards live under `dashboards/` with upstream filenames (except `envoy-resources-monitor.json`, from `resources-monitor.gen.json`). **Global Ratelimit** is omitted because no ratelimit service is deployed.
 
 | **Misc** | **Speedtest Tracker** | [CrazyWolf13/Speedtest-Tracker-Prometheus](https://github.com/CrazyWolf13/Speedtest-Tracker-Prometheus) (`dashboards/speedtest-tracker.json`; [Grafana 24608](https://grafana.com/grafana/dashboards/24608-speedtest-tracker/)) | Speedtest Tracker `/prometheus` (`scrape-apps.yaml`) |
-| **Misc** | **PeaNUT** | [Brandawg93/PeaNUT](https://github.com/Brandawg93/PeaNUT/blob/main/examples/prometheus/grafana/provisioning/dashboards/PeaNUT.json) (`dashboards/peanut.json`) | `apps/peanut` ServiceMonitor (`/api/v1/metrics`) |
+| **Misc** | **PeaNUT** | Prometheus adaptation of [zephyr325/Grafana-for-PeaNUT](https://github.com/zephyr325/Grafana-for-PeaNUT) (`dashboards/peanut.json`; numeric NUT metrics only—no Influx outage/status panels) | `apps/peanut` ServiceMonitor (`/api/v1/metrics`) |
 | **UniFi** | **Network Sites** | [Grafana 11311](https://grafana.com/grafana/dashboards/11311-unifi-poller-network-sites-prometheus/) (`unpoller-network-sites.json`) | UniFi Poller (`apps/unpoller` PodMonitor) |
 | **UniFi** | **USW Insights** | [Grafana 11312](https://grafana.com/grafana/dashboards/11312-unifi-poller-usw-insights-prometheus/) (`unpoller-usw-insights.json`) | UniFi Poller |
 | **UniFi** | **USG Insights** | [Grafana 11313](https://grafana.com/grafana/dashboards/11313-unifi-poller-usg-insights-prometheus/) (`unpoller-usg-insights.json`) | UniFi Poller |

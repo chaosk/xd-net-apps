@@ -1,6 +1,6 @@
 # PeaNUT
 
-In-cluster [PeaNUT](https://github.com/Brandawg93/PeaNUT) UI that talks to **Synology’s network UPS server** (NUT on `nas.net.ecksd.ee:3493`). Prometheus scrapes PeaNUT’s `/api/v1/metrics`; Grafana dashboard is in **`apps/monitoring`** (folder **Misc**).
+In-cluster [PeaNUT](https://github.com/Brandawg93/PeaNUT) UI that talks to **Synology’s network UPS server** (NUT on `nas.net.ecksd.ee:3493`). Prometheus scrapes PeaNUT’s `/api/v1/metrics`; Grafana dashboard is in **`apps/monitoring`** (folder **Misc**), adapted from [Grafana-for-PeaNUT](https://github.com/zephyr325/Grafana-for-PeaNUT) for Prometheus (overview, trends, power estimate; use Influx + upstream dashboard for outage history).
 
 ## Prerequisites (Synology)
 
