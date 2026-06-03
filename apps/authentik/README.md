@@ -65,6 +65,20 @@ Each protected app ships **`securitypolicy-forward-auth.yaml`** and the outpost 
 
 To protect another app: copy Sonarr’s **SecurityPolicy** and outpost **HTTPRoute** rule, add **`spec.from`** entries for that namespace in **`referencegrant-forward-auth.yaml`**, re-apply **authentik** then the app. In the Authentik UI, one **domain-level** forward-auth **Proxy provider** (cookie domain **`net.ecksd.ee`**) on the **embedded outpost** is usually enough for all `*.net.ecksd.ee` hostnames; **single-application** providers require the outpost path on that app’s hostname as above.
 
+## Argo CD (Dex OIDC)
+
+Argo CD lives in **xd-net** Terraform (`apps/modules/argocd`), not under `apps/argocd/` here. Login uses **bundled Dex** with an **OIDC connector** to Authentik ([integration guide](https://integrations.goauthentik.io/infrastructure/argocd/)), not Envoy forward auth.
+
+In Authentik: **OAuth2/OpenID Provider** slug **`argocd`**, redirect URIs **`https://argocd.net.ecksd.ee/api/dex/callback`** and **`https://localhost:8085/auth/callback`** (strict), grant types **`authorization_code`** and **`refresh_token`**, authentication flow **Welcome to authentik!**, plus a **`groups`** scope mapping (`return {"groups": [group.name for group in user.groups.all()]}`) so Dex can read **`ArgoCD Admins`** / **`ArgoCD Viewers`**. Put users in those groups for **`role:admin`** / **`role:readonly`** in Argo CD.
+
+In **xd-net** `config.auto.tfvars` (gitignored): set **`argocd_oidc_issuer`**, **`argocd_oidc_client_id`**, **`argocd_oidc_client_secret`**, and **`argocd_rbac_policy_csv`**, then `terraform apply` in **`apps/`**. The UI shows **Log in via Authentik**; the CLI can use the same Dex flow.
+
+## Client IP in audit events
+
+Authentik reads the client address from **`X-Forwarded-For`** when the request comes from a [trusted proxy network](https://docs.goauthentik.io/install-config/reverse-proxy/) (private ranges including **`10.0.0.0/8`** are trusted by default). OAuth and login traffic hits **`authentik-server`** through Envoy Gateway; if the gateway SNATs ingress (**`externalTrafficPolicy: Cluster`**) or does not append the real client to **`X-Forwarded-For`**, events show the Envoy pod IP (**`10.244.x.x`**) instead of the browser.
+
+Fix at the gateway (xd-net): apply **`ClientTrafficPolicy`** **`client-ip-detection`** on the shared Gateway and, when Cilium L2 allows, set **`envoy_proxy_external_traffic_policy = "Local"`** so the dataplane sees the real LAN client. For **`auth.ecksd.ee`** via Pangolin, increase **`gateway_xff_num_trusted_hops`** if the edge already sends **`X-Forwarded-For`**. No Authentik env change is required unless the proxy connects from a public IP outside the default trusted CIDRs.
+
 ## After install
 
 Complete the **initial setup wizard** at your public URL. See [Post-installation](https://docs.goauthentik.io/docs/installation/post-install/) in the Authentik docs.
