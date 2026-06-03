@@ -86,11 +86,12 @@ Envoy Gateway addon dashboards live under `dashboards/` with upstream filenames 
 
 ## Prerequisites
 
-1. **Secret `grafana-admin`** in namespace `monitoring` — see `secrets/grafana-admin.yaml`. Generate a password, add `# sops:encrypt` on `admin-password`, then `sops --encrypt --in-place secrets/grafana-admin.yaml` and sync **platform-secrets** before the stack can start.
+1. **Secret `grafana-admin`** in namespace `monitoring` — see `secrets/grafana-admin.yaml`. Generate a password, add `# sops:encrypt` on `admin-password`, then `sops --encrypt --in-place secrets/grafana-admin.yaml` and sync **platform-secrets** before the stack can start. Keeps break-glass local login when OAuth auto-login is enabled.
 2. **Secret `grafana-db`** in namespace `monitoring` — CNPG bootstrap for `postgres.yaml` (`username`, `password`; owner/database `grafana`). See `secrets/grafana-db.yaml`. Encrypt with SOPS and sync **platform-secrets** before the **`grafana-db`** cluster and Grafana pod start.
-3. **Metrics Server** — `apps/metrics-server` (for node/pod metrics in Grafana).
-4. **Synology `storageClass`** — `synology` (same as other apps).
-5. **Pod Security** — namespace uses **`privileged`** so `prometheus-node-exporter` can use host network, hostPath, and port 9100 (cluster default is baseline).
+3. **Secret `grafana-oidc`** in namespace `monitoring` — Authentik OAuth2 client credentials (`client_id`, `client_secret`) for Generic OAuth. See `secrets/grafana-oidc.yaml`. Provider slug **`grafana`**, redirect URI **`https://grafana.net.ecksd.ee/login/generic_oauth`**. Encrypt with SOPS and sync **platform-secrets** before enabling OAuth in `values-prometheus.yaml`.
+4. **Metrics Server** — `apps/metrics-server` (for node/pod metrics in Grafana).
+5. **Synology `storageClass`** — `synology` (same as other apps).
+6. **Pod Security** — namespace uses **`privileged`** so `prometheus-node-exporter` can use host network, hostPath, and port 9100 (cluster default is baseline).
 
 ## Apply
 
@@ -103,6 +104,6 @@ The prometheus-community chart installs **Prometheus Operator CRDs**. On first s
 ## Notes
 
 - **Grafana database:** Internal state (users, preferences, secure values) uses **PostgreSQL** via CNPG (`grafana-db`).
-- **No Authentik forward-auth** on Grafana in this manifest — login uses Grafana’s built-in admin user from `grafana-admin`. Add a `SecurityPolicy` + HTTPRoute outpost rule later if you want SSO on `grafana.net.ecksd.ee`.
+- **Authentik login:** Generic OAuth in `values-prometheus.yaml` ([integration guide](https://integrations.goauthentik.io/monitoring/grafana/)). Authentik groups **`Grafana Admins`** / **`Grafana Editors`** map to Grafana **Admin** / **Editor**; everyone else gets **Viewer** (`auto_assign_org_role`). Use a custom **`profile`** scope mapping without embedded groups plus a filtered **`groups`** scope (same pattern as Argo CD in `apps/authentik/README.md`).
 - **Resource use:** Prometheus and Loki each request a **50Gi** RWO volume; adjust `values-*.yaml` if your NAS exports are smaller.
 - **Homepage:** optional `gethomepage.dev/*` annotations on `httproute.yaml` can be added once the stack is up.

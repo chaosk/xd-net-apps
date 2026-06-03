@@ -69,9 +69,13 @@ To protect another app: copy Sonarr’s **SecurityPolicy** and outpost **HTTPRou
 
 Argo CD lives in **xd-net** Terraform (`apps/modules/argocd`), not under `apps/argocd/` here. Login uses **bundled Dex** with an **OIDC connector** to Authentik ([integration guide](https://integrations.goauthentik.io/infrastructure/argocd/)), not Envoy forward auth.
 
-In Authentik: **OAuth2/OpenID Provider** slug **`argocd`**, redirect URIs **`https://argocd.net.ecksd.ee/api/dex/callback`** and **`https://localhost:8085/auth/callback`** (strict), grant types **`authorization_code`** and **`refresh_token`**, authentication flow **Welcome to authentik!**, plus a **`groups`** scope mapping (`return {"groups": [group.name for group in user.groups.all()]}`) so Dex can read **`ArgoCD Admins`** / **`ArgoCD Viewers`**. Put users in those groups for **`role:admin`** / **`role:readonly`** in Argo CD.
+In Authentik: **OAuth2/OpenID Provider** slug **`argocd`**, redirect URIs **`https://argocd.net.ecksd.ee/api/dex/callback`** and **`https://localhost:8085/auth/callback`** (strict), grant types **`authorization_code`** and **`refresh_token`**, authentication flow **Welcome to authentik!**, plus scope mappings for **`profile`** (name/username only — do not use the default profile mapping, it embeds all groups) and **`groups`** (only **`ArgoCD Admins`** / **`ArgoCD Viewers`**). Put users in those groups for **`role:admin`** / **`role:readonly`** in Argo CD.
 
 In **xd-net** `config.auto.tfvars` (gitignored): set **`argocd_oidc_issuer`**, **`argocd_oidc_client_id`**, **`argocd_oidc_client_secret`**, and **`argocd_rbac_policy_csv`**, then `terraform apply` in **`apps/`**. The UI shows **Log in via Authentik**; the CLI can use the same Dex flow.
+
+## Grafana (Generic OAuth)
+
+Grafana uses native **Generic OAuth** in `apps/monitoring/values-prometheus.yaml`, not forward auth. Authentik provider slug **`grafana`**, redirect URI **`https://grafana.net.ecksd.ee/login/generic_oauth`**, grant types **`authorization_code`** and **`refresh_token`**, plus scoped **`profile`** (no groups) and **`groups`** mappings (**`Grafana Admins`** / **`Grafana Editors`** only). Credentials live in **`secrets/grafana-oidc.yaml`**. See `apps/monitoring/README.md`.
 
 ## Client IP in audit events
 
