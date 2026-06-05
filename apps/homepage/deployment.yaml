@@ -139,6 +139,12 @@ spec:
               name: homepage-pangolin-widget
               key: HOMEPAGE_VAR_PANGOLIN_API_KEY
               optional: true
+        - name: HOMEPAGE_VAR_ARGOCD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homepage-argocd-widget
+              key: HOMEPAGE_VAR_ARGOCD_API_KEY
+              optional: true
         volumeMounts:
         - name: config
           mountPath: /app/config

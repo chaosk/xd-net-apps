@@ -23,6 +23,8 @@ To customize, edit `apps/homepage/configmap.yaml` keys:
 
 **PeaNUT** — deployed in **`apps/peanut`**; Homepage tile and widget come from `httproute.yaml` (Management). Grafana dashboard in **`apps/monitoring`** (folder **Misc**).
 
+**Argo CD widget (optional)** — tile and widget come from the Argo CD HTTPRoute in **xd-net** (`gethomepage.dev/*` annotations). Argo CD exposes a local **`homepage`** account with **`apiKey`** and **`role:readonly`** ([Homepage widget docs](https://gethomepage.dev/widgets/services/argocd/)). Generate a token under **Settings → Accounts → homepage → Tokens**, store it in `secrets/homepage-argocd-widget.yaml` as `HOMEPAGE_VAR_ARGOCD_API_KEY`, then SOPS-encrypt and sync **platform-secrets**.
+
 **Pangolin widget (optional)** — create an Integration API key with **List Sites** and **List Resources**, set `HOMEPAGE_VAR_PANGOLIN_API_URL`, `HOMEPAGE_VAR_PANGOLIN_DASHBOARD_URL`, and `HOMEPAGE_VAR_PANGOLIN_ORG` in `secrets/homepage-pangolin-widget.yaml`, then SOPS-encrypt and sync **platform-secrets**. The tile is defined in `services.yaml` under **Management**.
 
-**Management manual tiles** use weights `10` (UniFi), `35` (Pangolin), `45` (DSM). PeaNUT (`15`) and Authentik (`30`) / Grafana (`40`) use HTTPRoute `gethomepage.dev/weight` annotations.
+**Management manual tiles** use weights `10` (UniFi), `35` (Pangolin), `45` (DSM). PeaNUT (`15`), Argo CD (`25`), Authentik (`30`), and Grafana (`40`) use HTTPRoute `gethomepage.dev/weight` annotations.
