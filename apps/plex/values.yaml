@@ -56,15 +56,50 @@ extraEnv:
   # VA-API uses the GPU passed through by the Intel GPU device plugin (gpu.intel.com/i915).
   # In Plex: Settings → Transcoder → enable hardware acceleration.
 
-extraVolumes:
-  - name: media
-    persistentVolumeClaim:
-      claimName: plex-media
-
 extraVolumeMounts:
   - name: media
     # Library root inside the container (many examples use /data; this app uses /media).
     mountPath: /media
+
+# Tube Archivist Plex integration — https://github.com/tubearchivist/tubearchivist-plex
+extraInitContainers:
+  - name: tubearchivist-plex
+    image: alpine:3.22
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh", "/install/install.sh"]
+    env:
+      - name: TA_URL
+        valueFrom:
+          secretKeyRef:
+            name: plex-tubearchivist-plex
+            key: TA_URL
+            optional: true
+      - name: TA_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: plex-tubearchivist-plex
+            key: TA_API_KEY
+    volumeMounts:
+      - name: pms-config
+        mountPath: /config
+      - name: tubearchivist-plex-install
+        mountPath: /install
+        readOnly: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+
+extraVolumes:
+  - name: media
+    persistentVolumeClaim:
+      claimName: plex-media
+  - name: tubearchivist-plex-install
+    configMap:
+      name: plex-tubearchivist-plex-install
+      defaultMode: 0755
 
 # PMS logs to files under /config, not stdout. Alloy (monitoring) ships container logs to Loki.
 extraContainers:

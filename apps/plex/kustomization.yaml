@@ -8,6 +8,7 @@ resources:
   - pvc.yaml
   - nfs-media.yaml
   - httproute-pangolin.yaml
+  - tubearchivist-plex-install.yaml
 
 helmCharts:
   - name: plex-media-server

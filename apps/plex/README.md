@@ -12,7 +12,8 @@
 | `namespace.yaml` | **`plex`** namespace. |
 | `pvc.yaml` | **`plex-config`** PVC (**Synology** `StorageClass` **`synology`**, **ReadWriteOnce**, **20Gi**) for Plex application data (`pms.configExistingClaim`). |
 | `nfs-media.yaml` | Static **NFS** PV **`plex-media-pv`** + claim **`plex-media`** (**ReadWriteMany**, empty `storageClassName`) bound for the chart mount at **`/media`**. |
-| `values.yaml` | **`fullnameOverride`**, **`httpRoute`** (**`plex.net.ecksd.ee`** on gateway **shared**, Homepage + **Tracearr** widget), **`nodeSelector`**, **`pms`**, NFS mounts, Intel GPU. |
+| `values.yaml` | **`fullnameOverride`**, **`httpRoute`** (**`plex.net.ecksd.ee`** on gateway **shared**, Homepage + **Tracearr** widget), **`nodeSelector`**, **`pms`**, NFS mounts, Intel GPU, **Tube Archivist Plex** init container. |
+| `tubearchivist-plex-install.yaml` | ConfigMap script that installs [tubearchivist-plex](https://github.com/tubearchivist/tubearchivist-plex) **v0.1.8** on the Plex config PVC. |
 | `httproute-pangolin.yaml` | **`plex.ecksd.ee`** only; **`pangolin-operator/site-ref: xd-net`** (separate from Helm route so Pangolin gets one public resource). |
 
 ## Before you apply
@@ -36,6 +37,12 @@ kubectl kustomize "$HOME/Projects/xd-net-apps/apps/plex" --enable-helm | kubectl
 ## After install
 
 Open the URL from **`httpRoute.hostnames`**, complete Plex server setup, and add libraries under **`/media`** (for example **`/media/Movies`**). In **Settings → Transcoder**, enable **hardware acceleration** when the GPU path is working.
+
+## Tube Archivist Plex integration
+
+An init container installs [tubearchivist-plex](https://github.com/tubearchivist/tubearchivist-plex) **v0.1.8** on the Plex config volume before PMS starts. It writes **`ta_config.json`** with the in-cluster Tube Archivist URL (**`http://tubearchivist.tubearchivist.svc.cluster.local:8000`**) and API token from **`secrets/plex-tubearchivist-plex.yaml`** (same token as **`homepage-tubearchivist-widget`** — Tube Archivist **Settings → Application → API Token**).
+
+Add a **TV Shows** library pointing at **`/media/youtube`** (NFS subpath under the shared media export). In **Manage Library → Edit → Advanced**, set **Scanner** to **TubeArchivist Scanner**, **Agent** to **TubeArchivist Agent**, and match the **TubeArchivist URL** / **API Key** fields to the in-cluster URL and token. Restart Plex after upgrading the integration (roll the StatefulSet).
 
 ## Logs in Grafana (Loki)
 

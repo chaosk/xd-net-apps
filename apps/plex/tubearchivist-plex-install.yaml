@@ -1,0 +1,55 @@
+# Installs/upgrades tubearchivist-plex on the Plex config PVC before PMS starts.
+# https://github.com/tubearchivist/tubearchivist-plex
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: plex-tubearchivist-plex-install
+  namespace: plex
+data:
+  install.sh: |
+    #!/bin/sh
+    set -eu
+
+    PMS="/config/Library/Application Support/Plex Media Server"
+    TA_VERSION="v0.1.8"
+    TA_URL="${TA_URL:-http://tubearchivist.tubearchivist.svc.cluster.local:8000}"
+    TA_API_KEY="${TA_API_KEY:?TA_API_KEY is required}"
+    STAMP="$PMS/.tubearchivist-plex-version"
+    SCANNER_DIR="$PMS/Scanners/Series"
+    PLUGIN_DIR="$PMS/Plug-ins/TubeArchivist-Agent.bundle"
+
+    apk add --no-cache curl unzip >/dev/null
+
+    mkdir -p "$SCANNER_DIR"
+    cat > "$SCANNER_DIR/ta_config.json" <<EOF
+    {
+        "ta_url": "${TA_URL}",
+        "ta_api_key": "${TA_API_KEY}"
+    }
+    EOF
+    chown 1000:1000 "$SCANNER_DIR/ta_config.json"
+    chmod 644 "$SCANNER_DIR/ta_config.json"
+
+    if [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$TA_VERSION" ] && [ -d "$PLUGIN_DIR/Contents" ]; then
+      echo "tubearchivist-plex ${TA_VERSION} present; refreshed ta_config.json"
+      exit 0
+    fi
+
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+
+    curl -fsSL "https://github.com/tubearchivist/tubearchivist-plex/archive/refs/tags/${TA_VERSION}.zip" -o "$tmpdir/ta.zip"
+    unzip -q "$tmpdir/ta.zip" -d "$tmpdir"
+    srcdir=$(ls -d "$tmpdir"/tubearchivist-plex-*)
+
+    cp -f "$srcdir/Scanners/Series/"*.py "$SCANNER_DIR/"
+    chmod 755 "$SCANNER_DIR/"*.py
+
+    rm -rf "$PLUGIN_DIR"
+    cp -a "$srcdir" "$PLUGIN_DIR"
+    rm -rf "$PLUGIN_DIR/Scanners"
+
+    chown -R 1000:1000 "$SCANNER_DIR" "$PLUGIN_DIR"
+    echo "$TA_VERSION" > "$STAMP"
+    chown 1000:1000 "$STAMP"
+    echo "tubearchivist-plex ${TA_VERSION} installed"
