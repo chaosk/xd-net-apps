@@ -1,0 +1,109 @@
+# Installs hass-oidc-auth and merges Authentik OIDC config on the HA config PVC.
+# https://github.com/christiaangoossens/hass-oidc-auth
+# https://integrations.goauthentik.io/miscellaneous/home-assistant/
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: home-assistant-authentik-oidc-install
+  namespace: home-assistant
+data:
+  install.sh: |
+    #!/bin/sh
+    set -eu
+
+    CONFIG="/config"
+    OIDC_VERSION="v1.1.0"
+    COMPONENT_DIR="$CONFIG/custom_components/auth_oidc"
+    STAMP="$CONFIG/.hass-oidc-auth-version"
+    MARKER="xd-net-authentik"
+    DISCOVERY_URL="${OIDC_DISCOVERY_URL:-https://authentik.net.ecksd.ee/application/o/home-assistant/.well-known/openid-configuration}"
+
+    apk add --no-cache curl unzip >/dev/null
+
+    install_component() {
+      if [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$OIDC_VERSION" ] && [ -f "$COMPONENT_DIR/manifest.json" ]; then
+        return 0
+      fi
+      tmpdir=$(mktemp -d)
+      trap 'rm -rf "$tmpdir"' EXIT
+      curl -fsSL "https://github.com/christiaangoossens/hass-oidc-auth/releases/download/${OIDC_VERSION}/hass-oidc-auth.zip" -o "$tmpdir/oidc.zip"
+      rm -rf "$COMPONENT_DIR"
+      mkdir -p "$CONFIG/custom_components"
+      unzip -q "$tmpdir/oidc.zip" -d "$COMPONENT_DIR"
+      echo "$OIDC_VERSION" > "$STAMP"
+      echo "hass-oidc-auth ${OIDC_VERSION} installed"
+    }
+
+    normalize_configuration() {
+      if [ ! -f "$CONFIG/configuration.yaml" ]; then
+        return 0
+      fi
+      # Older init appended http under both xd-net-authentik and xd-net-reverse-proxy.
+      if grep -q 'xd-net-reverse-proxy' "$CONFIG/configuration.yaml"; then
+        awk '
+          /^http: !include oidc\/http.yaml$/ && prev ~ /xd-net-authentik/ { next }
+          { prev=$0; print }
+        ' "$CONFIG/configuration.yaml" > "$CONFIG/configuration.yaml.tmp" \
+          && mv "$CONFIG/configuration.yaml.tmp" "$CONFIG/configuration.yaml"
+      fi
+    }
+
+    configure_ha() {
+      if [ ! -f "$CONFIG/configuration.yaml" ]; then
+        echo "configuration.yaml not found; restart the pod after Home Assistant creates it"
+        return 0
+      fi
+
+      mkdir -p "$CONFIG/oidc"
+      printf '%s\n' \
+        'use_x_forwarded_for: true' \
+        'trusted_proxies:' \
+        '  - 10.0.0.0/8' \
+        '  - 172.16.0.0/12' \
+        '  - 192.168.0.0/16' \
+        > "$CONFIG/oidc/http.yaml"
+
+      if [ -f /run/secrets/oidc/OIDC_CLIENT_ID ]; then
+        OIDC_CLIENT_ID=$(cat /run/secrets/oidc/OIDC_CLIENT_ID)
+      fi
+      if [ -f /run/secrets/oidc/OIDC_CLIENT_SECRET ]; then
+        OIDC_CLIENT_SECRET=$(cat /run/secrets/oidc/OIDC_CLIENT_SECRET)
+      fi
+      if [ -z "${OIDC_CLIENT_ID:-}" ] || [ -z "${OIDC_CLIENT_SECRET:-}" ] || \
+         echo "$OIDC_CLIENT_ID" | grep -q '^REPLACE'; then
+        echo "OIDC credentials not set; wrote http.yaml only"
+        if ! grep -q "$MARKER" "$CONFIG/configuration.yaml"; then
+          printf '\n# %s\nhttp: !include oidc/http.yaml\n' "$MARKER" >> "$CONFIG/configuration.yaml"
+        fi
+        return 0
+      fi
+
+      printf '%s\n' \
+        "client_id: \"${OIDC_CLIENT_ID}\"" \
+        'client_secret: !secret authentik_client_secret' \
+        "discovery_url: \"${DISCOVERY_URL}\"" \
+        'display_name: "Authentik"' \
+        'features:' \
+        '  default_redirect: true' \
+        '  force_https: true' \
+        > "$CONFIG/oidc/auth_oidc.yaml"
+      printf '%s\n' \
+        'auth_providers: []' \
+        > "$CONFIG/oidc/homeassistant.yaml"
+      printf '%s\n' \
+        "authentik_client_secret: \"${OIDC_CLIENT_SECRET}\"" \
+        > "$CONFIG/secrets.yaml"
+
+      if ! grep -q "$MARKER" "$CONFIG/configuration.yaml"; then
+        printf '\n# %s\nhttp: !include oidc/http.yaml\nhomeassistant: !include oidc/homeassistant.yaml\nauth_oidc: !include oidc/auth_oidc.yaml\n' "$MARKER" >> "$CONFIG/configuration.yaml"
+        echo "Appended Authentik OIDC includes to configuration.yaml"
+      elif ! grep -q 'oidc/homeassistant.yaml' "$CONFIG/configuration.yaml"; then
+        printf '\nhomeassistant: !include oidc/homeassistant.yaml\n' >> "$CONFIG/configuration.yaml"
+        echo "Appended homeassistant auth_providers include to configuration.yaml"
+      fi
+      normalize_configuration
+      echo "Wrote oidc/http.yaml, oidc/homeassistant.yaml, oidc/auth_oidc.yaml, and secrets.yaml"
+    }
+
+    install_component
+    configure_ha

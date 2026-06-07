@@ -77,6 +77,10 @@ In **xd-net** `config.auto.tfvars` (gitignored): set **`argocd_oidc_issuer`**, *
 
 Grafana uses native **Generic OAuth** in `apps/monitoring/values-prometheus.yaml`, not forward auth. Authentik provider slug **`grafana`**, redirect URI **`https://grafana.net.ecksd.ee/login/generic_oauth`**, grant types **`authorization_code`** and **`refresh_token`**, plus scoped **`profile`** (no groups) and **`groups`** mappings (**`Grafana Admins`** / **`Grafana Editors`** only). Credentials live in **`secrets/grafana-oidc.yaml`**. See `apps/monitoring/README.md`.
 
+## Home Assistant (OIDC)
+
+Home Assistant has no built-in OIDC. This repo installs **[hass-oidc-auth](https://github.com/christiaangoossens/hass-oidc-auth)** via an init container and configures **`auth_oidc`** in `configuration.yaml` when **`secrets/home-assistant.yaml`** is present. Authentik provider slug **`home-assistant`**, redirect URI **`https://homeassistant.net.ecksd.ee/auth/oidc/callback`** (strict), grant types **`authorization_code`** and **`refresh_token`**. See [Authentik integration guide](https://integrations.goauthentik.io/miscellaneous/home-assistant/) and `apps/home-assistant/README.md`. Envoy forward auth is **not** used (WebSockets and the mobile app).
+
 ## Client IP in audit events
 
 Authentik reads the client address from **`X-Forwarded-For`** when the request comes from a [trusted proxy network](https://docs.goauthentik.io/install-config/reverse-proxy/) (private ranges including **`10.0.0.0/8`** are trusted by default). OAuth and login traffic hits **`authentik-server`** through Envoy Gateway; if the gateway SNATs ingress (**`externalTrafficPolicy: Cluster`**) or does not append the real client to **`X-Forwarded-For`**, events show the Envoy pod IP (**`10.244.x.x`**) instead of the browser.

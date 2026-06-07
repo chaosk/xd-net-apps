@@ -1,0 +1,37 @@
+# Installs HACS on the Home Assistant config PVC.
+# https://hacs.xyz/docs/setup/download
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: home-assistant-hacs-install
+  namespace: home-assistant
+data:
+  install.sh: |
+    #!/bin/sh
+    set -eu
+
+    CONFIG="/config"
+    HACS_VERSION="2.0.5"
+    COMPONENT_DIR="$CONFIG/custom_components/hacs"
+    STAMP="$CONFIG/.hacs-version"
+
+    apk add --no-cache curl unzip >/dev/null
+
+    if [ ! -f "$CONFIG/.HA_VERSION" ]; then
+      echo "Home Assistant not onboarded yet (.HA_VERSION missing); skipping HACS install"
+      exit 0
+    fi
+
+    if [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$HACS_VERSION" ] && [ -f "$COMPONENT_DIR/manifest.json" ]; then
+      echo "HACS ${HACS_VERSION} already installed"
+      exit 0
+    fi
+
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+    curl -fsSL "https://github.com/hacs/integration/releases/download/${HACS_VERSION}/hacs.zip" -o "$tmpdir/hacs.zip"
+    rm -rf "$COMPONENT_DIR"
+    mkdir -p "$CONFIG/custom_components"
+    unzip -q "$tmpdir/hacs.zip" -d "$COMPONENT_DIR"
+    echo "$HACS_VERSION" > "$STAMP"
+    echo "HACS ${HACS_VERSION} installed"

@@ -91,6 +91,12 @@ spec:
               name: homepage-miniflux-widget
               key: HOMEPAGE_VAR_MINIFLUX_API_KEY
               optional: true
+        - name: HOMEPAGE_VAR_HOMEASSISTANT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: homepage-homeassistant-widget
+              key: HOMEPAGE_VAR_HOMEASSISTANT_TOKEN
+              optional: true
         - name: HOMEPAGE_VAR_DSM_USERNAME
           valueFrom:
             secretKeyRef:

@@ -1,7 +1,7 @@
 # xd-net-apps
 
-GitOps manifests for workloads on the **xd-net** Kubernetes cluster. This
-repository is wired from **xd-net** via Argo CD (Terraform in `xd-net/apps`
+GitOps manifests for workloads on the **[xd-net](https://github.com/chaosk/xd-net)** Kubernetes cluster. This
+repository is wired from xd-net via Argo CD (Terraform in [`xd-net/apps`](https://github.com/chaosk/xd-net/tree/main/apps)
 creates the `Application` and `ApplicationSet`).
 
 ## Layout
@@ -12,7 +12,7 @@ creates the `Application` and `ApplicationSet`).
 | `apps/argocd-image-updater/` | Argo CD Image Updater controller (`argocd` namespace). Opt-in apps are listed in `image-updater.yaml`. |
 | `secrets/` | SOPS-encrypted YAML consumed by the **platform-secrets** Application. |
 
-Cluster install order in **xd-net**: `infra/` → `app-manifests/` → `apps/`.
+Cluster install order in [xd-net](https://github.com/chaosk/xd-net): `infra/` → `app-manifests/` → `apps/`.
 This repo is only the Git source for Argo CD after `apps/` has been applied.
 
 ## Argo CD behavior
@@ -25,10 +25,6 @@ This repo is only the Git source for Argo CD after `apps/` has been applied.
   directory name unless you override in manifests.
 - Optional **image auto-updates** — add the app to `apps/argocd-image-updater/image-updater.yaml`
   (see `apps/argocd-image-updater/README.md`).
-
-Synology CSI credentials may already be created by Terraform in **xd-net**
-(`apps/synology-csi.tf`). Use `secrets/` for additional or Git-managed
-secrets that should follow the SOPS workflow.
 
 ## Add an application
 

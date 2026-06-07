@@ -1,0 +1,144 @@
+# bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+# Home Assistant — https://www.home-assistant.io/installation/
+controllers:
+  main:
+    strategy: Recreate
+    pod:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: lan-macvlan@net1
+    initContainers:
+      authentik-oidc:
+        dependsOn: []
+        image:
+          repository: docker.io/library/alpine
+          tag: "3.22"
+          pullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - /install/install.sh
+        securityContext:
+          runAsUser: 0
+      hacs:
+        dependsOn:
+          - authentik-oidc
+        image:
+          repository: docker.io/library/alpine
+          tag: "3.22"
+          pullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - /install/install.sh
+        securityContext:
+          runAsUser: 0
+    containers:
+      main:
+        image:
+          repository: ghcr.io/home-assistant/home-assistant
+          tag: stable
+          pullPolicy: IfNotPresent
+        env:
+          TZ: UTC
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 8123
+              initialDelaySeconds: 120
+              periodSeconds: 60
+              timeoutSeconds: 10
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 8123
+              initialDelaySeconds: 30
+              periodSeconds: 30
+              timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: "2"
+            memory: 2Gi
+      matter-server:
+        image:
+          repository: ghcr.io/home-assistant-libs/python-matter-server
+          tag: stable
+          pullPolicy: IfNotPresent
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 5580
+              initialDelaySeconds: 30
+              periodSeconds: 30
+              timeoutSeconds: 5
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              tcpSocket:
+                port: 5580
+              initialDelaySeconds: 10
+              periodSeconds: 15
+              timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: "1"
+            memory: 512Mi
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8123
+
+persistence:
+  config:
+    enabled: true
+    existingClaim: home-assistant-config
+    globalMounts:
+      - path: /config
+  authentik-oidc-install:
+    type: configMap
+    name: home-assistant-authentik-oidc-install
+    defaultMode: 0755
+    advancedMounts:
+      main:
+        authentik-oidc:
+          - path: /install
+            readOnly: true
+  hacs-install:
+    type: configMap
+    name: home-assistant-hacs-install
+    defaultMode: 0755
+    advancedMounts:
+      main:
+        hacs:
+          - path: /install
+            readOnly: true
+  oidc-credentials:
+    type: secret
+    name: home-assistant
+    advancedMounts:
+      main:
+        authentik-oidc:
+          - path: /run/secrets/oidc
+            readOnly: true
+  matter-data:
+    enabled: true
+    existingClaim: home-assistant-matter
+    advancedMounts:
+      main:
+        matter-server:
+          - path: /data
