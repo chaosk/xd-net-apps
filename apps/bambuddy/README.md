@@ -27,7 +27,7 @@ Printers must be reachable from **`net1`**. Add printers **by IP** in the BamBud
 
 No Kubernetes secret is required for OIDC — BamBuddy stores the IdP client credentials in its database (encrypted when **`MFA_ENCRYPTION_KEY`** is set). Create the Authentik provider first so you can paste the client ID and secret during first-run setup.
 
-1. **Authentik OIDC** — create an **OAuth2/OpenID Provider** with slug **`bambuddy`**, client type **confidential**, grant types **`authorization_code`** and **`refresh_token`**, and redirect URI **`https://bambuddy.net.ecksd.ee/api/v1/auth/oidc/callback`** (strict). Attach an **Application** so users can sign in. Issuer URL for BamBuddy: **`https://authentik.net.ecksd.ee/application/o/bambuddy/`** (trailing slash is fine; BamBuddy normalises it). See [`apps/authentik/README.md`](../authentik/README.md).
+1. **Authentik OIDC** — create an **OAuth2/OpenID Provider** with slug **`bambuddy`**, client type **confidential**, grant types **`authorization_code`** and **`refresh_token`**, and redirect URI **`https://bambuddy.net.ecksd.ee/api/v1/auth/oidc/callback`** (strict). Attach an **Application** so users can sign in. Issuer URL for BamBuddy: **`https://authentik.net.ecksd.ee/application/o/bambuddy/`** (trailing slash is fine; BamBuddy normalises it). Swap the default **`email`** scope mapping for a custom one that sets **`email_verified: True`** — BamBuddy requires verified emails for OIDC login ([Authentik docs](https://docs.goauthentik.io/add-secure-apps/providers/oauth2/#email-scope-verification)). See [`apps/authentik/README.md`](../authentik/README.md).
 
 ## First-time setup
 
