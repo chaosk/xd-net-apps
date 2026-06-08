@@ -60,4 +60,4 @@ kubectl kustomize "$HOME/Projects/xd-net-apps/apps/bambuddy" --enable-helm | kub
 
 ## Image updates
 
-**Argo CD Image Updater** tracks **`ghcr.io/maziggy/bambuddy`** in `apps/argocd-image-updater/image-updater.yaml`. GHCR tags omit the **`v`** prefix used on GitHub releases (image **`0.2.4.5`**, not **`v0.2.4.5`**). Manual bump: **`controllers.main.containers.main.image.tag`** in `values.yaml`.
+**Argo CD Image Updater** tracks **`ghcr.io/maziggy/bambuddy`** with **`newest-build`** (not semver) in `apps/argocd-image-updater/image-updater.yaml`. GHCR tags omit the **`v`** prefix used on GitHub releases (image **`0.2.4.5`**, not **`v0.2.4.5`**), and only **four-part** release tags are considered — semver would misread **`0.2.4.5`** as an older prerelease of **`0.2.4`**. Manual bump: **`controllers.main.containers.main.image.tag`** in `values.yaml`.
