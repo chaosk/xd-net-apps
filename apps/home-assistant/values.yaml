@@ -14,27 +14,27 @@ controllers:
           tag: "3.22"
           pullPolicy: IfNotPresent
         command:
-          - /bin/sh
-          - /install/install.sh
+        - /bin/sh
+        - /install/install.sh
         securityContext:
           runAsUser: 0
       hacs:
         dependsOn:
-          - authentik-oidc
+        - authentik-oidc
         image:
           repository: docker.io/library/alpine
           tag: "3.22"
           pullPolicy: IfNotPresent
         command:
-          - /bin/sh
-          - /install/install.sh
+        - /bin/sh
+        - /install/install.sh
         securityContext:
           runAsUser: 0
     containers:
       main:
         image:
           repository: ghcr.io/home-assistant/home-assistant
-          tag: stable
+          tag: 2026.6.1
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -67,7 +67,7 @@ controllers:
       matter-server:
         image:
           repository: ghcr.io/home-assistant-libs/python-matter-server
-          tag: stable
+          tag: 6.6.1
           pullPolicy: IfNotPresent
         probes:
           liveness:
@@ -95,20 +95,18 @@ controllers:
           limits:
             cpu: "1"
             memory: 512Mi
-
 service:
   main:
     controller: main
     ports:
       http:
         port: 8123
-
 persistence:
   config:
     enabled: true
     existingClaim: home-assistant-config
     globalMounts:
-      - path: /config
+    - path: /config
   authentik-oidc-install:
     type: configMap
     name: home-assistant-authentik-oidc-install
@@ -116,8 +114,8 @@ persistence:
     advancedMounts:
       main:
         authentik-oidc:
-          - path: /install
-            readOnly: true
+        - path: /install
+          readOnly: true
   hacs-install:
     type: configMap
     name: home-assistant-hacs-install
@@ -125,20 +123,20 @@ persistence:
     advancedMounts:
       main:
         hacs:
-          - path: /install
-            readOnly: true
+        - path: /install
+          readOnly: true
   oidc-credentials:
     type: secret
     name: home-assistant
     advancedMounts:
       main:
         authentik-oidc:
-          - path: /run/secrets/oidc
-            readOnly: true
+        - path: /run/secrets/oidc
+          readOnly: true
   matter-data:
     enabled: true
     existingClaim: home-assistant-matter
     advancedMounts:
       main:
         matter-server:
-          - path: /data
+        - path: /data
