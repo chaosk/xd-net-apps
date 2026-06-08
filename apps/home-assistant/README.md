@@ -17,6 +17,18 @@ An init container installs **[HACS](https://hacs.xyz/)** (**2.0.5**) into **`/co
 
 If HACS is missing after deploy, finish the HA onboarding wizard first, then restart the pod so the init container can write the component.
 
+## BamBuddy
+
+**[BamBuddy](https://github.com/maziggy/bambuddy)** runs as **`apps/bambuddy/`** (`https://bambuddy.net.ecksd.ee`). An init container installs **[hacs_bambuddy](https://github.com/Spegeli/hacs_bambuddy)** (**v2026.05.17**) into **`/config/custom_components/bambuddy`**.
+
+**After both apps sync:**
+
+1. Complete BamBuddy first-run at **`https://bambuddy.net.ecksd.ee`** (admin account, optional Authentik OIDC in **Settings → Authentication → SSO / OIDC**, add printers by IP). See **`apps/bambuddy/README.md`**.
+2. **Settings → API Keys** in BamBuddy — create a key for Home Assistant.
+3. In HA: **Settings → Devices & services → Add integration → BamBuddy** — host **`http://bambuddy.bambuddy.svc.cluster.local`**, port **8000**, API key. Add printers via the integration options (wrench icon).
+
+Bump **`BAMBUDDY_HA_VERSION`** in **`bambuddy-install.yaml`** to upgrade the HA integration.
+
 ## Matter
 
 The pod runs **[python-matter-server](https://github.com/home-assistant-libs/python-matter-server)** as a sidecar (port **5580**, fabric data on **`home-assistant-matter`** PVC). It shares the pod network namespace with Home Assistant, including Multus **`net1`**, so Matter/mDNS traffic uses the IoT LAN.
@@ -87,6 +99,7 @@ Set **Settings → System → Network → Home Assistant URL** to `https://homea
 | `values.yaml` | HA + **python-matter-server** sidecar, probes, Multus annotation |
 | `authentik-oidc-install.yaml` | Init script: **hass-oidc-auth** + OIDC YAML |
 | `hacs-install.yaml` | Init script: **HACS** custom component |
+| `bambuddy-install.yaml` | Init script: **BamBuddy** HA integration |
 | `macvlan-network.yaml` | Multus NAD — **192.168.2.0/24** macvlan on worker **`ens19`**, route to **192.168.6.0/24** |
 | `httproute.yaml` | `homeassistant.net.ecksd.ee` + Homepage discovery |
 

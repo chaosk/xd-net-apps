@@ -1,0 +1,80 @@
+# bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+# BamBuddy — https://github.com/maziggy/bambuddy
+controllers:
+  main:
+    strategy: Recreate
+    pod:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: lan-macvlan@net1
+    containers:
+      main:
+        image:
+          repository: ghcr.io/maziggy/bambuddy
+          tag: "0.2.4.5"
+          pullPolicy: IfNotPresent
+        env:
+          TZ: UTC
+          PORT: "8000"
+          PUID: "1000"
+          PGID: "1000"
+          TRUSTED_FRAME_ORIGINS: "https://homeassistant.net.ecksd.ee"
+        securityContext:
+          capabilities:
+            add:
+              - NET_BIND_SERVICE
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8000
+              initialDelaySeconds: 60
+              periodSeconds: 60
+              timeoutSeconds: 10
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8000
+              initialDelaySeconds: 20
+              periodSeconds: 30
+              timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: "2"
+            memory: 2Gi
+
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8000
+
+persistence:
+  data:
+    enabled: true
+    existingClaim: bambuddy-data
+    advancedMounts:
+      main:
+        main:
+          - path: /app/data
+  logs:
+    enabled: true
+    existingClaim: bambuddy-logs
+    advancedMounts:
+      main:
+        main:
+          - path: /app/logs
+
+defaultPodOptions:
+  securityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch

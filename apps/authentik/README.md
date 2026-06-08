@@ -81,6 +81,10 @@ Grafana uses native **Generic OAuth** in `apps/monitoring/values-prometheus.yaml
 
 Home Assistant has no built-in OIDC. This repo installs **[hass-oidc-auth](https://github.com/christiaangoossens/hass-oidc-auth)** via an init container and configures **`auth_oidc`** in `configuration.yaml` when **`secrets/home-assistant.yaml`** is present. Authentik provider slug **`home-assistant`**, redirect URI **`https://homeassistant.net.ecksd.ee/auth/oidc/callback`** (strict), grant types **`authorization_code`** and **`refresh_token`**. See [Authentik integration guide](https://integrations.goauthentik.io/miscellaneous/home-assistant/) and `apps/home-assistant/README.md`. Envoy forward auth is **not** used (WebSockets and the mobile app).
 
+## BamBuddy (OIDC)
+
+[BamBuddy](https://github.com/maziggy/bambuddy) has built-in OIDC — credentials are entered in **Settings → Authentication → SSO / OIDC**, not in Kubernetes secrets. Authentik provider slug **`bambuddy`**, redirect URI **`https://bambuddy.net.ecksd.ee/api/v1/auth/oidc/callback`** (strict), grant types **`authorization_code`** and **`refresh_token`**. Issuer URL in BamBuddy: **`https://authentik.net.ecksd.ee/application/o/bambuddy/`**. See [BamBuddy authentication docs](https://wiki.bambuddy.cool/features/authentication/) and `apps/bambuddy/README.md`. Envoy forward auth is **not** used (WebSockets; Home Assistant uses an in-cluster API key).
+
 ## Client IP in audit events
 
 Authentik reads the client address from **`X-Forwarded-For`** when the request comes from a [trusted proxy network](https://docs.goauthentik.io/install-config/reverse-proxy/) (private ranges including **`10.0.0.0/8`** are trusted by default). OAuth and login traffic hits **`authentik-server`** through Envoy Gateway; if the gateway SNATs ingress (**`externalTrafficPolicy: Cluster`**) or does not append the real client to **`X-Forwarded-For`**, events show the Envoy pod IP (**`10.244.x.x`**) instead of the browser.

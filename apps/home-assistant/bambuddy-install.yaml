@@ -1,0 +1,38 @@
+# Installs the BamBuddy Home Assistant integration on the HA config PVC.
+# https://github.com/Spegeli/hacs_bambuddy
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: home-assistant-bambuddy-install
+  namespace: home-assistant
+data:
+  install.sh: |
+    #!/bin/sh
+    set -eu
+
+    CONFIG="/config"
+    BAMBUDDY_HA_VERSION="v2026.05.17"
+    COMPONENT_DIR="$CONFIG/custom_components/bambuddy"
+    STAMP="$CONFIG/.bambuddy-ha-version"
+
+    apk add --no-cache curl tar >/dev/null
+
+    if [ ! -f "$CONFIG/.HA_VERSION" ]; then
+      echo "Home Assistant not onboarded yet (.HA_VERSION missing); skipping BamBuddy integration install"
+      exit 0
+    fi
+
+    if [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$BAMBUDDY_HA_VERSION" ] && [ -f "$COMPONENT_DIR/manifest.json" ]; then
+      echo "BamBuddy HA integration ${BAMBUDDY_HA_VERSION} already installed"
+      exit 0
+    fi
+
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+    curl -fsSL "https://github.com/Spegeli/hacs_bambuddy/archive/refs/tags/${BAMBUDDY_HA_VERSION}.tar.gz" -o "$tmpdir/bambuddy.tar.gz"
+    rm -rf "$COMPONENT_DIR"
+    mkdir -p "$CONFIG/custom_components"
+    tar xzf "$tmpdir/bambuddy.tar.gz" -C "$tmpdir"
+    mv "$tmpdir/hacs_bambuddy-"*/custom_components/bambuddy "$COMPONENT_DIR"
+    echo "$BAMBUDDY_HA_VERSION" > "$STAMP"
+    echo "BamBuddy HA integration ${BAMBUDDY_HA_VERSION} installed"

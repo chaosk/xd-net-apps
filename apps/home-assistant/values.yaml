@@ -30,6 +30,18 @@ controllers:
         - /install/install.sh
         securityContext:
           runAsUser: 0
+      bambuddy:
+        dependsOn:
+        - hacs
+        image:
+          repository: docker.io/library/alpine
+          tag: "3.22"
+          pullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - /install/install.sh
+        securityContext:
+          runAsUser: 0
     containers:
       main:
         image:
@@ -123,6 +135,15 @@ persistence:
     advancedMounts:
       main:
         hacs:
+        - path: /install
+          readOnly: true
+  bambuddy-install:
+    type: configMap
+    name: home-assistant-bambuddy-install
+    defaultMode: 0755
+    advancedMounts:
+      main:
+        bambuddy:
         - path: /install
           readOnly: true
   oidc-credentials:
