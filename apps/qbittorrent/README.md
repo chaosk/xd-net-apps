@@ -9,6 +9,9 @@ BitTorrent client via bjw-s `app-template` and `ghcr.io/home-operations/qbittorr
 | `nfs-torrents.yaml` | RWX NFS ingest at `/volume1/ingest/torrents` → `/data/torrents`. |
 | `values.yaml` | Image, TCP probes on port 8080; config and torrents mounts. |
 | `httproute.yaml` | `qbittorrent.net.ecksd.ee` via Gateway `shared`. |
+| `securitypolicy-forward-auth.yaml` | Envoy Gateway forward auth to Authentik for this HTTPRoute. |
+
+Forward auth needs **authentik** applied first (shared **ReferenceGrant** and outpost route). In Authentik, a **forward_single** **Proxy provider** on the **embedded outpost** sends HTTP Basic auth to qBittorrent (`qbittorrent_user` / `qbittorrent_password` on the **`*arr users`** group — same pattern as Sonarr). **Intercept header authentication** must be **off** so the `Authorization` header reaches qBittorrent. Those Authentik attributes must match the **existing** qBittorrent WebUI username/password (do not rotate the WebUI password unless you update the group attributes too). Requires qBittorrent **5.2+** (WebUI Basic auth behind a reverse proxy). See **`apps/authentik/README.md`** and [Authentik header authentication](https://docs.goauthentik.io/add-secure-apps/providers/proxy/header_authentication/).
 
 ## Apply
 
@@ -35,4 +38,4 @@ kubectl exec -n qbittorrent deploy/qbittorrent -c main -- curl -4 -sS --max-time
 
 Sonarr/Radarr stay off the VPN; they reach qBittorrent via the cluster Service as usual.
 
-Pin the image `tag` in `values.yaml` when upgrading.
+**Argo CD Image Updater** tracks **`ghcr.io/home-operations/qbittorrent`** on the **`5.2`** line in `apps/argocd-image-updater/image-updater.yaml` ( **`~5.2`** — needed for reverse-proxy Basic auth; do not pin back to **`~5.1`** ). Manual bump: **`controllers.main.containers.main.image.tag`** in `values.yaml`.

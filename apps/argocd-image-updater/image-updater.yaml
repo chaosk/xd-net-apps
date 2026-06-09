@@ -219,7 +219,7 @@ spec:
     - namePattern: qbittorrent
       images:
         - alias: qbittorrent
-          imageName: ghcr.io/home-operations/qbittorrent:~5.1
+          imageName: ghcr.io/home-operations/qbittorrent:~5.2
           manifestTargets:
             helm:
               name: controllers.main.containers.main.image.repository

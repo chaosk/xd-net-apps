@@ -41,6 +41,12 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: paperless-ngx
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: qbittorrent
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: qbittorrent
   to:
     - group: ""
       kind: Service
