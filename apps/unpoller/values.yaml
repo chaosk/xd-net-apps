@@ -2,16 +2,13 @@
 # https://unpoller.com/docs/install/configuration/
 
 replicaCount: 1
-
 image:
   repository: ghcr.io/unpoller/unpoller
-  tag: v3.2.0
-
+  tag: v3.3.0
 dashboards:
   create: false
   grafana:
     create: false
-
 # UniFi controller URL, user, and password come from Secret unpoller-unifi via deployment-patch.yaml (UP_UNIFI_DEFAULT_*).
 upConfig: |
   [poller]
@@ -27,7 +24,6 @@ upConfig: |
   dynamic = false
   [loki]
   disable = true
-
 resources:
   requests:
     cpu: 50m
