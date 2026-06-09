@@ -38,4 +38,4 @@ kubectl exec -n qbittorrent deploy/qbittorrent -c main -- curl -4 -sS --max-time
 
 Sonarr/Radarr stay off the VPN; they reach qBittorrent via the cluster Service as usual.
 
-**Argo CD Image Updater** tracks **`ghcr.io/home-operations/qbittorrent`** on the **`5.2`** line in `apps/argocd-image-updater/image-updater.yaml` ( **`~5.2`** — needed for reverse-proxy Basic auth; do not pin back to **`~5.1`** ). Manual bump: **`controllers.main.containers.main.image.tag`** in `values.yaml`.
+**Argo CD Image Updater** tracks **`ghcr.io/home-operations/qbittorrent`** on the **`5.x`** line (`~5` in `apps/argocd-image-updater/image-updater.yaml`). Manual bump: **`controllers.main.containers.main.image.tag`** in `values.yaml`.

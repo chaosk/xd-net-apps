@@ -44,7 +44,7 @@ spec:
     - namePattern: bazarr
       images:
         - alias: bazarr
-          imageName: ghcr.io/home-operations/bazarr:~1.5
+          imageName: ghcr.io/home-operations/bazarr:~1
           manifestTargets:
             helm:
               name: controllers.main.containers.main.image.repository
@@ -68,7 +68,7 @@ spec:
     - namePattern: bitmagnet
       images:
         - alias: bitmagnet
-          imageName: ghcr.io/bitmagnet-io/bitmagnet:~0.10
+          imageName: ghcr.io/bitmagnet-io/bitmagnet:~0
           manifestTargets:
             helm:
               name: controllers.main.containers.main.image.repository
@@ -104,7 +104,6 @@ spec:
           imageName: ghcr.io/home-assistant-libs/python-matter-server:~6
           commonUpdateSettings:
             updateStrategy: semver
-            allowTags: "regexp:^[0-9]+\\.[0-9]+\\.[0-9]+$"
             ignoreTags: ["*-rc*", "*-beta*", "*dev*", "stable", "latest"]
           manifestTargets:
             helm:
@@ -139,7 +138,6 @@ spec:
           imageName: ghcr.io/mealie-recipes/mealie:~v3
           commonUpdateSettings:
             updateStrategy: semver
-            allowTags: "regexp:^v3\\.[0-9]+\\.[0-9]+$"
             ignoreTags: ["*-rc*", "*-beta*", "*dev*", "latest"]
           manifestTargets:
             helm:
@@ -161,7 +159,6 @@ spec:
           imageName: miniflux/miniflux:~2
           commonUpdateSettings:
             updateStrategy: semver
-            allowTags: "regexp:^2\\.[0-9]+\\.[0-9]+$"
             ignoreTags: ["*-rc*", "*-beta*", "*dev*", "latest"]
           manifestTargets:
             helm:
@@ -174,7 +171,6 @@ spec:
           imageName: ghcr.io/paperless-ngx/paperless-ngx:~2
           commonUpdateSettings:
             updateStrategy: semver
-            allowTags: "regexp:^2\\.[0-9]+\\.[0-9]+$"
             ignoreTags: ["*-rc*", "*-beta*", "*dev*", "latest"]
           manifestTargets:
             helm:
@@ -187,7 +183,6 @@ spec:
           imageName: docker.io/brandawg93/peanut:~6
           commonUpdateSettings:
             updateStrategy: semver
-            allowTags: "regexp:^[0-9]+\\.[0-9]+\\.[0-9]+$"
             ignoreTags: ["latest", "test", "*-beta*", "*-rc*"]
           manifestTargets:
             helm:
@@ -210,7 +205,12 @@ spec:
     - namePattern: prowlarr
       images:
         - alias: prowlarr
-          imageName: ghcr.io/home-operations/prowlarr:~2.3
+          imageName: ghcr.io/home-operations/prowlarr
+          commonUpdateSettings:
+            # home-operations publishes 4-part build tags (e.g. 2.3.7.5365); semver ~ constraints skip them.
+            updateStrategy: newest-build
+            allowTags: "regexp:^2(\\.[0-9]+)+$"
+            ignoreTags: ["*-b*", "*beta*", "*dev*", "*rc*", "latest", "*-amd64*", "*-arm64*"]
           manifestTargets:
             helm:
               name: controllers.main.containers.main.image.repository
@@ -219,7 +219,7 @@ spec:
     - namePattern: qbittorrent
       images:
         - alias: qbittorrent
-          imageName: ghcr.io/home-operations/qbittorrent:~5.2
+          imageName: ghcr.io/home-operations/qbittorrent:~5
           manifestTargets:
             helm:
               name: controllers.main.containers.main.image.repository
@@ -228,7 +228,11 @@ spec:
     - namePattern: radarr
       images:
         - alias: radarr
-          imageName: ghcr.io/home-operations/radarr:~6.1
+          imageName: ghcr.io/home-operations/radarr
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^6(\\.[0-9]+)+$"
+            ignoreTags: ["*-b*", "*beta*", "*dev*", "*rc*", "latest", "*-amd64*", "*-arm64*"]
           manifestTargets:
             helm:
               name: controllers.main.containers.main.image.repository
@@ -237,7 +241,11 @@ spec:
     - namePattern: sonarr
       images:
         - alias: sonarr
-          imageName: ghcr.io/home-operations/sonarr:~4.0
+          imageName: ghcr.io/home-operations/sonarr
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^4(\\.[0-9]+)+$"
+            ignoreTags: ["*-b*", "*beta*", "*dev*", "*rc*", "latest", "*-amd64*", "*-arm64*"]
           manifestTargets:
             helm:
               name: controllers.main.containers.main.image.repository
@@ -258,7 +266,7 @@ spec:
     - namePattern: tracearr
       images:
         - alias: tracearr
-          imageName: ghcr.io/connorgallopo/tracearr:~1.4
+          imageName: ghcr.io/connorgallopo/tracearr:~1
           manifestTargets:
             helm:
               name: tracearr.image.repository
@@ -270,7 +278,6 @@ spec:
           imageName: ghcr.io/unpoller/unpoller:~v3
           commonUpdateSettings:
             updateStrategy: semver
-            allowTags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+$"
             ignoreTags: ["*-rc*", "*-beta*", "*-dev*", "latest"]
           manifestTargets:
             helm:
@@ -284,7 +291,7 @@ spec:
           writeBackTarget: kustomization
       images:
         - alias: tubearchivist
-          imageName: bbilly1/tubearchivist:~v0.5
+          imageName: bbilly1/tubearchivist:~v0
           manifestTargets:
             kustomize:
               name: bbilly1/tubearchivist
