@@ -5,7 +5,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/home-operations/radarr
-          tag: "6.1.2"
+          tag: "6.2.1.10437"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
