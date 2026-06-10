@@ -154,6 +154,9 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /app/config
+        - name: images
+          mountPath: /app/public/images
+          readOnly: true
         - name: logs
           mountPath: /app/config/logs
         resources:
@@ -167,6 +170,9 @@ spec:
       - name: config
         configMap:
           name: homepage-config
+      - name: images
+        configMap:
+          name: homepage-images
       - name: logs
         emptyDir: {}
 

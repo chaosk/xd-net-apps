@@ -11,6 +11,7 @@ data:
     hideVersion: true
     statusStyle: dot
     maxGroupColumns: 4
+    favicon: /images/favicon.png
 
     layout:
       Media:
@@ -86,6 +87,8 @@ data:
               volume: volume_1
 
   widgets.yaml: |
+    - logo:
+        icon: /images/logo.png
     - kubernetes:
         cluster:
           show: true

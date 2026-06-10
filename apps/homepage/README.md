@@ -10,7 +10,16 @@ Kubernetes manifests for [Homepage](https://github.com/gethomepage/homepage) on 
 
 Homepage reads config from `/app/config`. This app mounts a Git-managed `ConfigMap` (`homepage-config`).
 
-To customize, edit `apps/homepage/configmap.yaml` keys:
+**Favicon and logo** — drop your files in **`apps/homepage/images/`** (see below), then re-apply and **restart the Homepage pod** (Homepage only picks up new static files on container start). Config references: [favicon](https://gethomepage.dev/configs/settings/#favicon), [logo widget](https://gethomepage.dev/widgets/info/logo/).
+
+| File | Purpose |
+|------|---------|
+| `images/favicon.png` | Browser tab icon (`favicon: /images/favicon.png` in `settings.yaml`) |
+| `images/logo.png` | Header logo widget (`icon: /images/logo.png` in `widgets.yaml`) |
+
+PNG or ICO; a square logo around 192×192 px works well. Optional PWA icons can reuse the same paths under `settings.yaml` → `pwa.icons` later.
+
+To customize YAML, edit `apps/homepage/configmap.yaml` keys:
 
 - `settings.yaml`
 - `bookmarks.yaml`
