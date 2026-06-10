@@ -17,7 +17,7 @@ Homepage reads config from `/app/config`. This app mounts a Git-managed `ConfigM
 | `images/favicon.png` | Browser tab icon (`favicon: /images/favicon.png` in `settings.yaml`) |
 | `images/logo.png` | Header logo widget (`icon: /images/logo.png` in `widgets.yaml`) |
 
-PNG or ICO; a square logo around 192×192 px works well. Optional PWA icons can reuse the same paths under `settings.yaml` → `pwa.icons` later.
+PNG or ICO. Square assets (~192×192 px) work as-is; **wide banner logos** need sizing in `custom.css` (see `configmap.yaml`) because the logo widget defaults to 48×48. Optional PWA icons can reuse the same paths under `settings.yaml` → `pwa.icons` later.
 
 To customize YAML, edit `apps/homepage/configmap.yaml` keys:
 

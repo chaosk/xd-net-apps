@@ -114,6 +114,12 @@ data:
 
   proxmox.yaml: ""
 
-  custom.css: ""
+  custom.css: |
+    /* logo.png is a wide banner; the logo widget defaults to 48×48 and shrinks it illegibly. */
+    .information-widget-logo.resolved img {
+      width: 230px !important;
+      height: 36px !important;
+      object-fit: contain !important;
+    }
 
   custom.js: ""
