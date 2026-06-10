@@ -6,7 +6,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/home-operations/sonarr
-          tag: "4.0.17"
+          tag: "4.0.17.2969"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
