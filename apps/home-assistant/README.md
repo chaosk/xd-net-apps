@@ -66,7 +66,7 @@ The namespace uses **`pod-security: privileged`** because the OIDC init containe
 1. In HA: **Settings → System → Network** — enable **Advanced mode**, configure **`net1`** (192.168.2.x), leave **Home Assistant URL** as `https://homeassistant.net.ecksd.ee`.
 2. Restart HA if **`net1`** does not appear (usually means **`ens19`** parent missing on the scheduled worker).
 
-Edit **`macvlan-network.yaml`** for **`master`**, **`subnet`**, **`rangeStart`/`rangeEnd`** (default **192.168.2.220–229**), gateway **192.168.2.1**, and the **192.168.6.0/24** route.
+Edit **`macvlan-network.yaml`** for **`master`**, **`subnet`**, **`rangeStart`/`rangeEnd`** (default **192.168.2.210–219**), gateway **192.168.2.1**, and the **192.168.6.0/24** route.
 
 ## Access
 

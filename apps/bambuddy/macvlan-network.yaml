@@ -1,5 +1,5 @@
 # IoT LAN for Bambu printer control (MQTT/FTP/camera). Same layout as home-assistant;
-# uses a separate IP slice (.230–.234) so pods do not collide with HA (.220–.229).
+# uses a separate IP slice (.230–.234) so pods do not collide with HA (.210–.219).
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
