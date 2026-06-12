@@ -16,7 +16,7 @@ Sign in with **OpenID Connect** (Authentik) after the provider is configured in 
 | Item | Value |
 |------|--------|
 | NAD | `lan-macvlan` (same **`ens19`** parent as Home Assistant) |
-| IP pool | **192.168.2.230–234** (HA uses **.220–229**) |
+| IP pool | **192.168.2.220–224** (HA uses **.210–219**) |
 | Route | **192.168.6.0/24** via **192.168.2.1** (isolated IoT printers) |
 
 Printers must be reachable from **`net1`**. Add printers **by IP** in the BamBuddy UI if SSDP discovery does not find them (common in Kubernetes bridge/macvlan setups).
@@ -47,7 +47,7 @@ Optional: embed BamBuddy in HA with a **Webpage** dashboard panel — `TRUSTED_F
 | `namespace.yaml` | **`bambuddy`** namespace |
 | `pvc.yaml` | **`/app/data`** (10Gi) and **`/app/logs`** (2Gi) on Synology |
 | `values.yaml` | Official image, probes, macvlan annotation, `NET_BIND_SERVICE` |
-| `macvlan-network.yaml` | Multus NAD — **192.168.2.230–234** |
+| `macvlan-network.yaml` | Multus NAD — **192.168.2.220–224** |
 | `httproute.yaml` | `bambuddy.net.ecksd.ee` + Homepage tile |
 
 Virtual printer / slicer sidecars and extra port ranges are not wired here — see [BamBuddy Docker docs](https://wiki.bambuddy.cool/getting-started/docker/) if you need VP or OrcaSlicer API.
