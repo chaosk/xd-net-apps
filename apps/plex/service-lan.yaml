@@ -1,0 +1,25 @@
+# Direct LAN access on 32400 with preserved client source IPs.
+# Plex behind Envoy ignores private X-Forwarded-For, so LAN playback must bypass the gateway.
+# IP from xd-net gateway-lb-pool (192.168.4.201–210); 201 is the shared Gateway.
+apiVersion: v1
+kind: Service
+metadata:
+  name: plex-lan
+  namespace: plex
+  labels:
+    app.kubernetes.io/name: plex-media-server
+    app.kubernetes.io/instance: plex
+    ecksd.ee/l2-loadbalancer: "true"
+  annotations:
+    io.cilium/lb-ipam-ips: "192.168.4.202"
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app.kubernetes.io/instance: plex
+    app.kubernetes.io/name: plex-media-server
+  ports:
+    - name: pms
+      port: 32400
+      targetPort: 32400
+      protocol: TCP

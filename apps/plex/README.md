@@ -8,11 +8,12 @@
 
 | File | Purpose |
 |------|---------|
-| `kustomization.yaml` | Namespace, **`pvc.yaml`**, **`nfs-media.yaml`**, **`httproute-pangolin.yaml`**, Helm chart **`plex-media-server`**. |
+| `kustomization.yaml` | Namespace, **`pvc.yaml`**, **`nfs-media.yaml`**, **`service-lan.yaml`**, **`httproute-pangolin.yaml`**, Helm chart **`plex-media-server`**. |
 | `namespace.yaml` | **`plex`** namespace. |
 | `pvc.yaml` | **`plex-config`** PVC (**Synology** `StorageClass` **`synology`**, **ReadWriteOnce**, **20Gi**) for Plex application data (`pms.configExistingClaim`). |
 | `nfs-media.yaml` | Static **NFS** PV **`plex-media-pv`** + claim **`plex-media`** (**ReadWriteMany**, empty `storageClassName`) bound for the chart mount at **`/media`**. |
-| `values.yaml` | **`fullnameOverride`**, **`httpRoute`** (**`plex.net.ecksd.ee`** on gateway **shared**, Homepage + **Tracearr** widget), **`nodeSelector`**, **`pms`**, NFS mounts, Intel GPU, **Tube Archivist Plex** init container. |
+| `values.yaml` | **`fullnameOverride`**, **`httpRoute`** (**`plex.net.ecksd.ee`** on gateway **shared**, Homepage + **Tracearr** widget), **`ADVERTISE_IP`**, **`nodeSelector`**, **`pms`**, NFS mounts, Intel GPU, **Tube Archivist Plex** init container. |
+| `service-lan.yaml` | **`plex-lan`** LoadBalancer (**`192.168.4.202:32400`**, **`externalTrafficPolicy: Local`**) for LAN playback with real client IPs; HTTPS routes stay on the Gateway. |
 | `tubearchivist-plex-install.yaml` | ConfigMap script that installs [tubearchivist-plex](https://github.com/tubearchivist/tubearchivist-plex) **v0.1.8** on the Plex config PVC. |
 | `httproute-pangolin.yaml` | **`plex.ecksd.ee`** only; **`pangolin-operator/site-ref: xd-net`** (separate from Helm route so Pangolin gets one public resource). |
 
@@ -27,6 +28,8 @@
 4. **NFS reachability** — Every node that can schedule Plex must reach the NFS export, or tighten **`nodeSelector`** / affinity so the pod only lands on allowed nodes.
 
 5. **Pangolin** — **`NewtSite`** **`xd-net`** (xd-net). **`httproute-pangolin.yaml`** is the only route with **`site-ref`**; do not add Pangolin annotations on the Helm HTTPRoute or you will get duplicate public resources.
+
+6. **LAN client IPs** — **`service-lan.yaml`** requests **`192.168.4.202`** from the xd-net Cilium LB pool (**`gateway-lb-pool`**, same range as the shared Gateway). Requires the **`apps-l2-announce`** policy in xd-net (label **`ecksd.ee/l2-loadbalancer: "true"`**). Plex ignores private **`X-Forwarded-For`** values, so LAN clients must reach **`plex-lan`** directly on port **32400**; **`ADVERTISE_IP`** in **`values.yaml`** publishes that URL alongside the HTTPS hostnames.
 
 ## Apply
 

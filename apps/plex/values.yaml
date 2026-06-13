@@ -53,6 +53,9 @@ pms:
 
 extraEnv:
   TZ: UTC
+  # LAN clients use plex-lan LoadBalancer (192.168.4.202:32400) so Plex sees real source IPs.
+  # HTTPS hostnames stay on the Gateway for web UI and remote access.
+  ADVERTISE_IP: "http://192.168.4.202:32400,https://plex.net.ecksd.ee:443,https://plex.ecksd.ee:443"
   # VA-API uses the GPU passed through by the Intel GPU device plugin (gpu.intel.com/i915).
   # In Plex: Settings → Transcoder → enable hardware acceleration.
 
