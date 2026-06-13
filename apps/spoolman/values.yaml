@@ -1,0 +1,58 @@
+# bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+# Spoolman — https://github.com/Donkie/Spoolman
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/donkie/spoolman
+          tag: "0.23.1"
+          pullPolicy: IfNotPresent
+        env:
+          TZ: UTC
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8000
+              initialDelaySeconds: 30
+              periodSeconds: 60
+              timeoutSeconds: 10
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /
+                port: 8000
+              initialDelaySeconds: 15
+              periodSeconds: 30
+              timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: "1"
+            memory: 512Mi
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8000
+persistence:
+  data:
+    enabled: true
+    existingClaim: spoolman-data
+    globalMounts:
+      - path: /home/app/.local/share/spoolman
+defaultPodOptions:
+  securityContext:
+    # Entrypoint runs groupmod/usermod then gosu app — do not set runAsUser/runAsGroup.
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch

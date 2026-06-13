@@ -47,6 +47,12 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: qbittorrent
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: spoolman
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: spoolman
   to:
     - group: ""
       kind: Service

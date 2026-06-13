@@ -1,0 +1,38 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: spoolman
+  namespace: spoolman
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Misc
+    gethomepage.dev/weight: "36"
+    gethomepage.dev/name: Spoolman
+    gethomepage.dev/description: Filament spool inventory
+    gethomepage.dev/icon: mdi-filament
+    gethomepage.dev/href: "https://spoolman.net.ecksd.ee"
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=spoolman
+spec:
+  parentRefs:
+    - name: shared
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - spoolman.net.ecksd.ee
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: spoolman
+          port: 8000
