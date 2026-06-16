@@ -5,7 +5,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/home-operations/qbittorrent
-          tag: "5.2.1"
+          tag: "5.2.2"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -29,26 +29,23 @@ controllers:
           limits:
             cpu: "4"
             memory: 2Gi
-
 service:
   main:
     controller: main
     ports:
       http:
         port: 8080
-
 persistence:
   config:
     enabled: true
     existingClaim: qbittorrent-config
     globalMounts:
-      - path: /config
+    - path: /config
   torrents:
     enabled: true
     existingClaim: qbittorrent-torrents
     globalMounts:
-      - path: /data/torrents
-
+    - path: /data/torrents
 defaultPodOptions:
   labels:
     vpn-gateway: "true"
