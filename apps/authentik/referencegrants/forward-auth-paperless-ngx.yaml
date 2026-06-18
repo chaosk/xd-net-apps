@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: forward-auth-paperless-ngx
+  namespace: authentik
+spec:
+  from:
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: paperless-ngx
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: paperless-ngx
+  to:
+    - group: ""
+      kind: Service
+      name: authentik-server

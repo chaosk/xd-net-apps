@@ -18,6 +18,9 @@ qbittorrent (vpn-gateway=true)
 bitmagnet (vpn-gateway=true)
   → same path (DHT and torrent egress; Postgres stays in-cluster via bitmagnet-db-rw)
 
+zilean (vpn-gateway=true)
+  → same path (DMM scrape egress; Postgres stays in-cluster via zilean-db-rw)
+
 archivist-es / archivist-redis (no label)
   → normal cluster routing
 ```

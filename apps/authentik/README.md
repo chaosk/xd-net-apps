@@ -12,7 +12,7 @@ PostgreSQL is a **[CloudNativePG](https://cloudnative-pg.io/) `Cluster`** (`post
 | `namespace.yaml` | `authentik` namespace. |
 | `postgres.yaml` | CNPG cluster **`authentik-db`** (single instance, **`local-path`** PVC, stock `postgresql` image). |
 | `pvc-authentik-data.yaml` | **`authentik-data`** PVC (**Synology** `storageClass` **`synology`**, **ReadWriteOnce**, **1Gi**) at **`/data`**. Server and worker are pinned to the same node via **`worker` podAffinity** in `values.yaml`. |
-| `referencegrant-forward-auth.yaml` | Shared **ReferenceGrant**: each app namespace with a forward-auth **SecurityPolicy** is listed under **`spec.from`**; all policies may call **`authentik-server`**. |
+| `referencegrants/` | One **ReferenceGrant** per forward-auth app namespace (`forward-auth-<app>.yaml`); allows that namespace’s **HTTPRoute** and **SecurityPolicy** to call **`authentik-server`**. Gateway API caps **`spec.from` at 16 entries** per grant, so grants are not merged into a single file. |
 | `values.yaml` | **`global.volumes`** / **`volumeMounts`** for `/data`, `AUTHENTIK_HOST`, **`AUTHENTIK_SECRET_KEY`**, Gateway **`server.route.main`** (includes `/outpost.goauthentik.io`), external Postgres, **GeoIP**, Bitnami **disabled**, **memory requests/limits**. |
 | `httproute-pangolin.yaml` | **`auth.ecksd.ee`** only; **`pangolin-operator/site-ref: xd-net`** (separate from Helm route so Pangolin gets one public resource). |
 
@@ -61,9 +61,9 @@ Two mechanisms work together:
 1. **HTTPRoute** — On each protected app hostname and on **`authentik.net.ecksd.ee`**, paths under **`/outpost.goauthentik.io`** go to **`authentik-server`** (browser callbacks and outpost UI). App routes list this rule **before** the catch-all **`/`** rule to the app Service.
 2. **SecurityPolicy** — Envoy calls **`authentik-server`** in-cluster at **`/outpost.goauthentik.io/auth/envoy`** to allow or deny each request before it reaches the app.
 
-Each protected app ships **`securitypolicy-forward-auth.yaml`** and the outpost rule on its **HTTPRoute**. This app supplies the shared **ReferenceGrant** (for both **SecurityPolicy** and cross-namespace **HTTPRoute** backend refs) and **`additionalRules`** on the Authentik chart route in `values.yaml`.
+Each protected app ships **`securitypolicy-forward-auth.yaml`** and the outpost rule on its **HTTPRoute**. This app supplies **ReferenceGrant** manifests under **`referencegrants/`** (for both **SecurityPolicy** and cross-namespace **HTTPRoute** backend refs) and **`additionalRules`** on the Authentik chart route in `values.yaml`.
 
-To protect another app: copy Sonarr’s **SecurityPolicy** and outpost **HTTPRoute** rule, add **`spec.from`** entries for that namespace in **`referencegrant-forward-auth.yaml`**, re-apply **authentik** then the app. In the Authentik UI, one **domain-level** forward-auth **Proxy provider** (cookie domain **`net.ecksd.ee`**) on the **embedded outpost** is usually enough for all `*.net.ecksd.ee` hostnames; **single-application** providers require the outpost path on that app’s hostname as above.
+To protect another app: copy Sonarr’s **SecurityPolicy** and outpost **HTTPRoute** rule, add **`referencegrants/forward-auth-<namespace>.yaml`** (copy an existing file and change the namespace), list it in **`referencegrants/kustomization.yaml`**, re-apply **authentik** then the app. In the Authentik UI, one **domain-level** forward-auth **Proxy provider** (cookie domain **`net.ecksd.ee`**) on the **embedded outpost** is usually enough for all `*.net.ecksd.ee` hostnames; **single-application** providers require the outpost path on that app’s hostname as above.
 
 ## Argo CD (Dex OIDC)
 

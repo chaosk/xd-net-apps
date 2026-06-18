@@ -6,6 +6,7 @@ routed_namespaces:
   - tubearchivist
   - qbittorrent
   - bitmagnet
+  - zilean
 
 DNS: 172.16.0.1
 DNSPolicy: None

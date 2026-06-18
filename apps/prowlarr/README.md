@@ -1,12 +1,12 @@
 # Prowlarr
 
-Indexer manager ([Prowlarr](https://prowlarr.com/)) via bjw-s `app-template` and `ghcr.io/home-operations/prowlarr`. Config only (no media mount).
+Indexer manager ([Prowlarr](https://prowlarr.com/)) via bjw-s `app-template` and `ghcr.io/home-operations/prowlarr`. Config only (no media mount). Zilean itself runs in **`apps/zilean`**.
 
 | File | Purpose |
 |------|---------|
 | `kustomization.yaml` | Namespace, config PVC, HTTPRoute, Helm chart. |
 | `pvc-config.yaml` | App data on StorageClass `synology` (5Gi). |
-| `values.yaml` | Image, probes, mount at `/config`. |
+| `values.yaml` | Prowlarr image, probes, mount at `/config`. |
 | `httproute.yaml` | `prowlarr.net.ecksd.ee` via Gateway `shared`. |
 | `securitypolicy-forward-auth.yaml` | Envoy Gateway forward auth to Authentik for this HTTPRoute. |
 
@@ -19,3 +19,15 @@ kubectl kustomize "$HOME/Projects/xd-net-apps/apps/prowlarr" --enable-helm | kub
 ```
 
 Sync apps to Sonarr and Radarr from the Prowlarr UI. Pin the image `tag` in `values.yaml` when upgrading.
+
+## Zilean indexer
+
+Deploy **`apps/zilean`** first and wait for the initial DMM sync to finish. In Prowlarr, add **Generic Torznab** (Settings → Indexers → Add):
+
+| Field | Value |
+|-------|--------|
+| Name | Zilean |
+| URL | `http://zilean.zilean.svc.cluster.local:8181/torznab` |
+| API path | `/api` |
+
+No API key is required. Sync to Sonarr and Radarr from the Prowlarr UI. In Radarr, enable **Remove year from search string** on the Zilean indexer if title matching is too strict.
