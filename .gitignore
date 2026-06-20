@@ -10,3 +10,4 @@
 # Use `git add -f path/to/charts/...` only if you intentionally vendor a chart under this name.
 **/charts/
 .helm-cache/
+.kube/
