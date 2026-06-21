@@ -5,6 +5,34 @@ crds:
 
 defaultRules:
   create: true
+  rules:
+    # Apiserver SLO recording rules and burn-rate alerts need full histogram scrapes.
+    kubeApiserverAvailability: false
+    kubeApiserverBurnrate: false
+    kubeApiserverHistogram: false
+    kubeApiserverSlos: false
+
+# Thin apiserver scrape: ~159k samples/job at 30s was ~55% of Prometheus ingest and
+# loaded control-plane apiservers. Drop histograms and high-cardinality labels; scrape
+# every 60s. Re-enable chart defaults temporarily when debugging API latency.
+kubeApiServer:
+  serviceMonitor:
+    interval: 60s
+    metricRelabelings:
+      - action: drop
+        sourceLabels: [__name__]
+        regex: .*_bucket
+      - action: drop
+        sourceLabels: [__name__]
+        regex: apiserver_(request_slo|request_sli|response_sizes|watch_events_sizes|request_filter_duration_seconds).*
+      - action: drop
+        sourceLabels: [__name__]
+        regex: etcd_request_.*
+      - action: drop
+        sourceLabels: [__name__]
+        regex: rest_client_.*
+      - action: labeldrop
+        regex: (resource|subresource|group|version|scope)
 
 alertmanager:
   enabled: true

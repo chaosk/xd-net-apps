@@ -21,7 +21,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `namespace.yaml` | **`monitoring`** namespace; Pod Security **`privileged`** (node-exporter). |
 | `postgres.yaml` | CNPG cluster **`grafana-db`** (Grafana internal metadata on `local-path`). |
 | `kustomization.yaml` | Namespace, HTTPRoute, three Helm releases, dashboard ConfigMaps. |
-| `values-prometheus.yaml` | Retention, Synology PVCs for Prometheus and Alertmanager, Grafana Postgres + admin Secret. |
+| `values-prometheus.yaml` | Retention, Synology PVCs for Prometheus and Alertmanager, Grafana Postgres + admin Secret, thin apiserver scrape. |
 | `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
@@ -103,6 +103,7 @@ The prometheus-community chart installs **Prometheus Operator CRDs**. On first s
 
 ## Notes
 
+- **Apiserver metrics:** `values-prometheus.yaml` scrapes the API server every **60s** and drops histogram buckets, SLI/SLO series, and high-cardinality labels (`resource`, `subresource`, etc.) to cut control-plane and Prometheus load. Bundled **API server SLO** dashboards and recording rules are disabled; **`KubeAPIDown`** and other coarse `kubernetesSystem` alerts remain. Restore chart defaults temporarily when debugging apiserver latency.
 - **Grafana database:** Internal state (users, preferences, secure values) uses **PostgreSQL** via CNPG (`grafana-db`).
 - **Authentik login:** Generic OAuth in `values-prometheus.yaml` ([integration guide](https://integrations.goauthentik.io/monitoring/grafana/)). Authentik groups **`Grafana Admins`** / **`Grafana Editors`** map to Grafana **Admin** / **Editor**; everyone else gets **Viewer** (`auto_assign_org_role`). Use a custom **`profile`** scope mapping without embedded groups plus a filtered **`groups`** scope (same pattern as Argo CD in `apps/authentik/README.md`).
 - **Resource use:** Prometheus and Loki each request a **50Gi** RWO volume; adjust `values-*.yaml` if your NAS exports are smaller.
