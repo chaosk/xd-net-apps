@@ -2,6 +2,7 @@
 # Zilean — https://github.com/Thoroslives/zilean (fork of iPromKnight/zilean)
 controllers:
   main:
+    replicas: 0
     strategy: Recreate
     containers:
       main:
