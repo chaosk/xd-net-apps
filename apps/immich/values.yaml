@@ -8,6 +8,8 @@ valkey:
   enabled: true
 
 immich:
+  metrics:
+    enabled: true
   persistence:
     library:
       existingClaim: immich-library
@@ -16,7 +18,11 @@ immich:
   existingConfiguration: immich-config
 
 # GPU and DB env: server-only block below; top-level controllers still apply shared env to all components.
+# Chart can emit its own ServiceMonitor; we scrape from apps/monitoring with release: kube-prometheus-stack.
 server:
+  serviceMonitor:
+    main:
+      enabled: false
   controllers:
     main:
       pod:

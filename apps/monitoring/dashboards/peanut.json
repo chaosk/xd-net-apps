@@ -15,6 +15,7 @@
     ]
   },
   "description": "Prometheus adaptation of zephyr325/Grafana-for-PeaNUT. Scrapes PeaNUT /api/v1/metrics.",
+  "id": null,
   "editable": true,
   "graphTooltip": 1,
   "links": [

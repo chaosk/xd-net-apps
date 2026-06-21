@@ -38,7 +38,7 @@ Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: ku
 |--------|---------|--------|
 | CNPG (`*-db`) | `scrape-cnpg.yaml` | Port `metrics` (9187) on cluster pods. |
 | Authentik server | `scrape-apps.yaml` | `/metrics` on pod port `metrics` (9300), not the HTTP Service. |
-| Immich server | `scrape-apps.yaml` | `/metrics` on Service port `http` (2283). |
+| Immich server | `scrape-apps.yaml` | `/metrics` on Service ports `metrics-api` (8081) and `metrics-ms` (8082); requires `immich.metrics.enabled: true` in `apps/immich/values.yaml`. |
 | Bitmagnet | `scrape-apps.yaml` | `/metrics` on Service port `http` (3333). Postgres via `scrape-cnpg.yaml` (`bitmagnet-db`). |
 | Speedtest Tracker | `scrape-apps.yaml` | `/prometheus` on Service port `http` (80), interval 5m. Enable in app **Settings → Data platforms → Prometheus** ([docs](https://docs.speedtest-tracker.dev/settings/data-platforms/prometheus)); allow cluster scrape sources (e.g. `10.0.0.0/8`). Postgres via `scrape-cnpg.yaml` (`speedtest-tracker-db`). |
 | Envoy Gateway controller | `scrape-platform.yaml` | Service `envoy-gateway:19001/metrics`. |

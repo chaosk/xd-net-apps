@@ -32,7 +32,11 @@ spec:
     matchLabels:
       app.kubernetes.io/service: immich-server
   endpoints:
-    - port: http
+    # Port 2283 serves the web UI (HTML), not Prometheus text; metrics need telemetry enabled on 8081/8082.
+    - port: metrics-api
+      path: /metrics
+      interval: 30s
+    - port: metrics-ms
       path: /metrics
       interval: 30s
 ---
