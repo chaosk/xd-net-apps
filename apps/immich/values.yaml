@@ -25,6 +25,8 @@ server:
       enabled: false
   controllers:
     main:
+      # Single GPU node (xd-w-1): RollingUpdate needs 2× GPU+CPU briefly and stays Pending.
+      strategy: Recreate
       pod:
         nodeSelector:
           intel.feature.node.kubernetes.io/gpu: "true"
