@@ -1,0 +1,19 @@
+# Pangolin private HTTP (OLM): reachable only with an active Pangolin client — not on the public internet.
+# Homelab ingress stays on httproute.yaml (bitmagnet.net.ecksd.ee). Do not add site-ref there.
+# Requires pangolin-operator + NewtSite xd-net (xd-net) and Pangolin 1.18+ on the edge.
+apiVersion: pangolin.home-operations.com/v1alpha1
+kind: PrivateResource
+metadata:
+  name: bitmagnet
+  namespace: bitmagnet
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  siteRef: xd-net
+  name: Bitmagnet
+  mode: http
+  fullDomain: bitmagnet.ecksd.ee
+  destination: bitmagnet-main.bitmagnet.svc.cluster.local
+  destinationPort: 3333
+  scheme: http
+  ssl: true

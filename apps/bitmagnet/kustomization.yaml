@@ -8,6 +8,7 @@ resources:
   - pvc-config.yaml
   - postgres.yaml
   - httproute.yaml
+  - private-resource-pangolin.yaml
 
 helmCharts:
   - name: app-template

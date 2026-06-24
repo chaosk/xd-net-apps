@@ -8,7 +8,8 @@ Self-hosted [Bitmagnet](https://bitmagnet.io/) DHT crawler and torrent search (W
 | `pvc-config.yaml` | App config on StorageClass `synology` (5Gi) at `/root/.config/bitmagnet`. |
 | `postgres.yaml` | CloudNativePG cluster `bitmagnet-db` (PostgreSQL 18.3, `local-path` 300Gi). |
 | `values.yaml` | Image `ghcr.io/bitmagnet-io/bitmagnet`, workers via `worker run --all`, DB env from secret. |
-| `httproute.yaml` | `bitmagnet.net.ecksd.ee` → Service `bitmagnet-main:3333`. |
+| `httproute.yaml` | `bitmagnet.net.ecksd.ee` → Service `bitmagnet-main:3333` (homelab Gateway only). |
+| `private-resource-pangolin.yaml` | Pangolin **private** HTTP at `bitmagnet.ecksd.ee` (Pangolin client required; not public internet). |
 
 ## Before you apply
 
@@ -42,7 +43,18 @@ kubectl kustomize "$HOME/Projects/xd-net-apps/apps/bitmagnet" --enable-helm | ku
 
 If the CNPG cluster already exists, growing PVCs to 300Gi or upgrading Postgres 16→18 may require [CNPG volume expansion](https://cloudnative-pg.io/documentation/current/storage/) or a fresh cluster — plan before changing a live database.
 
-Wait for `bitmagnet-db` to be ready before the app pod stays healthy. Open `https://bitmagnet.net.ecksd.ee` after sync.
+Wait for `bitmagnet-db` to be ready before the app pod stays healthy. Open `https://bitmagnet.net.ecksd.ee` on the LAN after sync.
+
+## Pangolin (private remote)
+
+`private-resource-pangolin.yaml` registers **`https://bitmagnet.ecksd.ee`** as a Pangolin **private** HTTP resource (`mode: http`). It is **not** reachable from the public internet without the [Pangolin client](https://docs.pangolin.net/) connected — unlike Plex’s `httproute-pangolin.yaml` public route.
+
+1. **`ecksd.ee`** must be a domain in your Pangolin org (same as other `*.ecksd.ee` resources).
+2. Argo syncs the `PrivateResource`; pangolin-operator reconciles it against the Integration API (`NewtSite` **`xd-net`**).
+3. Connect with the Pangolin desktop/mobile client, then open **`https://bitmagnet.ecksd.ee`**.
+4. Grant access in the Pangolin dashboard (users/roles) if you restricted the resource; omitting `roleIds`/`userIds` in the CR leaves org-admin access per Pangolin defaults.
+
+Do **not** add `pangolin-operator/site-ref` to `httproute.yaml` — that would create a duplicate **public** resource for the same app.
 
 ## Prowlarr
 
