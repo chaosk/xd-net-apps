@@ -6,6 +6,8 @@ controllers:
     pod:
       annotations:
         k8s.v1.cni.cncf.io/networks: lan-macvlan@net1
+      nodeSelector:
+        multus.io/ready: "true"
     containers:
       main:
         image:

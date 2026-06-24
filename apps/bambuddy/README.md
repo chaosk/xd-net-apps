@@ -21,7 +21,7 @@ Sign in with **OpenID Connect** (Authentik) after the provider is configured in 
 
 Printers must be reachable from **`net1`**. Add printers **by IP** in the BamBuddy UI if SSDP discovery does not find them (common in Kubernetes bridge/macvlan setups).
 
-**Platform prerequisites:** Multus + worker **`ens19`** on VLAN 2 — same as [`apps/home-assistant/`](../home-assistant/README.md).
+**Platform prerequisites:** Multus + worker **`ens19`** on VLAN 2 — same as [`apps/home-assistant/`](../home-assistant/README.md). Pods require **`multus.io/ready=true`** on the node (set by the Multus DaemonSet in xd-net after `multus.sock` is up).
 
 ## Before sync
 

@@ -56,7 +56,7 @@ Home Assistant gets a **second NIC** on **192.168.2.0/24** via [Multus](https://
 
 **Platform prerequisites ([xd-net](https://github.com/chaosk/xd-net)):**
 
-1. **`apps/`** — `multus_enabled = true` (Multus + `cni.exclusive=false`, includes **macvlan** and **sbr** binaries). See **`apps/multus.tf`**.
+1. **`apps/`** — `multus_enabled = true` (Multus + `cni.exclusive=false`, includes **macvlan** and **sbr** binaries). See **`apps/multus.tf`**. The Multus DaemonSet labels each node **`multus.io/ready=true`** when **`multus.sock`** is up; macvlan pods require that label via **`nodeSelector`** in `values.yaml`.
 2. **`infra/`** — workers get a **second Proxmox NIC** on **`worker_iot_vlan_id`** (default **2** / 192.168.2.0/24) and Talos **`ens19`** with no address (`patches/worker-iot-nic.yaml`).
 
 The namespace uses **`pod-security: privileged`** because the OIDC init container runs as root to write the config PVC.
@@ -64,7 +64,7 @@ The namespace uses **`pod-security: privileged`** because the OIDC init containe
 **After sync:**
 
 1. In HA: **Settings → System → Network** — enable **Advanced mode**, configure **`net1`** (192.168.2.x), leave **Home Assistant URL** as `https://homeassistant.net.ecksd.ee`.
-2. Restart HA if **`net1`** does not appear (usually means **`ens19`** parent missing on the scheduled worker).
+2. Restart HA if **`net1`** does not appear (usually means **`ens19`** parent missing on the scheduled worker, or the pod started before Multus labeled the node — it should reschedule once **`multus.io/ready=true`**).
 
 Edit **`macvlan-network.yaml`** for **`master`**, **`subnet`**, **`rangeStart`/`rangeEnd`** (default **192.168.2.210–219**), gateway **192.168.2.1**, and the **192.168.6.0/24** route.
 
