@@ -8,6 +8,7 @@ resources:
   - pvc.yaml
   - httproute.yaml
   - macvlan-network.yaml
+  - bambu-studio.yaml
 
 helmCharts:
   - name: app-template

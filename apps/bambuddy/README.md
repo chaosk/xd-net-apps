@@ -49,8 +49,19 @@ Optional: embed BamBuddy in HA with a **Webpage** dashboard panel — `TRUSTED_F
 | `values.yaml` | Official image, probes, macvlan annotation, `NET_BIND_SERVICE` |
 | `macvlan-network.yaml` | Multus NAD — **192.168.2.220–224** |
 | `httproute.yaml` | `bambuddy.net.ecksd.ee` + Homepage tile |
+| `bambu-studio.yaml` | **Service** (`bambu-studio-api:3001`) for the optional Bambu Studio slicing controller |
 
-Virtual printer / slicer sidecars and extra port ranges are not wired here — see [BamBuddy Docker docs](https://wiki.bambuddy.cool/getting-started/docker/) if you need VP or OrcaSlicer API.
+The **Virtual Printer** feature (BamBuddy presenting itself to a slicer over MQTT/FTP/RTSP) and its extra port ranges are not wired here — see [BamBuddy Docker docs](https://wiki.bambuddy.cool/getting-started/docker/) if you need it.
+
+## Server-side slicing (Bambu Studio)
+
+**`ghcr.io/maziggy/bambu-studio-api`** runs as a second app-template controller (`controllers.bambu-studio` in `values.yaml`) — a separate Deployment, not a sidecar ([Slicer API docs](https://wiki.bambuddy.cool/features/slicer-api/)). It is an HTTP wrapper around the headless Bambu Studio CLI, so the **Slice** button in File Manager / Archives / MakerWorld produces a ready-to-print `.gcode.3mf` without a desktop slicer. Bambu Studio is used over OrcaSlicer because OrcaSlicer's mid-2026 CLI has known bugs on Bambu-authored 3MFs.
+
+- BamBuddy reaches it over **in-cluster DNS** at **`http://bambu-studio-api.bambuddy.svc.cluster.local:3001`**, set via the **`BAMBU_STUDIO_API_URL`** env on the BamBuddy container (used when the Settings → Slicer URL field is blank). Results return over HTTP — no shared volume; `/app/data` is `emptyDir` scratch.
+- The Service is a **plain manifest** (`bambu-studio.yaml`), not part of the chart. Only the `main` Service is rendered by the chart on purpose: a second chart Service would suffix both to `bambuddy-main` / `bambuddy-bambu-studio` and break the HTTPRoute backendRef and the Home Assistant in-cluster host. The plain Service selects the chart-generated `bambu-studio` controller pod labels.
+- The image is **`linux/amd64` only**; its tag follows the app version as **`bambuddy-<version>`** (e.g. `bambuddy-0.2.4.7`). Because it stays a Helm value, **Argo CD Image Updater bumps it in lockstep** with `ghcr.io/maziggy/bambuddy` (`newest-build`, `allowTags: ^bambuddy-X.Y.Z.B$`). Manual bump: `controllers.bambu-studio.containers.main.image.tag`.
+
+Enable it in BamBuddy: **Settings → Workflow → Slicer** — set **Preferred Slicer** to *Bambu Studio* and toggle **Use Slicer API** on. Leave the **Sidecar URL** blank to use `BAMBU_STUDIO_API_URL`.
 
 ## Apply (local test)
 

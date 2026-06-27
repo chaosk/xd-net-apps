@@ -64,6 +64,19 @@ spec:
             helm:
               name: controllers.main.containers.main.image.repository
               tag: controllers.main.containers.main.image.tag
+        # Optional server-side slicing service (second app-template controller in values.yaml).
+        # Its tags are the BamBuddy version prefixed with "bambuddy-" (e.g. bambuddy-0.2.4.7),
+        # so newest-build keeps it in lockstep with the app release above.
+        - alias: bambu-studio-api
+          imageName: ghcr.io/maziggy/bambu-studio-api
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^bambuddy-[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$"
+            ignoreTags: ["latest", "*daily*", "*-amd64*", "*-arm64*"]
+          manifestTargets:
+            helm:
+              name: controllers.bambu-studio.containers.main.image.repository
+              tag: controllers.bambu-studio.containers.main.image.tag
 
     - namePattern: bitmagnet
       images:

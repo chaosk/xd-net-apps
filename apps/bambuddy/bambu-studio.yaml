@@ -1,0 +1,24 @@
+# Service for the optional Bambu Studio server-side slicing controller defined in `values.yaml`
+# (https://wiki.bambuddy.cool/features/slicer-api/). The slicer runs as a second app-template
+# controller so its image tag stays a Helm value (auto-updated by Argo CD Image Updater), but the
+# Service is kept out of the chart: a second chart Service would rename the primary one to
+# `bambuddy-main` and break the HTTPRoute backendRef and the Home Assistant in-cluster host.
+#
+# BamBuddy reaches it at http://bambu-studio-api.bambuddy.svc.cluster.local:3001 via the
+# BAMBU_STUDIO_API_URL env in values.yaml. The selector matches the chart-generated pod labels
+# of the `bambu-studio` controller.
+apiVersion: v1
+kind: Service
+metadata:
+  name: bambu-studio-api
+  namespace: bambuddy
+  labels:
+    app.kubernetes.io/name: bambu-studio-api
+spec:
+  selector:
+    app.kubernetes.io/instance: bambuddy
+    app.kubernetes.io/controller: bambu-studio
+  ports:
+    - name: http
+      port: 3001
+      targetPort: 3001

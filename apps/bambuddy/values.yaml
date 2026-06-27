@@ -20,6 +20,9 @@ controllers:
           PUID: "1000"
           PGID: "1000"
           TRUSTED_FRAME_ORIGINS: "https://homeassistant.net.ecksd.ee"
+          # Default Bambu Studio Slicer API URL (the in-cluster slicer below). BamBuddy uses
+          # this when the Settings -> Slicer URL field is left blank.
+          BAMBU_STUDIO_API_URL: "http://bambu-studio-api.bambuddy.svc.cluster.local:3001"
         securityContext:
           capabilities:
             add:
@@ -52,7 +55,49 @@ controllers:
           limits:
             cpu: "2"
             memory: 2Gi
+  bambu-studio:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/maziggy/bambu-studio-api
+          tag: "bambuddy-0.2.4.7"
+          pullPolicy: IfNotPresent
+        env:
+          NODE_ENV: production
+          PORT: "3001"
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /health
+                port: 3001
+              initialDelaySeconds: 30
+              periodSeconds: 30
+              timeoutSeconds: 5
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /health
+                port: 3001
+              initialDelaySeconds: 15
+              periodSeconds: 30
+              timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 256Mi
+          limits:
+            cpu: "2"
+            memory: 2Gi
 service:
+  # Only the BamBuddy Service is rendered by the chart. Adding a second chart Service would
+  # suffix both (bambuddy-main / bambuddy-bambu-studio) and break the httproute backendRef and
+  # the Home Assistant in-cluster host; the slicer Service is a plain manifest instead.
   main:
     controller: main
     ports:
@@ -73,6 +118,13 @@ persistence:
       main:
         main:
         - path: /app/logs
+  # Scratch working dir for the Bambu Studio slicer service; results return to BamBuddy over HTTP.
+  slicer-data:
+    type: emptyDir
+    advancedMounts:
+      bambu-studio:
+        main:
+        - path: /app/data
 defaultPodOptions:
   securityContext:
     fsGroup: 1000
