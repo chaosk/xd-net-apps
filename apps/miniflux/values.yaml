@@ -7,7 +7,7 @@ controllers:
       main:
         image:
           repository: miniflux/miniflux
-          tag: "2.3.1"
+          tag: "2.3.2"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
