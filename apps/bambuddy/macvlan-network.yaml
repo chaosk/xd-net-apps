@@ -1,5 +1,8 @@
-# IoT LAN for Bambu printer control (MQTT/FTP/camera). Same layout as home-assistant;
-# uses a separate IP slice (.220–.224) so pods do not collide with HA (.210–.219).
+# IoT LAN for Bambu printer control (MQTT/FTP/camera). Same layout as home-assistant,
+# on a separate IP slice from HA (.210–.219). The host-local pool is pinned to a single
+# address (rangeStart == rangeEnd == 192.168.2.220) so BamBuddy always binds the same IP —
+# Bambu Studio pins printers by IP, so a changing address would force re-adding the printer
+# on every restart/reschedule.
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
@@ -19,7 +22,7 @@ spec:
             "type": "host-local",
             "subnet": "192.168.2.0/24",
             "rangeStart": "192.168.2.220",
-            "rangeEnd": "192.168.2.224",
+            "rangeEnd": "192.168.2.220",
             "gateway": "192.168.2.1",
             "routes": [
               {

@@ -16,7 +16,7 @@ Sign in with **OpenID Connect** (Authentik) after the provider is configured in 
 | Item | Value |
 |------|--------|
 | NAD | `lan-macvlan` (same **`ens19`** parent as Home Assistant) |
-| IP pool | **192.168.2.220–224** (HA uses **.210–219**) |
+| IP | **192.168.2.220** — single-IP `host-local` pool (`rangeStart == rangeEnd`), fixed so Bambu Studio's IP-pinned printer survives restarts (HA uses **.210–219**) |
 | Route | **192.168.6.0/24** via **192.168.2.1** (isolated IoT printers) |
 
 Printers must be reachable from **`net1`**. Add printers **by IP** in the BamBuddy UI if SSDP discovery does not find them (common in Kubernetes bridge/macvlan setups).
@@ -47,7 +47,7 @@ Optional: embed BamBuddy in HA with a **Webpage** dashboard panel — `TRUSTED_F
 | `namespace.yaml` | **`bambuddy`** namespace |
 | `pvc.yaml` | **`/app/data`** (10Gi) and **`/app/logs`** (2Gi) on Synology |
 | `values.yaml` | Official image, probes, macvlan annotation, `NET_BIND_SERVICE` |
-| `macvlan-network.yaml` | Multus NAD — **192.168.2.220–224** |
+| `macvlan-network.yaml` | Multus NAD — fixed IP **192.168.2.220** (single-IP `host-local` pool) |
 | `httproute.yaml` | `bambuddy.net.ecksd.ee` + Homepage tile |
 | `bambu-studio.yaml` | **Service** (`bambu-studio-api:3001`) for the optional Bambu Studio slicing controller |
 
