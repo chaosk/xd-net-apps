@@ -1,0 +1,76 @@
+# Invidious and its companion cache YouTube session/po-token state in memory; upstream recommends
+# periodically restarting them so playback keeps working as YouTube rotates tokens. A daily
+# rollout-restart is a gentle, zero-downtime refresh (new ReplicaSet comes up before the old pod
+# is torn down). Bump the schedule toward hourly if you hit playback errors between restarts.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: invidious-restart
+  namespace: invidious
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: invidious-restart
+  namespace: invidious
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: invidious-restart
+  namespace: invidious
+subjects:
+  - kind: ServiceAccount
+    name: invidious-restart
+    namespace: invidious
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: invidious-restart
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: invidious-restart
+  namespace: invidious
+spec:
+  schedule: "0 4 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          serviceAccountName: invidious-restart
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: kubectl
+              image: registry.k8s.io/kubectl:v1.36.0
+              command:
+                - /bin/sh
+                - -c
+                - kubectl rollout restart deployment/invidious-main deployment/invidious-companion
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi

@@ -1,0 +1,142 @@
+# bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+# Invidious — https://docs.invidious.io/ ; config reference:
+# https://github.com/iv-org/invidious/blob/master/config/config.example.yml
+#
+# Only non-secret settings live in INVIDIOUS_CONFIG below. Secrets (DB URL, hmac_key, and the
+# 16-char companion key) are injected as INVIDIOUS_* env vars from the `invidious` Secret —
+# Invidious overrides any top-level config key from an env var named INVIDIOUS_<UPPERCASED_KEY>,
+# and INVIDIOUS_DATABASE_URL supplies the full DB connection (the nested db: block has no per-key
+# env override). The companion key is stored once in the Secret and wired into both containers so
+# the two copies can never drift.
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: quay.io/invidious/invidious
+          tag: "latest"
+          pullPolicy: IfNotPresent
+        env:
+          INVIDIOUS_CONFIG: |
+            domain: invidious.net.ecksd.ee
+            https_only: true
+            external_port: 443
+            port: 3000
+            host_binding: 0.0.0.0
+            check_tables: true
+            statistics_enabled: true
+            popular_enabled: true
+            invidious_companion:
+              - private_url: "http://invidious-companion:8282/companion"
+                public_url: "https://invidious.net.ecksd.ee/companion"
+          INVIDIOUS_DATABASE_URL:
+            valueFrom:
+              secretKeyRef:
+                name: invidious
+                key: database_url
+          INVIDIOUS_HMAC_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: invidious
+                key: hmac_key
+          INVIDIOUS_INVIDIOUS_COMPANION_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: invidious
+                key: companion_key
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/v1/stats
+                port: 3000
+              initialDelaySeconds: 30
+              periodSeconds: 60
+              timeoutSeconds: 10
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/v1/stats
+                port: 3000
+              initialDelaySeconds: 15
+              periodSeconds: 30
+              timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: "1"
+            memory: 768Mi
+  companion:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: quay.io/invidious/invidious-companion
+          tag: "latest"
+          pullPolicy: IfNotPresent
+        env:
+          SERVER_SECRET_KEY:
+            valueFrom:
+              secretKeyRef:
+                name: invidious
+                key: companion_key
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /healthz
+                port: 8282
+              initialDelaySeconds: 20
+              periodSeconds: 30
+              timeoutSeconds: 5
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /healthz
+                port: 8282
+              initialDelaySeconds: 10
+              periodSeconds: 30
+              timeoutSeconds: 5
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: "1"
+            memory: 512Mi
+service:
+  # Only the Invidious web Service is rendered by the chart (kept named `invidious`). A second chart
+  # Service would suffix both to invidious-main / invidious-companion and break the HTTPRoute
+  # backendRef; the companion Service is a plain manifest (service-companion.yaml) instead.
+  main:
+    controller: main
+    ports:
+      http:
+        port: 3000
+persistence:
+  # Companion runs read-only/non-root and caches youtubei.js state under /var/tmp.
+  companion-cache:
+    type: emptyDir
+    advancedMounts:
+      companion:
+        main:
+        - path: /var/tmp/youtubei.js

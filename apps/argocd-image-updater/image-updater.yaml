@@ -145,6 +145,31 @@ spec:
             helm:
               tag: machine-learning.controllers.main.containers.main.image.tag
 
+    - namePattern: invidious
+      images:
+        # Invidious and its companion publish date-stamped tags (e.g. 2025.09.29-0065a3e);
+        # newest-build picks the most recently built one and keeps both in lockstep.
+        - alias: invidious
+          imageName: quay.io/invidious/invidious
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^20[0-9]{2}\\.[0-9]{2}\\.[0-9]{2}-[0-9a-f]+$"
+            ignoreTags: ["latest", "master", "*-arm64*", "*-amd64*"]
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+        - alias: companion
+          imageName: quay.io/invidious/invidious-companion
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^20[0-9]{2}\\.[0-9]{2}\\.[0-9]{2}-[0-9a-f]+$"
+            ignoreTags: ["latest", "master", "*-arm64*", "*-amd64*"]
+          manifestTargets:
+            helm:
+              name: controllers.companion.containers.main.image.repository
+              tag: controllers.companion.containers.main.image.tag
+
     - namePattern: mealie
       images:
         - alias: mealie

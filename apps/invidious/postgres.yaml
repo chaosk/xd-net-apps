@@ -1,0 +1,26 @@
+# Invidious schema is created on first start by `check_tables: true` (values.yaml), so this
+# is an empty CNPG cluster with database/owner `invidious`. Invidious upstream pins Postgres 14,
+# but a current major works fine with check_tables.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: invidious-db
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.3
+  storage:
+    storageClass: local-path
+    size: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+  bootstrap:
+    initdb:
+      database: invidious
+      owner: invidious
+      secret:
+        name: invidious-db

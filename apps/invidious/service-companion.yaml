@@ -1,0 +1,22 @@
+# Service for the invidious-companion controller defined in values.yaml. Companion is mandatory for
+# playback (it fetches streams from YouTube); Invidious reaches it over in-cluster DNS at
+# http://invidious-companion:8282/companion (the private_url in INVIDIOUS_CONFIG).
+#
+# Kept out of the chart on purpose: a second chart Service would rename the primary one to
+# `invidious-main` and break the HTTPRoute backendRef. The selector matches the chart-generated
+# pod labels of the `companion` controller.
+apiVersion: v1
+kind: Service
+metadata:
+  name: invidious-companion
+  namespace: invidious
+  labels:
+    app.kubernetes.io/name: invidious-companion
+spec:
+  selector:
+    app.kubernetes.io/instance: invidious
+    app.kubernetes.io/controller: companion
+  ports:
+    - name: http
+      port: 8282
+      targetPort: 8282

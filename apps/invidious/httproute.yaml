@@ -1,0 +1,47 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: invidious
+  namespace: invidious
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: "Media"
+    gethomepage.dev/name: Invidious
+    gethomepage.dev/description: Privacy-friendly YouTube frontend
+    gethomepage.dev/icon: invidious
+    gethomepage.dev/href: "https://invidious.net.ecksd.ee"
+    # Scope to the web controller: the companion controller shares app.kubernetes.io/name=invidious.
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=invidious,app.kubernetes.io/controller=main
+spec:
+  parentRefs:
+    - name: shared
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - invidious.net.ecksd.ee
+  rules:
+    # Authentik forward-auth outpost (used by the SecurityPolicy ext-authz on this route).
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
+    # Companion serves the actual media streams; Invidious advertises its public_url here.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /companion
+      backendRefs:
+        - name: invidious-companion
+          port: 8282
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: invidious
+          port: 3000

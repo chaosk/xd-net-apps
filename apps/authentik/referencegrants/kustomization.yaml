@@ -11,3 +11,4 @@ resources:
   - forward-auth-qbittorrent.yaml
   - forward-auth-spoolman.yaml
   - forward-auth-zilean.yaml
+  - forward-auth-invidious.yaml
