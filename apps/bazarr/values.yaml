@@ -5,7 +5,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/home-operations/bazarr
-          tag: "1.5.6"
+          tag: "1.6.0"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -29,26 +29,23 @@ controllers:
           limits:
             cpu: "2"
             memory: 1Gi
-
 service:
   main:
     controller: main
     ports:
       http:
         port: 6767
-
 persistence:
   config:
     enabled: true
     existingClaim: bazarr-config
     globalMounts:
-      - path: /config
+    - path: /config
   media:
     enabled: true
     existingClaim: bazarr-media
     globalMounts:
-      - path: /data/media
-
+    - path: /data/media
 defaultPodOptions:
   securityContext:
     fsGroup: 568
