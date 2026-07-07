@@ -7,7 +7,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/donkie/spoolman
-          tag: "0.23.1"
+          tag: "0.24.0"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -50,7 +50,7 @@ persistence:
     enabled: true
     existingClaim: spoolman-data
     globalMounts:
-      - path: /home/app/.local/share/spoolman
+    - path: /home/app/.local/share/spoolman
 defaultPodOptions:
   securityContext:
     # Entrypoint runs groupmod/usermod then gosu app — do not set runAsUser/runAsGroup.
