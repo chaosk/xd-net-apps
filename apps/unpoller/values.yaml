@@ -29,4 +29,21 @@ resources:
     cpu: 50m
     memory: 128Mi
   limits:
-    memory: 256Mi
+    memory: 512Mi
+# The chart probes :9130 immediately with no startup grace. UniPoller connects to the
+# controller first and only binds the Prometheus listener after the initial poll; with DPI
+# enabled that routinely exceeds 30s, so kubelet kills the container before / answers.
+livenessProbe:
+  httpGet:
+    path: /
+    port: tcp
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+readinessProbe:
+  httpGet:
+    path: /
+    port: tcp
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3

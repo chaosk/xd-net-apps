@@ -7,6 +7,14 @@ spec:
     spec:
       containers:
         - name: unpoller
+          # Helm chart has no startupProbe value; first UniFi+DPI poll can take a minute.
+          startupProbe:
+            httpGet:
+              path: /
+              port: tcp
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 36
           env:
             - name: UP_UNIFI_DEFAULT_URL
               valueFrom:
