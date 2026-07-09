@@ -11,7 +11,7 @@ PostgreSQL is a **[CloudNativePG](https://cloudnative-pg.io/) `Cluster`** (`post
 | `kustomization.yaml` | Namespace, **`postgres.yaml`**, **`pvc-authentik-data.yaml`**, **`httproute-pangolin.yaml`**, Helm chart `authentik`. |
 | `namespace.yaml` | `authentik` namespace. |
 | `postgres.yaml` | CNPG cluster **`authentik-db`** (single instance, **`local-path`** PVC, stock `postgresql` image). |
-| `pvc-authentik-data.yaml` | **`authentik-data`** PVC (**Synology** `storageClass` **`synology`**, **ReadWriteOnce**, **1Gi**) at **`/data`**. Server and worker are pinned to the same node via **`worker` podAffinity** in `values.yaml`. |
+| `pvc-authentik-data.yaml` | **`authentik-data`** PVC (**Synology** `storageClass` **`synology`**, **ReadWriteOnce**, **1Gi**) at **`/data`**. Server and worker share it on one node (`worker` podAffinity + **`global.deploymentStrategy: Recreate`** in `values.yaml`). |
 | `referencegrants/` | One **ReferenceGrant** per forward-auth app namespace (`forward-auth-<app>.yaml`); allows that namespace’s **HTTPRoute** and **SecurityPolicy** to call **`authentik-server`**. Gateway API caps **`spec.from` at 16 entries** per grant, so grants are not merged into a single file. |
 | `values.yaml` | **`global.volumes`** / **`volumeMounts`** for `/data`, `AUTHENTIK_HOST`, **`AUTHENTIK_SECRET_KEY`**, Gateway **`server.route.main`** (includes `/outpost.goauthentik.io`), external Postgres, **GeoIP**, Bitnami **disabled**, **memory requests/limits**. |
 | `httproute-pangolin.yaml` | **`auth.ecksd.ee`** only; **`pangolin-operator/site-ref: xd-net`** (separate from Helm route so Pangolin gets one public resource). |

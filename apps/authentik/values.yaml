@@ -12,8 +12,11 @@ global:
     # CalVer; Image Updater bumps to the newest stable YYYY.M.P on GHCR (2026.x, 2027.x, …).
     tag: "2026.5.4"
     repository: ghcr.io/goauthentik/server
-  # RWO authentik-data: server and worker must share a node. Disable chart anti-affinity
-  # (soft spread across hosts); worker.required podAffinity to server is set below.
+  # RWO authentik-data: server and worker must share a node. Use Recreate (not RollingUpdate)
+  # so the old pod releases the volume before the new one mounts it; worker podAffinity below.
+  deploymentStrategy:
+    type: Recreate
+  # Disable chart anti-affinity (soft spread across hosts).
   affinity:
     podAntiAffinity: none
   securityContext:
