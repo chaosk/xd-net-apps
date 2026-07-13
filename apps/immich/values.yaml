@@ -32,6 +32,8 @@ server:
           intel.feature.node.kubernetes.io/gpu: "true"
       containers:
         main:
+          image:
+            repository: ghcr.io/immich-app/immich-server
           resources:
             requests:
               cpu: 500m
@@ -51,7 +53,8 @@ machine-learning:
       containers:
         main:
           image:
-            tag: v2.7.5-openvino
+            repository: ghcr.io/immich-app/immich-machine-learning
+            tag: v3.0.2-openvino
           resources:
             requests:
               cpu: 500m
@@ -66,7 +69,7 @@ controllers:
     containers:
       main:
         image:
-          tag: v2.7.5
+          tag: v3.0.2
         env:
           DB_HOSTNAME:
             valueFrom:
