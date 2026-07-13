@@ -4,6 +4,7 @@ metadata:
   name: grafana-db
 spec:
   instances: 1
+  enablePDB: false
   imageName: ghcr.io/cloudnative-pg/postgresql:18.3
   storage:
     storageClass: local-path
