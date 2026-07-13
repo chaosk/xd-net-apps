@@ -6,7 +6,6 @@
 
 valkey:
   enabled: true
-
 immich:
   metrics:
     enabled: true
@@ -16,7 +15,6 @@ immich:
   # Chart mounts secrets/immich-config.yaml (platform-secrets); do not set immich.configuration here.
   configurationKind: Secret
   existingConfiguration: immich-config
-
 # GPU and DB env: server-only block below; top-level controllers still apply shared env to all components.
 # Chart can emit its own ServiceMonitor; we scrape from apps/monitoring with release: kube-prometheus-stack.
 server:
@@ -42,7 +40,6 @@ server:
             limits:
               memory: 8Gi
               gpu.intel.com/i915: 1
-
 # OpenVINO backend for Intel Arc / Iris — https://docs.immich.app/features/ml-hardware-acceleration
 machine-learning:
   controllers:
@@ -63,7 +60,6 @@ machine-learning:
             limits:
               memory: 6Gi
               gpu.intel.com/i915: 1
-
 controllers:
   main:
     containers:
