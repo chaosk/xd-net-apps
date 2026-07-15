@@ -65,7 +65,7 @@ controllers:
     containers:
       main:
         image:
-          tag: v3.0.2
+          tag: v3.0.3
         env:
           DB_HOSTNAME:
             valueFrom:
