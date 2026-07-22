@@ -10,7 +10,7 @@ authentik:
 global:
   image:
     # CalVer; Image Updater bumps to the newest stable YYYY.M.P on GHCR (2026.x, 2027.x, …).
-    tag: "2026.5.5"
+    tag: "2026.5.6"
     repository: ghcr.io/goauthentik/server
   # RWO authentik-data: server and worker must share a node. Use Recreate (not RollingUpdate)
   # so the old pod releases the volume before the new one mounts it; worker podAffinity below.
