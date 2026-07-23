@@ -79,7 +79,7 @@ controllers:
       main:
         image:
           repository: quay.io/invidious/invidious-companion
-          tag: "2026.07.22-9d27470"
+          tag: "2026.07.23-310f4f7"
           pullPolicy: IfNotPresent
         env:
           SERVER_SECRET_KEY:
