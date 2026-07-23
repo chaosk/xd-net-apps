@@ -15,7 +15,7 @@ controllers:
       main:
         image:
           repository: quay.io/invidious/invidious
-          tag: "2026.07.23-5953859"
+          tag: "2026.07.23-59bb97c"
           pullPolicy: IfNotPresent
         env:
           INVIDIOUS_CONFIG: |
