@@ -12,7 +12,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/maziggy/bambuddy
-          tag: "0.2.4.9"
+          tag: "1.2.5"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -61,7 +61,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/maziggy/bambu-studio-api
-          tag: "bambuddy-0.2.4.9"
+          tag: "bambuddy-1.2.5"
           pullPolicy: IfNotPresent
         env:
           NODE_ENV: production

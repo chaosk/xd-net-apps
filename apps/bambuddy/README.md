@@ -59,7 +59,7 @@ The **Virtual Printer** feature (BamBuddy presenting itself to a slicer over MQT
 
 - BamBuddy reaches it over **in-cluster DNS** at **`http://bambu-studio-api.bambuddy.svc.cluster.local:3001`**, set via the **`BAMBU_STUDIO_API_URL`** env on the BamBuddy container (used when the Settings → Slicer URL field is blank). Results return over HTTP — no shared volume; `/app/data` is `emptyDir` scratch.
 - The Service is a **plain manifest** (`bambu-studio.yaml`), not part of the chart. Only the `main` Service is rendered by the chart on purpose: a second chart Service would suffix both to `bambuddy-main` / `bambuddy-bambu-studio` and break the HTTPRoute backendRef and the Home Assistant in-cluster host. The plain Service selects the chart-generated `bambu-studio` controller pod labels.
-- The image is **`linux/amd64` only**; its tag follows the app version as **`bambuddy-<version>`** (e.g. `bambuddy-0.2.4.7`). Because it stays a Helm value, **Argo CD Image Updater bumps it in lockstep** with `ghcr.io/maziggy/bambuddy` (`newest-build`, `allowTags: ^bambuddy-X.Y.Z.B$`). Manual bump: `controllers.bambu-studio.containers.main.image.tag`.
+- The image is **`linux/amd64` only**; its tag follows the app version as **`bambuddy-<version>`** (e.g. `bambuddy-1.2.5`). Because it stays a Helm value, **Argo CD Image Updater bumps it in lockstep** with `ghcr.io/maziggy/bambuddy`. Manual bump: `controllers.bambu-studio.containers.main.image.tag`.
 
 Enable it in BamBuddy: **Settings → Workflow → Slicer** — set **Preferred Slicer** to *Bambu Studio* and toggle **Use Slicer API** on. Leave the **Sidecar URL** blank to use `BAMBU_STUDIO_API_URL`.
 
@@ -71,4 +71,4 @@ kubectl kustomize "$HOME/Projects/xd-net-apps/apps/bambuddy" --enable-helm | kub
 
 ## Image updates
 
-**Argo CD Image Updater** tracks **`ghcr.io/maziggy/bambuddy`** with **`newest-build`** (not semver) in `apps/argocd-image-updater/image-updater.yaml`. GHCR tags omit the **`v`** prefix used on GitHub releases (image **`0.2.4.5`**, not **`v0.2.4.5`**), and only **four-part** release tags are considered — semver would misread **`0.2.4.5`** as an older prerelease of **`0.2.4`**. Manual bump: **`controllers.main.containers.main.image.tag`** in `values.yaml`.
+**Argo CD Image Updater** tracks **`ghcr.io/maziggy/bambuddy:~1`** (semver) in `apps/argocd-image-updater/image-updater.yaml`. GHCR tags omit the **`v`** prefix used on GitHub releases (image **`1.2.5`**, not **`v1.2.5`**). Manual bump: **`controllers.main.containers.main.image.tag`** in `values.yaml`.
