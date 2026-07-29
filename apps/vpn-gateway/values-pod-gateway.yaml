@@ -1,15 +1,12 @@
 # pod-gateway + Gluetun VPN gateway. Per-pod routing: label pods vpn-gateway: "true".
 # https://github.com/angelnu/pod-gateway
 clusterName: cluster.local
-
 routed_namespaces:
-  - tubearchivist
-  - qbittorrent
-  - bitmagnet
-
+- tubearchivist
+- qbittorrent
+- bitmagnet
 DNS: 172.16.0.1
 DNSPolicy: None
-
 settings:
   NOT_ROUTED_TO_GATEWAY_CIDRS: "10.0.0.0/8 10.96.0.0/12 10.244.0.0/16 172.16.0.0/12 192.168.0.0/16 169.254.0.0/16"
   VXLAN_ID: 42
@@ -23,7 +20,6 @@ settings:
   # Gluetun overwrites resolv.conf; pin CoreDNS so dnsmasq forwards cluster.local correctly.
   # ClusterIP of kube-dns/coredns (kubectl get svc -n kube-system -l k8s-app=kube-dns).
   DNS_LOCAL_SERVER: "10.96.0.10"
-
 webhook:
   namespaceSelector:
     type: label
@@ -31,7 +27,6 @@ webhook:
   gatewayDefault: false
   gatewayLabel: vpn-gateway
   gatewayLabelValue: "true"
-
 controllers:
   main:
     strategy: Recreate
@@ -45,23 +40,21 @@ controllers:
         enabled: true
         image:
           repository: ghcr.io/qdm12/gluetun
-          tag: v3.41.1
+          tag: v3.41.2
         env:
           DNS_SERVER: "off"
           VPN_TYPE: wireguard
           # Allow gateway dnsmasq and VXLAN clients to reach cluster Service/Pod CIDRs.
           FIREWALL_OUTBOUND_SUBNETS: "10.96.0.0/12,10.244.0.0/16,192.168.0.0/16,172.16.0.0/12"
         envFrom:
-          - secretRef:
-              name: vpn-gateway
-
+        - secretRef:
+            name: vpn-gateway
   webhook:
     containers:
       main:
         image:
           repository: ghcr.io/angelnu/gateway-admision-controller
           tag: v3.12.0
-
 networkpolicies:
   main:
     enabled: false
