@@ -6,12 +6,12 @@ controllers:
       main:
         image:
           repository: ghcr.io/bitmagnet-io/bitmagnet
-          tag: v0.10.0
+          tag: v0.10.1
           pullPolicy: IfNotPresent
         args:
-          - worker
-          - run
-          - --all
+        - worker
+        - run
+        - --all
         env:
           TZ: UTC
           POSTGRES_HOST:
@@ -55,7 +55,6 @@ controllers:
           limits:
             cpu: "4"
             memory: 2Gi
-
 service:
   main:
     controller: main
@@ -74,14 +73,12 @@ service:
       bittorrent:
         port: 3334
         protocol: UDP
-
 persistence:
   config:
     enabled: true
     existingClaim: bitmagnet-config
     globalMounts:
-      - path: /root/.config/bitmagnet
-
+    - path: /root/.config/bitmagnet
 defaultPodOptions:
   labels:
     vpn-gateway: "true"
