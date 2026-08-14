@@ -8,7 +8,6 @@ resources:
   - deployment.yaml
   - service.yaml
   - httproute.yaml
-
 # Static assets for favicon (settings.yaml) and logo widget — paths under /app/public/images.
 # Add files before kustomize build; restart the pod after changing images (Homepage limitation).
 configMapGenerator:
@@ -18,8 +17,7 @@ configMapGenerator:
       - images/logo.png
     options:
       disableNameSuffixHash: true
-
 images:
   - name: ghcr.io/gethomepage/homepage
-    newTag: v1.13.2
+    newTag: v2.0.0
     newName: ghcr.io/gethomepage/homepage
