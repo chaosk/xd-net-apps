@@ -19,5 +19,5 @@ configMapGenerator:
       disableNameSuffixHash: true
 images:
   - name: ghcr.io/gethomepage/homepage
-    newTag: v2.1.0
+    newTag: v2.1.1
     newName: ghcr.io/gethomepage/homepage
