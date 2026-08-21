@@ -10,5 +10,4 @@ resources:
   - forward-auth-paperless-ngx.yaml
   - forward-auth-qbittorrent.yaml
   - forward-auth-spoolman.yaml
-  - forward-auth-zilean.yaml
   - forward-auth-invidious.yaml

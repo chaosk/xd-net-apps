@@ -101,7 +101,6 @@ Until you do this, existing files still decrypt and work; new encrypts follow
 | `miniflux.yaml` | `miniflux` | `DATABASE_URL`, `OAUTH2_CLIENT_ID`, and `OAUTH2_CLIENT_SECRET` for Miniflux (`miniflux`; DB password must match `miniflux-db`). |
 | `homepage-miniflux-widget.yaml` | `homepage` | Miniflux API key for Homepage widget via env `HOMEPAGE_VAR_MINIFLUX_API_KEY` ([widget](https://gethomepage.dev/widgets/services/miniflux/)). |
 | `homepage-homeassistant-widget.yaml` | `homepage` | Home Assistant long-lived access token for Homepage widget via env `HOMEPAGE_VAR_HOMEASSISTANT_TOKEN` ([widget](https://gethomepage.dev/widgets/services/homeassistant/)); used on the **Home Assistant** HTTPRoute tile. |
-| `zilean-db.yaml` | `zilean` | CNPG bootstrap + Zilean `POSTGRES_*` env (`zilean-db`, keys `username`, `password`; owner/database `zilean` in `apps/zilean/postgres.yaml`). |
 | `mealie-db.yaml` | `mealie` | CNPG bootstrap (`mealie-db`, keys `username`, `password`; owner/database `mealie` in `apps/mealie/postgres.yaml`). |
 | `mealie.yaml` | `mealie` | `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` for Mealie Authentik OIDC (`mealie`). |
 | `grafana-admin.yaml` | `monitoring` | Grafana admin login (`grafana-admin`, keys `admin-user`, `admin-password`) for kube-prometheus-stack. See `apps/monitoring/README.md`. |
