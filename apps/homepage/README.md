@@ -26,7 +26,7 @@ To customize YAML, edit `apps/homepage/configmap.yaml` keys:
 - `services.yaml` — manual tiles (Upcoming calendar, UniFi, Pangolin, DSM, external apps not on Gateway discovery)
 - `widgets.yaml`
 
-**Service order:** Homepage sorts by `weight` (lower first). Discovered apps use `gethomepage.dev/weight` on HTTPRoutes; manual entries in `services.yaml` can set `weight` too. The Arr! calendar uses `weight: 0`; keep Bazarr/Prowlarr/Flood above `0` (currently `10`/`20`/`30`).
+**Service order:** Homepage sorts by `weight` (lower first). Discovered apps use `gethomepage.dev/weight` on HTTPRoutes; manual entries in `services.yaml` can set `weight` too. The Arr! calendar uses `weight: -1`; keep Bazarr/Prowlarr/Flood/Invidious above that (currently `10`/`20`/`30`/`40`).
 
 **UniFi widget (optional)** — use the same local admin as UniFi Poller (`secrets/unpoller.yaml` / `unifipoller`) in `secrets/homepage-unifi-widget.yaml`, then SOPS-encrypt and sync **platform-secrets**. The tile is in `services.yaml` under **Management**.
 
