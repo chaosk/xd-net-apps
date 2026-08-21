@@ -41,6 +41,8 @@ spec:
               value: X_AUTHENTIK_USERNAME
             - name: TA_AUTH_PROXY_LOGOUT_URL
               value: https://tubearchivist.net.ecksd.ee/outpost.goauthentik.io/sign_out
+            - name: TA_AUTO_UPDATE_YTDLP
+              value: release
             - name: ELASTIC_PASSWORD
               valueFrom:
                 secretKeyRef:
