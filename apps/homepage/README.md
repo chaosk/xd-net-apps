@@ -1,39 +1,77 @@
 # homepage
 
-Kubernetes manifests for [Homepage](https://github.com/gethomepage/homepage) on the xd-net cluster.
+[Homepage](https://github.com/gethomepage/homepage) dashboard for the xd-net cluster. Served at **https://net.ecksd.ee** on the shared Gateway (`gateway/shared`, HTTPS).
 
-## Access
+## Apply
 
-- Host: `net.ecksd.ee` (Gateway API via shared cluster Gateway)
+```bash
+kubectl apply -k apps/homepage
+```
 
-## Configuration
+Widget API keys and credentials live in `secrets/homepage-*.yaml`. SOPS-encrypt each file, add it to the **platform-secrets** Application in xd-net, and sync. The Deployment maps those Secrets to `HOMEPAGE_VAR_*` environment variables.
 
-Homepage reads config from `/app/config`. This app mounts a Git-managed `ConfigMap` (`homepage-config`).
+## Config
 
-**Favicon and logo** — drop your files in **`apps/homepage/images/`** (see below), then re-apply and **restart the Homepage pod** (Homepage only picks up new static files on container start). Config references: [favicon](https://gethomepage.dev/configs/settings/#favicon), [logo widget](https://gethomepage.dev/widgets/info/logo/).
+All YAML is in the `homepage-config` ConfigMap (`configmap.yaml`), mounted at `/app/config`.
 
-| File | Purpose |
-|------|---------|
-| `images/favicon.png` | Browser tab icon (`favicon: /images/favicon.png` in `settings.yaml`) |
-| `images/logo.png` | Header logo widget (`icon: /images/logo.png` in `widgets.yaml`) |
+| Key | Role |
+|-----|------|
+| `settings.yaml` | Title, layout groups, favicon path, UI options |
+| `services.yaml` | Tiles not discovered from the cluster (see below) |
+| `widgets.yaml` | Header logo and Kubernetes cluster/node widgets |
+| `kubernetes.yaml` | In-cluster mode; Gateway API HTTPRoute discovery enabled |
+| `custom.css` | Logo widget sizing (`logo.png` is a wide banner) |
 
-PNG or ICO. Square assets (~192×192 px) work as-is; **wide banner logos** need sizing in `custom.css` (see `configmap.yaml`) because the logo widget defaults to 48×48. Optional PWA icons can reuse the same paths under `settings.yaml` → `pwa.icons` later.
+`bookmarks.yaml`, `docker.yaml`, and `proxmox.yaml` are empty placeholders.
 
-To customize YAML, edit `apps/homepage/configmap.yaml` keys:
+Favicon and logo are in `images/`. Kustomize packs them into the `homepage-images` ConfigMap, mounted at `/app/public/images`. Paths in config: `settings.yaml` → `/images/favicon.png`, `widgets.yaml` → `/images/logo.png`.
 
-- `settings.yaml`
-- `bookmarks.yaml`
-- `services.yaml` — manual tiles (Upcoming calendar, UniFi, Pangolin, DSM, external apps not on Gateway discovery)
-- `widgets.yaml`
+## Service tiles
 
-**Service order:** Homepage sorts by `weight` (lower first). Discovered apps use `gethomepage.dev/weight` on HTTPRoutes; manual entries in `services.yaml` can set `weight` too. The Arr! calendar uses `weight: -1`; keep Bazarr/Prowlarr/Flood/Invidious above that (currently `10`/`20`/`30`/`40`).
+Most tiles come from **Gateway API HTTPRoutes** annotated with `gethomepage.dev/*`. Homepage discovers them via `kubernetes.yaml` (`gateway: true`). Each app’s `httproute.yaml` (or Helm values) sets group, weight, icon, href, and widget fields.
 
-**UniFi widget (optional)** — use the same local admin as UniFi Poller (`secrets/unpoller.yaml` / `unifipoller`) in `secrets/homepage-unifi-widget.yaml`, then SOPS-encrypt and sync **platform-secrets**. The tile is in `services.yaml` under **Management**.
+Three **Management** tiles are defined manually in `services.yaml` because they are external or not on a discovered route:
 
-**PeaNUT** — deployed in **`apps/peanut`**; Homepage tile and widget come from `httproute.yaml` (Management). Grafana dashboard in **`apps/monitoring`** (folder **Misc**).
+| Tile | Weight | Widget | Credentials |
+|------|--------|--------|-------------|
+| UniFi | 10 | UniFi controller | `secrets/homepage-unifi-widget.yaml` — same local admin as UniFi Poller (`secrets/unpoller.yaml`) |
+| Pangolin | 35 | Pangolin Integration API | `secrets/homepage-pangolin-widget.yaml` — List Sites, List Resources |
+| DSM | 45 | Disk Station (`volume_1`) | `secrets/homepage-dsm-widget.yaml` |
 
-**Argo CD widget (optional)** — tile and widget come from the Argo CD HTTPRoute in **xd-net** (`gethomepage.dev/*` annotations). Argo CD exposes a local **`homepage`** account with **`apiKey`** and **`role:readonly`** ([Homepage widget docs](https://gethomepage.dev/widgets/services/argocd/)). Generate a token under **Settings → Accounts → homepage → Tokens**, store it in `secrets/homepage-argocd-widget.yaml` as `HOMEPAGE_VAR_ARGOCD_API_KEY`, then SOPS-encrypt and sync **platform-secrets**.
+The **Arr!** group includes an **Upcoming** calendar tile (`weight: -1`) backed by the Sonarr integration in `services.yaml`.
 
-**Pangolin widget (optional)** — create an Integration API key with **List Sites** and **List Resources**, set `HOMEPAGE_VAR_PANGOLIN_API_URL`, `HOMEPAGE_VAR_PANGOLIN_DASHBOARD_URL`, and `HOMEPAGE_VAR_PANGOLIN_ORG` in `secrets/homepage-pangolin-widget.yaml`, then SOPS-encrypt and sync **platform-secrets**. The tile is defined in `services.yaml` under **Management**.
+**Argo CD** is not in this repo. Its tile and widget are on the Argo CD HTTPRoute in **xd-net** (`apps/argocd-route.tf`). The API token is in `secrets/homepage-argocd-widget.yaml` (`HOMEPAGE_VAR_ARGOCD_API_KEY`), generated for the local `homepage` account (`apiKey`, `role:readonly`).
 
-**Management manual tiles** use weights `10` (UniFi), `35` (Pangolin), `45` (DSM). PeaNUT (`15`), Argo CD (`25`), Authentik (`30`), and Grafana (`40`) use HTTPRoute `gethomepage.dev/weight` annotations.
+Discovered apps reference widget secrets through `{{HOMEPAGE_VAR_*}}` placeholders on their HTTPRoutes; the Deployment supplies the matching env vars.
+
+## Groups and sort order
+
+Homepage sorts tiles by `weight` (lower first). Layout groups are in `settings.yaml`: **Media**, **Arr!**, **Management**, **Data storage**, **Misc**.
+
+**Management** (manual + discovered):
+
+| Weight | Tile | Source |
+|--------|------|--------|
+| 10 | UniFi | `services.yaml` |
+| 15 | PeaNUT | `apps/peanut/httproute.yaml` |
+| 25 | Argo CD | xd-net `argocd-route.tf` |
+| 30 | Authentik | `apps/authentik/values.yaml` |
+| 35 | Pangolin | `services.yaml` |
+| 40 | Grafana | `apps/monitoring/httproute.yaml` |
+| 45 | DSM | `services.yaml` |
+
+**Arr!** app weights: Bazarr `10`, Prowlarr `20`, Flood/qBittorrent `30`, Invidious `40`. The calendar tile stays at `-1` (below the apps).
+
+**Media**: Plex `0`, Sonarr `10`, Radarr `20`.
+
+**Data storage**: Paperless `10`, Immich `20`, Actual Budget `30`, Tube Archivist `30`.
+
+**Misc**: Tracearr `0`, Speedtest Tracker `20`, Miniflux `30`, Home Assistant `30`, Bambuddy `35`, Spoolman `36`, Mealie `40`, Bitmagnet `100`.
+
+## Runtime
+
+Image tag is set in `kustomization.yaml` and updated by Argo CD Image Updater.
+
+`HOMEPAGE_ALLOWED_HOSTS=net.ecksd.ee`. `HOMEPAGE_PROXY_DISABLE_IPV6=true` avoids IPv6 timeout on dual-stack Talos nodes during widget proxy calls.
+
+The ServiceAccount has RBAC to read cluster state for the Kubernetes widget and HTTPRoute discovery.

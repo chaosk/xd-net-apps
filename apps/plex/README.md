@@ -1,35 +1,20 @@
 # Plex
 
-[Plex Media Server](https://www.plex.tv/) is a media library and streaming stack. This app deploys the upstream **plex-media-server** Helm chart from the [Plex `pms-docker` chart repo](https://github.com/plexinc/pms-docker) (`https://raw.githubusercontent.com/plexinc/pms-docker/gh-pages`), which packages the same image the project publishes for Docker.
-
-`values.yaml` targets **Intel Quick Sync** via the **`gpu.intel.com/i915`** resource and a **`nodeSelector`** on `intel.feature.node.kubernetes.io/gpu`. Your cluster needs the [Intel device plugin for Kubernetes](https://github.com/intel/intel-device-plugins-for-kubernetes) (or equivalent) and labeled nodes, or change those fields to match how you expose transcoding.
+[Plex Media Server](https://www.plex.tv/) via the upstream **plex-media-server** Helm chart ([pms-docker](https://github.com/plexinc/pms-docker)). Intel Quick Sync transcoding uses **`gpu.intel.com/i915`** and **`nodeSelector`** `intel.feature.node.kubernetes.io/gpu` (Intel device plugin on xd-net GPU nodes).
 
 ## Layout
 
 | File | Purpose |
 |------|---------|
-| `kustomization.yaml` | Namespace, **`pvc.yaml`**, **`nfs-media.yaml`**, **`service-lan.yaml`**, **`httproute-pangolin.yaml`**, Helm chart **`plex-media-server`**. |
-| `namespace.yaml` | **`plex`** namespace. |
-| `pvc.yaml` | **`plex-config`** PVC (**Synology** `StorageClass` **`synology`**, **ReadWriteOnce**, **20Gi**) for Plex application data (`pms.configExistingClaim`). |
-| `nfs-media.yaml` | Static **NFS** PV **`plex-media-pv`** + claim **`plex-media`** (**ReadWriteMany**, empty `storageClassName`) bound for the chart mount at **`/media`**. |
-| `values.yaml` | **`fullnameOverride`**, **`httpRoute`** (**`plex.net.ecksd.ee`** on gateway **shared**, Homepage + **Tracearr** widget), **`ADVERTISE_IP`**, **`nodeSelector`**, **`pms`**, NFS mounts, Intel GPU, **Tube Archivist Plex** init container. |
-| `service-lan.yaml` | **`plex-lan`** LoadBalancer (**`192.168.4.202:32400`**, **`externalTrafficPolicy: Local`**) for LAN playback with real client IPs; HTTPS routes stay on the Gateway. |
-| `tubearchivist-plex-install.yaml` | ConfigMap script that installs [tubearchivist-plex](https://github.com/tubearchivist/tubearchivist-plex) **v0.1.8** on the Plex config PVC. |
-| `httproute-pangolin.yaml` | **`plex.ecksd.ee`** only; **`pangolin-operator/site-ref: xd-net`** (separate from Helm route so Pangolin gets one public resource). |
+| `kustomization.yaml` | Namespace, PVC, NFS media, LAN LoadBalancer, Pangolin route, Helm chart |
+| `pvc.yaml` | **`plex-config`** on StorageClass `synology` (20Gi, RWO) |
+| `nfs-media.yaml` | NFS PV/claim **`plex-media`** (RWX) — `nas.net.ecksd.ee`, path `/volume1/malachit/media/` → `/media` |
+| `values.yaml` | **`plex.net.ecksd.ee`** on Gateway `shared`, Homepage + Tracearr widget, GPU, Tube Archivist init |
+| `service-lan.yaml` | **`plex-lan`** LoadBalancer **`192.168.4.202:32400`**, `externalTrafficPolicy: Local` |
+| `tubearchivist-plex-install.yaml` | Installs [tubearchivist-plex](https://github.com/tubearchivist/tubearchivist-plex) on the config PVC |
+| `httproute-pangolin.yaml` | **`plex.ecksd.ee`** via Pangolin (`site-ref: xd-net`); homelab HTTPS stays on `plex.net.ecksd.ee` |
 
-## Before you apply
-
-1. **`nfs-media.yaml`** — Set **`nfs.server`**, **`nfs.path`**, **`spec.capacity`** on the PV, and the PVC **`resources.requests.storage`** so they match your export (PVC requests must fit the PV capacity). Adjust **`mountOptions`** if your server needs something other than NFSv4.1.
-
-2. **`pvc.yaml`** — Confirm **`storageClassName`**, access mode, and size for **`plex-config`** match what your storage provides.
-
-3. **`values.yaml`** — Align **`httpRoute.hostnames`** and Gateway **`parentRefs`** with your cluster gateway and TLS names. **`nodeSelector`** and **`pms.resources`** must match nodes where Plex is allowed to run and how GPU is exposed; remove or replace **`gpu.intel.com/i915`** if you do not use the Intel plugin.
-
-4. **NFS reachability** — Every node that can schedule Plex must reach the NFS export, or tighten **`nodeSelector`** / affinity so the pod only lands on allowed nodes.
-
-5. **Pangolin** — **`NewtSite`** **`xd-net`** (xd-net). **`httproute-pangolin.yaml`** is the only route with **`site-ref`**; do not add Pangolin annotations on the Helm HTTPRoute or you will get duplicate public resources.
-
-6. **LAN client IPs** — **`service-lan.yaml`** requests **`192.168.4.202`** from the xd-net Cilium LB pool (**`gateway-lb-pool`**, same range as the shared Gateway). Requires the **`apps-l2-announce`** policy in xd-net (label **`ecksd.ee/l2-loadbalancer: "true"`**). Plex ignores private **`X-Forwarded-For`** values, so LAN clients must reach **`plex-lan`** directly on port **32400**; **`ADVERTISE_IP`** in **`values.yaml`** publishes that URL alongside the HTTPS hostnames.
+LAN clients use **`plex-lan`** directly on port **32400** (Plex ignores private **`X-Forwarded-For`**). **`ADVERTISE_IP`** publishes that URL alongside HTTPS hostnames. The LB IP comes from the xd-net Cilium pool (`gateway-lb-pool`, **`apps-l2-announce`** policy).
 
 ## Apply
 
@@ -37,20 +22,20 @@
 kubectl kustomize "$HOME/Projects/xd-net-apps/apps/plex" --enable-helm | kubectl apply -f -
 ```
 
-## After install
-
-Open the URL from **`httpRoute.hostnames`**, complete Plex server setup, and add libraries under **`/media`** (for example **`/media/Movies`**). In **Settings → Transcoder**, enable **hardware acceleration** when the GPU path is working.
+After install: add libraries under **`/media`**, enable hardware transcoding in **Settings → Transcoder** when the GPU path is working.
 
 ## Tube Archivist Plex integration
 
-An init container installs [tubearchivist-plex](https://github.com/tubearchivist/tubearchivist-plex) **v0.1.8** on the Plex config volume before PMS starts. It writes **`ta_config.json`** with the in-cluster Tube Archivist URL (**`http://tubearchivist.tubearchivist.svc.cluster.local:8000`**) and API token from **`secrets/plex-tubearchivist-plex.yaml`** (same token as **`homepage-tubearchivist-widget`** — Tube Archivist **Settings → Application → API Token**).
+The init container installs tubearchivist-plex on the config volume and writes **`ta_config.json`** with in-cluster Tube Archivist URL **`http://tubearchivist.tubearchivist.svc.cluster.local:8000`** and API token from **`secrets/plex-tubearchivist-plex.yaml`** (same token as **`homepage-tubearchivist-widget`**).
 
-Add a **TV Shows** library pointing at **`/media/youtube`** (NFS subpath under the shared media export). In **Manage Library → Edit → Advanced**, set **Scanner** to **TubeArchivist Scanner**, **Agent** to **TubeArchivist Agent**, and match the **TubeArchivist URL** / **API Key** fields to the in-cluster URL and token. Restart Plex after upgrading the integration (roll the StatefulSet).
+Add a **TV Shows** library at **`/media/youtube`**. In **Manage Library → Edit → Advanced**, set **Scanner** to **TubeArchivist Scanner** and **Agent** to **TubeArchivist Agent**. Roll the StatefulSet after upgrading the integration script version in **`tubearchivist-plex-install.yaml`**.
 
 ## Logs in Grafana (Loki)
 
-Plex writes **`Plex Media Server.log`** on the config volume, not to stdout. A **`log-tailer`** sidecar tails that file so cluster **Alloy** can forward it to Loki. Alloy parses Plex’s timestamp (UTC) and **`level`** (`DEBUG`, `INFO`, `WARN`, `ERROR`). In Grafana **Explore → Loki**, use `{namespace="plex", container="log-tailer"}` or `{namespace="plex", container="log-tailer", level="ERROR"}`.
+Plex logs to **`Plex Media Server.log`** on the config volume. A **`log-tailer`** sidecar forwards lines to Loki via Alloy. Query **`{namespace="plex", container="log-tailer"}`** or filter by **`level="ERROR"`**.
 
 ## Upgrades
 
-Bump **`helmCharts.version`** in **`kustomization.yaml`** to a published chart version from the **`pms-docker`** chart index, then re-apply. Read upstream release notes for image or value changes that affect your cluster.
+**Argo CD Image Updater** tracks `docker.io/plexinc/pms-docker` in `apps/argocd-image-updater/image-updater.yaml`.
+
+Helm chart version is pinned in **`kustomization.yaml`** (`helmCharts.version`); bump manually when the upstream chart changes.

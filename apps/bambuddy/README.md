@@ -23,9 +23,9 @@ Printers must be reachable from **`net1`**. Add printers **by IP** in the BamBud
 
 **Platform prerequisites:** Multus + worker **`ens19`** on VLAN 2 — same as [`apps/home-assistant/`](../home-assistant/README.md). Pods require **`multus.io/ready=true`** on the node (set by the Multus DaemonSet in xd-net after `multus.sock` is up).
 
-## Before sync
+## Authentik OIDC
 
-No Kubernetes secret is required for OIDC — BamBuddy stores the IdP client credentials in its database (encrypted when **`MFA_ENCRYPTION_KEY`** is set). Create the Authentik provider first so you can paste the client ID and secret during first-run setup.
+BamBuddy stores IdP credentials in its database (encrypted when **`MFA_ENCRYPTION_KEY`** is set). Create the Authentik provider before first-run setup:
 
 1. **Authentik OIDC** — create an **OAuth2/OpenID Provider** with slug **`bambuddy`**, client type **confidential**, grant types **`authorization_code`** and **`refresh_token`**, and redirect URI **`https://bambuddy.net.ecksd.ee/api/v1/auth/oidc/callback`** (strict). Attach an **Application** so users can sign in. Issuer URL for BamBuddy: **`https://authentik.net.ecksd.ee/application/o/bambuddy/`** (trailing slash is fine; BamBuddy normalises it). Swap the default **`email`** scope mapping for a custom one that sets **`email_verified: True`** — BamBuddy requires verified emails for OIDC login ([Authentik docs](https://docs.goauthentik.io/add-secure-apps/providers/oauth2/#email-scope-verification)). See [`apps/authentik/README.md`](../authentik/README.md).
 
@@ -38,7 +38,7 @@ No Kubernetes secret is required for OIDC — BamBuddy stores the IdP client cre
 5. **Settings → API Keys** — create a key for Home Assistant (in-cluster traffic uses the API key, not OIDC).
 6. In HA: **Settings → Devices & services → Add integration → BamBuddy** — host `http://bambuddy.bambuddy.svc.cluster.local`, port **8000**, API key from step 5. Configure printers via the integration wrench menu.
 
-Optional: embed BamBuddy in HA with a **Webpage** dashboard panel — `TRUSTED_FRAME_ORIGINS` includes **`https://homeassistant.net.ecksd.ee`**.
+**`TRUSTED_FRAME_ORIGINS`** includes **`https://homeassistant.net.ecksd.ee`** for Webpage dashboard embeds.
 
 ## Layout
 
@@ -49,7 +49,7 @@ Optional: embed BamBuddy in HA with a **Webpage** dashboard panel — `TRUSTED_F
 | `values.yaml` | Official image, probes, macvlan annotation, `NET_BIND_SERVICE` |
 | `macvlan-network.yaml` | Multus NAD — fixed IP **192.168.2.220** (single-IP `host-local` pool) |
 | `httproute.yaml` | `bambuddy.net.ecksd.ee` + Homepage tile |
-| `bambu-studio.yaml` | **Service** (`bambu-studio-api:3001`) for the optional Bambu Studio slicing controller |
+| `bambu-studio.yaml` | **Service** (`bambu-studio-api:3001`) for the Bambu Studio slicing controller |
 
 The **Virtual Printer** feature (BamBuddy presenting itself to a slicer over MQTT/FTP/RTSP) and its extra port ranges are not wired here — see [BamBuddy Docker docs](https://wiki.bambuddy.cool/getting-started/docker/) if you need it.
 
@@ -59,11 +59,11 @@ The **Virtual Printer** feature (BamBuddy presenting itself to a slicer over MQT
 
 - BamBuddy reaches it over **in-cluster DNS** at **`http://bambu-studio-api.bambuddy.svc.cluster.local:3001`**, set via the **`BAMBU_STUDIO_API_URL`** env on the BamBuddy container (used when the Settings → Slicer URL field is blank). Results return over HTTP — no shared volume; `/app/data` is `emptyDir` scratch.
 - The Service is a **plain manifest** (`bambu-studio.yaml`), not part of the chart. Only the `main` Service is rendered by the chart on purpose: a second chart Service would suffix both to `bambuddy-main` / `bambuddy-bambu-studio` and break the HTTPRoute backendRef and the Home Assistant in-cluster host. The plain Service selects the chart-generated `bambu-studio` controller pod labels.
-- The image is **`linux/amd64` only**; its tag follows the app version as **`bambuddy-<version>`** (e.g. `bambuddy-1.2.5`). Because it stays a Helm value, **Argo CD Image Updater bumps it in lockstep** with `ghcr.io/maziggy/bambuddy`. Manual bump: `controllers.bambu-studio.containers.main.image.tag`.
+- The image is **`linux/amd64` only**; its tag follows the app version as **`bambuddy-<version>`**. **Argo CD Image Updater** bumps it in lockstep with `ghcr.io/maziggy/bambuddy`.
 
 Enable it in BamBuddy: **Settings → Workflow → Slicer** — set **Preferred Slicer** to *Bambu Studio* and toggle **Use Slicer API** on. Leave the **Sidecar URL** blank to use `BAMBU_STUDIO_API_URL`.
 
-## Apply (local test)
+## Apply
 
 ```bash
 kubectl kustomize "$HOME/Projects/xd-net-apps/apps/bambuddy" --enable-helm | kubectl apply -f -
@@ -71,4 +71,4 @@ kubectl kustomize "$HOME/Projects/xd-net-apps/apps/bambuddy" --enable-helm | kub
 
 ## Image updates
 
-**Argo CD Image Updater** tracks **`ghcr.io/maziggy/bambuddy:~1`** (semver) in `apps/argocd-image-updater/image-updater.yaml`. GHCR tags omit the **`v`** prefix used on GitHub releases (image **`1.2.5`**, not **`v1.2.5`**). Manual bump: **`controllers.main.containers.main.image.tag`** in `values.yaml`.
+**Argo CD Image Updater** tracks **`ghcr.io/maziggy/bambuddy`** in `apps/argocd-image-updater/image-updater.yaml`. GHCR tags omit the **`v`** prefix from GitHub releases. Manual override: **`controllers.main.containers.main.image.tag`** in `values.yaml`.

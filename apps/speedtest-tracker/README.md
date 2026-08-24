@@ -1,41 +1,43 @@
 # Speedtest Tracker
 
-Deploys [Speedtest Tracker](https://docs.speedtest-tracker.dev/) (linuxserver image) with the **bjw-s app-template** chart and **CloudNativePG** PostgreSQL.
+[Speedtest Tracker](https://docs.speedtest-tracker.dev/) (linuxserver image) via bjw-s `app-template` and **CloudNativePG** PostgreSQL.
 
 ## Access
 
-- Host: `https://speedtest.net.ecksd.ee` (Gateway API via shared cluster Gateway; public dashboard, no Authentik)
+- Host: `https://speedtest.net.ecksd.ee` (Gateway `shared`; public dashboard, no Authentik)
 
-## Before sync
+## Secrets
 
-1. **Secret `speedtest-tracker-db`** in namespace **`speedtest-tracker`** — CNPG bootstrap (`postgres.yaml`) and app DB password. Keys: `username`, `password` (owner/database `speedtest` / `speedtest_tracker`). See [`secrets/speedtest-tracker-db.yaml`](../../secrets/speedtest-tracker-db.yaml).
+| Secret | Keys |
+|--------|------|
+| `speedtest-tracker-db` | `username`, `password` — owner/database `speedtest` / `speedtest_tracker` |
+| `speedtest-tracker` | `APP_KEY` — `base64:` + 32 random bytes |
+| `homepage-speedtest-tracker-widget` | `HOMEPAGE_VAR_SPEEDTEST_TRACKER_API_KEY` — token from **Admin → API tokens** (Read Results) |
 
-2. **Secret `speedtest-tracker`** in namespace **`speedtest-tracker`** — Laravel app key:
-   - `APP_KEY` — `base64:` plus 32 random bytes, e.g. `echo "base64:$(openssl rand -base64 32)"`
+SOPS-encrypt and sync **platform-secrets** before CNPG and the app start ([`secrets/README.md`](../../secrets/README.md)).
 
-   Encrypt both secrets with **SOPS** and sync **platform-secrets** before the CNPG cluster and app start ([`secrets/README.md`](../../secrets/README.md)).
+## Runtime
 
-3. **Homepage widget (optional)** — after first login, create an API token in Speedtest Tracker (**Admin → API tokens**, ability **Read Results**) and add **`secrets/homepage-speedtest-tracker-widget.yaml`** (`HOMEPAGE_VAR_SPEEDTEST_TRACKER_API_KEY`). Wire the env var in `apps/homepage/deployment.yaml`.
-
-4. **Storage** — `pvc.yaml` uses **`synology`** for `/config` (1Gi). PostgreSQL data stays on CNPG **`local-path`**.
-
-5. **Scheduling** — `values.yaml` runs tests every five minutes (`*/5 * * * *`) against servers `7202`, `23677`, and `14139`. Adjust `SPEEDTEST_SCHEDULE` and `SPEEDTEST_SERVERS` there if needed.
-
-6. **Prometheus (optional)** — after the app is running, enable **Settings → Data platforms → Prometheus** in the UI. Under **Allowed IPs**, permit in-cluster scrapes (for example `10.0.0.0/8` or your pod CIDR). Metrics are scraped by `apps/monitoring/scrape-apps.yaml` at `/prometheus`; view them in Grafana under folder **Misc** ([community dashboard](https://github.com/CrazyWolf13/Speedtest-Tracker-Prometheus)).
+- App config PVC: StorageClass **`synology`** (1Gi)
+- PostgreSQL: CNPG on **`local-path`**
+- Schedule: every five minutes (`*/5 * * * *`) against servers `7202`, `23677`, `14139` (`values.yaml`)
+- Prometheus: enabled in app **Settings → Data platforms → Prometheus**; scrapes from `apps/monitoring/scrape-apps.yaml` at `/prometheus`; Grafana dashboard in **Misc**
 
 ## Layout
 
 | File | Purpose |
 |------|---------|
-| `postgres.yaml` | CNPG cluster `speedtest-tracker-db` on `local-path` |
+| `postgres.yaml` | CNPG cluster `speedtest-tracker-db` |
 | `pvc.yaml` | App config on Synology |
 | `values.yaml` | Container env, probes, resources |
-| `httproute.yaml` | `speedtest.net.ecksd.ee` + Homepage discovery |
+| `httproute.yaml` | `speedtest.net.ecksd.ee` + Homepage |
 
-## Apply (local test)
+## Apply
 
 ```bash
-kubectl kustomize "$REPO_ROOT/apps/speedtest-tracker" --enable-helm | kubectl apply -f -
+kubectl kustomize "$HOME/Projects/xd-net-apps/apps/speedtest-tracker" --enable-helm | kubectl apply -f -
 ```
 
-Wait for **`speedtest-tracker-db`** to report ready before the app pod stays healthy. Complete the web setup wizard on first visit.
+Wait for **`speedtest-tracker-db`** ready before the app pod stays healthy.
+
+**Argo CD Image Updater** tracks `lscr.io/linuxserver/speedtest-tracker` in `apps/argocd-image-updater/image-updater.yaml`.

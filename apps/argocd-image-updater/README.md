@@ -20,18 +20,18 @@ Use a **dedicated GitHub account** (not your personal one). You need **two SSH k
 | `image-updater.yaml` | `ImageUpdater` CR: git write-back + one `applicationRefs` entry per opted-in app |
 | `image-updater.example.yaml` | Copy-paste templates for new apps (Helm vs Kustomize) |
 
-## Opt in an app
+## Adding an app to Image Updater
 
-1. Confirm the Argo CD Application name matches the app directory (e.g. `homepage`).
+1. Argo CD Application name must match the app directory (e.g. `homepage`).
 2. Add an `applicationRefs` block to `image-updater.yaml` (see `image-updater.example.yaml`).
 3. Commit and sync the `argocd-image-updater` Application.
 
-To disable updates for an app, remove its `applicationRefs` entry (or comment it out).
+Remove the `applicationRefs` entry to stop updates for an app.
 
-## Apply (local test)
+## Apply
 
 ```bash
-kubectl kustomize "$REPO_ROOT/apps/argocd-image-updater" --enable-helm | kubectl apply -f -
+kubectl kustomize "$HOME/Projects/xd-net-apps/apps/argocd-image-updater" --enable-helm | kubectl apply -f -
 ```
 
 After sync: `kubectl get imageupdater -n argocd` and `kubectl logs -n argocd deploy/argocd-image-updater-controller`.

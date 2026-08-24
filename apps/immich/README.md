@@ -1,42 +1,46 @@
 # Immich
 
-Deploys [Immich](https://immich.app/) with the **official Helm chart** ([Kubernetes install docs](https://docs.immich.app/install/kubernetes/), chart repo [immich-charts](https://github.com/immich-app/immich-charts)).
+[Immich](https://immich.app/) via the [official Helm chart](https://github.com/immich-app/immich-charts). PostgreSQL is a **CloudNativePG** cluster with **VectorChord** (`postgres.yaml`); operator from **xd-net**.
 
-PostgreSQL is a **[CloudNativePG](https://cloudnative-pg.io/) `Cluster`** (`postgres.yaml`) using **[VectorChord](https://github.com/tensorchord/cloudnative-vectorchord)** with `shared_preload_libraries: vchord.so`, extensions `vchord` and `earthdistance`, and **`ALTER USER immich WITH SUPERUSER`** at bootstrap ([Immich pre-existing Postgres — with superuser](https://docs.immich.app/administration/postgres-standalone/#with-superuser-permission)). The CNPG operator is installed from **xd-net**.
+## Access
 
-## Before sync
+- Host: `https://photos.net.ecksd.ee` (Gateway `shared`)
+- Homepage widget: API key in **`secrets/homepage-immich-widget.yaml`**
 
-1. **`nfs-library.yaml`** — set NFS `server`, `path`, and capacity to your photo export (same pattern as Plex media). Allow **every node** that can run `immich-server` to mount that export, or constrain scheduling later.
+## Secrets
 
-2. **`httproute.yaml`** — set the hostname to one covered by the shared Gateway TLS cert in **xd-net** (`gateway_tls_dns_names`). Homepage discovery uses **`gethomepage.dev/*`** annotations; add an API key in **`secrets/homepage-immich-widget.yaml`** (`server.statistics` permission) and sync **platform-secrets**.
+| Secret | Namespace | Purpose |
+|--------|-----------|---------|
+| `immich-db` | `immich` | CNPG bootstrap + app connection (`username`, `password`, `host`, `user`, `dbname`) |
+| `immich-config` | `immich` | Non-default app config (OAuth/Authentik, QSV, external domain); whole key SOPS-encrypted — edit with `sops secrets/immich-config.yaml` |
 
-3. **Secret `immich-db`** in namespace **`immich`** — required **before** the CNPG cluster can bootstrap and for the Immich chart. Use **one** Secret for both CNPG (`bootstrap.initdb.secret`) and the app connection keys:
+Sync via **platform-secrets** before the CNPG cluster reconciles ([`secrets/README.md`](../../secrets/README.md)).
 
-   | Key | Value |
-   |-----|--------|
-   | `username` | Same as `user` (e.g. `immich`) — **required by CloudNativePG** bootstrap |
-   | `password` | Strong password |
-   | `host` | `immich-db-rw` (same namespace) or `immich-db-rw.immich.svc.cluster.local` |
-   | `user` | e.g. `immich` (Immich chart reads this) |
-   | `dbname` | e.g. `immich` |
+## Storage and scheduling
 
-   Encrypt with **SOPS** under `secrets/` and set **`metadata.namespace: immich`** ([`secrets/README.md`](../../secrets/README.md)).
+- Photo library: NFS **`nas.net.ecksd.ee`**, path **`/volume1/malachit/photos/`** (`nfs-library.yaml`, RWX)
+- **`immich-server`** and **`immich-machine-learning`** on Intel GPU nodes (`gpu.intel.com/i915`, same pattern as Plex)
+- **`ffmpeg.accel: qsv`** in immich config; ML image uses **`-openvino`** tags (Image Updater keeps server and ML tags in lockstep)
 
-4. **Application settings** — Non-default options live in **`secrets/immich-config.yaml`** (Secret **`immich-config`**, key **`immich-config.yaml`**; whole key SOPS-encrypted — see **`secrets/README.md`**). The Helm chart mounts it via **`immich.existingConfiguration`** in `values.yaml`. Edit with `sops secrets/immich-config.yaml`. Compared to defaults: **OAuth** with Authentik, **storage template** enabled, **`server.externalDomain`** `https://photos.net.ecksd.ee`, **`ffmpeg.accel: qsv`** on GPU nodes.
+Plex, server transcoding, and ML share GPU capacity on the same node.
 
-5. **Chart version** — `kustomization.yaml` pins `helmCharts.version`. Bump after checking [immich-charts releases](https://github.com/immich-app/immich-charts/releases). Override **`controllers.main.containers.main.image.tag`** (server) and **`machine-learning.controllers.main.containers.main.image.tag`** (ML) in `values.yaml` when you want a newer Immich app version than the chart default. **Argo CD Image Updater** (`apps/argocd-image-updater/image-updater.yaml`, `immich` entry) tracks the latest stable **`v3.x.y`** server tag and matching **`v3.x.y-openvino`** ML tag on GHCR and writes bumps to `values.yaml`; read release notes before merging those commits.
+## Layout
 
-6. **Hardware transcoding** — `values.yaml` schedules **`immich-server`** on Intel GPU nodes (`intel.feature.node.kubernetes.io/gpu`, `gpu.intel.com/i915`) like Plex, with **`ffmpeg.accel: qsv`** in `immich.configuration`. The GPU node must reach the NFS library export. Confirm in **Administration → Video transcoding** after deploy; see [Immich hardware transcoding](https://docs.immich.app/features/hardware-transcoding/).
+| File | Purpose |
+|------|---------|
+| `postgres.yaml` | CNPG **`immich-db`** on `local-path` |
+| `nfs-library.yaml` | RWX library mount |
+| `values.yaml` | Server + ML controllers, metrics, GPU, existingConfiguration |
+| `httproute.yaml` | `photos.net.ecksd.ee` + Homepage |
 
-7. **Hardware-accelerated ML (Intel Arc)** — **`immich-machine-learning`** uses image tag **`v3.0.2-openvino`** (OpenVINO for Intel discrete/integrated GPUs) on the same GPU nodes and **`gpu.intel.com/i915`** resource as Plex. Bump the **`-openvino`** tag together with **`controllers.main.containers.main.image.tag`** when upgrading Immich. After deploy, check ML logs for `Available ORT providers` including OpenVINO; see [hardware-accelerated ML](https://docs.immich.app/features/ml-hardware-acceleration). Plex, server transcoding, and ML may contend for one GPU — ensure the node exposes enough **`gpu.intel.com/i915`** capacity or accept serialized load.
-
-## Apply (local test)
+## Apply
 
 ```bash
-kubectl kustomize "$REPO_ROOT/apps/immich" --enable-helm | kubectl apply -f -
+kubectl kustomize "$HOME/Projects/xd-net-apps/apps/immich" --enable-helm | kubectl apply -f -
 ```
 
-## Optional
+**Argo CD Image Updater** tracks `ghcr.io/immich-app/immich-server` and matching **`v3.x.y-openvino`** ML tags in `apps/argocd-image-updater/image-updater.yaml`.
 
-- **Machine-learning model cache** — default is `emptyDir` (models re-download on restart). For persistent cache, configure `machine-learning.persistence.cache` per upstream `values.yaml`.
-- **Alpine + `search` in resolv.conf** — see [Immich Kubernetes doc](https://docs.immich.app/install/kubernetes/) note on DNS; set `dnsConfig` / `dnsPolicy` on pods if needed.
+Helm chart version is pinned in **`kustomization.yaml`**; bump when [immich-charts](https://github.com/immich-app/immich-charts/releases) requires it.
+
+Machine-learning model cache is **`emptyDir`** (models re-download on pod restart).

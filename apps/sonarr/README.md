@@ -20,4 +20,6 @@ Forward auth needs **authentik** applied first (shared **ReferenceGrant** and ou
 kubectl kustomize "$HOME/Projects/xd-net-apps/apps/sonarr" --enable-helm | kubectl apply -f -
 ```
 
-Set root folders under `/data/media` (for example `/data/media/TV`). Point the download client at `/data/torrents`. Pin the image `tag` in `values.yaml` when upgrading.
+Set root folders under `/data/media` (for example `/data/media/TV`). Point the download client at `/data/torrents`.
+
+**Argo CD Image Updater** tracks `ghcr.io/home-operations/sonarr` in `apps/argocd-image-updater/image-updater.yaml`.

@@ -12,9 +12,6 @@ creates the `Application` and `ApplicationSet`).
 | `apps/argocd-image-updater/` | Argo CD Image Updater controller (`argocd` namespace). Opt-in apps are listed in `image-updater.yaml`. |
 | `secrets/` | SOPS-encrypted YAML consumed by the **platform-secrets** Application. |
 
-Cluster install order in [xd-net](https://github.com/chaosk/xd-net): `infra/` → `app-manifests/` → `apps/`.
-This repo is only the Git source for Argo CD after `apps/` has been applied.
-
 ## Argo CD behavior
 
 - **Application `platform-secrets`** syncs the `secrets/` path using the
@@ -23,8 +20,7 @@ This repo is only the Git source for Argo CD after `apps/` has been applied.
 - **ApplicationSet `apps`** scans `apps/*` and deploys each subdirectory.
   Automated sync uses `CreateNamespace=true`, so the namespace matches the
   directory name unless you override in manifests.
-- Optional **image auto-updates** — add the app to `apps/argocd-image-updater/image-updater.yaml`
-  (see `apps/argocd-image-updater/README.md`).
+- **Image updates** — apps listed in `apps/argocd-image-updater/image-updater.yaml` get tag bumps via Git write-back. See `apps/argocd-image-updater/README.md`.
 
 ## Add an application
 
@@ -33,8 +29,7 @@ This repo is only the Git source for Argo CD after `apps/` has been applied.
 3. Commit and push; Argo CD picks up the new path and creates an Application
    named `<app>`.
 
-Optional: add `apps/<app>/kustomization.yaml` if you prefer Kustomize layout;
-the Application still uses directory sync from plain Git.
+Most apps use plain YAML or Kustomize under `apps/<app>/`; some add `kustomization.yaml` for Helm or config generators.
 
 ## SOPS and secrets
 

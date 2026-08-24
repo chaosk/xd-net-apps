@@ -27,11 +27,11 @@ Set in `values.yaml` and `postgres.yaml` from `kubectl top` (server ~450Mi, work
 | GeoIP sidecar | 64Mi | 256Mi |
 | `authentik-db` (CNPG) | 384Mi | 768Mi |
 
-## Before you apply
+## Prerequisites
 
 1. **Secret `authentik-secret-key`** (namespace **`authentik`**) — Authentik **`secret_key`** (cookie signing, etc.). Generate once, e.g. `openssl rand -base64 48`, put it in key **`secret_key`**, SOPS-encrypt the file under `secrets/` ([`secrets/README.md`](../../secrets/README.md)). **Do not change** after the first production install unless you intend to invalidate sessions.
 
-2. **`AUTHENTIK_HOST`** and **`server.route.main.hostnames`** in `values.yaml` — both must describe the **public HTTPS URL** users use (scheme + host, no path). Change `authentik.net.ecksd.ee` to your real hostname and keep them aligned.
+2. **`AUTHENTIK_HOST`** and **`server.route.main.hostnames`** in `values.yaml` — both **`https://authentik.net.ecksd.ee`** (homelab). Pangolin login uses **`auth.ecksd.ee`**; see item 5 below if redirects mismatch.
 
 3. **Secret `authentik-db`** in namespace **`authentik`** — required **before** the CNPG cluster can bootstrap. It must contain:
 
@@ -97,4 +97,6 @@ Complete the **initial setup wizard** at your public URL. See [Post-installation
 
 ## Upgrades
 
-Bump `helmCharts.version` in `kustomization.yaml` to match a published chart tag from [goauthentik/helm releases](https://github.com/goauthentik/helm/releases), then re-apply. Read upstream release notes for breaking changes.
+**Argo CD Image Updater** tracks `ghcr.io/goauthentik/server` in `apps/argocd-image-updater/image-updater.yaml`.
+
+Helm chart version is pinned in **`kustomization.yaml`**; bump to match [goauthentik/helm releases](https://github.com/goauthentik/helm/releases) when needed.

@@ -33,4 +33,4 @@ sync_rate: 5
 kubectl kustomize "$HOME/Projects/xd-net-apps/apps/spoolman" --enable-helm | kubectl apply -f -
 ```
 
-Pin the image `tag` in `values.yaml` when upgrading (Image Updater tracks `ghcr.io/donkie/spoolman` semver tags).
+**Argo CD Image Updater** tracks `ghcr.io/donkie/spoolman` in `apps/argocd-image-updater/image-updater.yaml`.

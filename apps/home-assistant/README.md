@@ -23,7 +23,7 @@ If HACS is missing after deploy, finish the HA onboarding wizard first, then res
 
 **After both apps sync:**
 
-1. Complete BamBuddy first-run at **`https://bambuddy.net.ecksd.ee`** (admin account, optional Authentik OIDC in **Settings → Authentication → SSO / OIDC**, add printers by IP). See **`apps/bambuddy/README.md`**.
+1. Complete BamBuddy first-run at **`https://bambuddy.net.ecksd.ee`** (admin account, Authentik OIDC in **Settings → Authentication → SSO / OIDC**, add printers by IP). See **`apps/bambuddy/README.md`**.
 2. **Settings → API Keys** in BamBuddy — create a key for Home Assistant.
 3. In HA: **Settings → Devices & services → Add integration → BamBuddy** — host **`http://bambuddy.bambuddy.svc.cluster.local`**, port **8000**, API key. Add printers via the integration options (wrench icon).
 
@@ -72,9 +72,11 @@ Edit **`macvlan-network.yaml`** for **`master`**, **`subnet`**, **`rangeStart`/`
 
 - Host: `https://homeassistant.net.ecksd.ee` (Gateway API via shared cluster Gateway; TLS covered by **`*.net.ecksd.ee`**)
 
-## Before sync
+## Secrets
 
-1. **Secret `home-assistant`** — Authentik provider slug **`home-assistant`** (redirect **`https://homeassistant.net.ecksd.ee/auth/oidc/callback`**) is configured in Authentik; client credentials live in **`secrets/home-assistant.yaml`**. Commit and sync **platform-secrets** before expecting OIDC to activate ([`secrets/README.md`](../../secrets/README.md)).
+**`secrets/home-assistant.yaml`** — Authentik OIDC provider slug **`home-assistant`**, redirect **`https://homeassistant.net.ecksd.ee/auth/oidc/callback`**. Sync **platform-secrets** before OIDC config is written ([`secrets/README.md`](../../secrets/README.md)).
+
+**`secrets/homepage-homeassistant-widget.yaml`** — long-lived access token from HA **Profile → Security** → `HOMEPAGE_VAR_HOMEASSISTANT_TOKEN`.
 
 ## First-time setup order
 
@@ -83,11 +85,9 @@ Edit **`macvlan-network.yaml`** for **`master`**, **`subnet`**, **`rangeStart`/`
 3. **Restart** the Home Assistant pod so the init container writes **`oidc/http.yaml`** (Envoy reverse proxy) and, once the secret is synced, **`auth_oidc`** config.
 4. Commit/push **`secrets/home-assistant.yaml`** and sync **platform-secrets** if not already done.
 5. **Restart** again if the secret appeared after the first restart, so OIDC YAML is written.
-6. Sign in via **Authentik** at **`https://homeassistant.net.ecksd.ee/auth/oidc/welcome`** (hass-oidc-auth’s documented entry point; **`/`** may show “Login aborted” until upstream improves that flow). With **`default_redirect`**, the welcome page sends you straight to Authentik on desktop.
+6. Sign in via **Authentik** at **`https://homeassistant.net.ecksd.ee/auth/oidc/welcome`** (hass-oidc-auth entry point; **`/`** may show “Login aborted” until upstream improves that flow). With **`default_redirect`**, the welcome page sends you straight to Authentik on desktop.
 
 Set **Settings → System → Network → Home Assistant URL** to `https://homeassistant.net.ecksd.ee`.
-
-**Homepage widget (optional)** — generate a **long-lived access token** in HA (**Profile → Security**). Put it in **`secrets/homepage-homeassistant-widget.yaml`** as `HOMEPAGE_VAR_HOMEASSISTANT_TOKEN`, SOPS-encrypt, sync **platform-secrets**, and restart Homepage if the widget was already deployed.
 
 ## Layout
 
@@ -103,7 +103,7 @@ Set **Settings → System → Network → Home Assistant URL** to `https://homea
 | `macvlan-network.yaml` | Multus NAD — **192.168.2.0/24** macvlan on worker **`ens19`**, route to **192.168.6.0/24** |
 | `httproute.yaml` | `homeassistant.net.ecksd.ee` + Homepage discovery |
 
-## Apply (local test)
+## Apply
 
 ```bash
 kubectl kustomize "$HOME/Projects/xd-net-apps/apps/home-assistant" --enable-helm | kubectl apply -f -
@@ -113,6 +113,4 @@ The Deployment uses **Recreate** strategy (single replica, RWO PVC). First boot 
 
 ## Image updates
 
-**Argo CD Image Updater** (`apps/argocd-image-updater/image-updater.yaml`, `home-assistant` entry) tracks **`ghcr.io/home-assistant/home-assistant`** release tags (`YYYY.M.P`, no beta/dev) and **`python-matter-server`** semver **`6.x.y`**, writing bumps to `values.yaml`. The first bot commit replaces **`stable`** with a pinned release tag.
-
-Manual override: set **`controllers.main.containers.main.image.tag`** (and **`matter-server`** if needed) in `values.yaml`. See [GitHub packages](https://github.com/home-assistant/core/pkgs/container/home-assistant) for release notes before merging updater commits.
+**Argo CD Image Updater** tracks **`ghcr.io/home-assistant/home-assistant`** and **`python-matter-server`** in `apps/argocd-image-updater/image-updater.yaml`, writing bumps to `values.yaml`. Manual override: image tags in `values.yaml`.

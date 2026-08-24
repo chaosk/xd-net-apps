@@ -21,13 +21,13 @@ The chart itself is maintained upstream; this directory is wiring for **xd-net**
 ## Prerequisites
 
 - **Gateway API** HTTPRoute parent `shared` in namespace `gateway` (same pattern as other apps in this repo).
-- **StorageClass** `local-path` for the database (`postgres.yaml`); **`synology`** for Redis/backups/cache in `values.yaml` (change to match your cluster).
+- **StorageClass** `local-path` for the database (`postgres.yaml`); **`synology`** for Redis/backups/cache in `values.yaml`.
 - **CloudNativePG operator** installed cluster-wide (see **xd-net** / `cnpg-system`).
 - **Helm 3** (used by Kustomize to render the vendored chart under `vendor/tracearr-0.1.0/tracearr/`).
 
 The upstream chart is not on a public Helm repo index; this app **vendors** it so `kubectl kustomize --enable-helm` can install app + Redis alongside the HTTPRoute and CNPG cluster in one apply.
 
-## Before you apply
+## Secrets
 
 1. **Secret `tracearr-db`** (namespace **`tracearr`**) — CNPG bootstrap and Helm (`secrets.existingSecret: tracearr-db`). Template: [`secrets/tracearr-db.yaml`](../../secrets/tracearr-db.yaml). SOPS-encrypt and sync via **platform-secrets** ([`secrets/README.md`](../../secrets/README.md)).
 
@@ -57,7 +57,7 @@ The upstream chart is not on a public Helm repo index; this app **vendors** it s
 
    Wait until `kubectl cnpg status -n tracearr tracearr-db` reports the cluster ready and `kubectl get svc tracearr -n tracearr` exists.
 
-Back up `JWT_SECRET` and `COOKIE_SECRET` from `tracearr-db` after first install; changing them invalidates sessions. `timescaledb_toolkit` is optional (Tracearr enables it only when the extension is available on the server); the CNPG image includes TimescaleDB and `pg_trgm`, not the HA image’s preinstalled toolkit.
+Back up `JWT_SECRET` and `COOKIE_SECRET` from `tracearr-db` after first install; changing them invalidates sessions. The CNPG image includes TimescaleDB and `pg_trgm`; `timescaledb_toolkit` is not preinstalled on this cluster.
 
 ## Networking
 
@@ -69,7 +69,9 @@ CNPG provisions the **database PVC** (**10Gi**, `local-path`) via `postgres.yaml
 
 ## Refreshing the vendored chart
 
-When [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) changes, replace the whole `vendor/tracearr-<Chart.Version>/tracearr/` tree from upstream (do not patch files in place). Adjust `helmCharts.version` in `kustomization.yaml` if `Chart.yaml` `version` bumps. Bump the app image in **`values.yaml`** (`tracearr.image.tag`), not in the vendored chart. Re-apply with `kubectl kustomize … --enable-helm | kubectl apply -f -`.
+When [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) changes, replace the whole `vendor/tracearr-<Chart.Version>/tracearr/` tree from upstream (do not patch files in `vendor/`). Adjust `helmCharts.version` in `kustomization.yaml` if `Chart.yaml` `version` bumps.
+
+**Argo CD Image Updater** tracks `ghcr.io/connorgallopo/tracearr` in `apps/argocd-image-updater/image-updater.yaml`.
 
 ## Upgrading the running release
 

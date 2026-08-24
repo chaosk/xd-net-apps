@@ -1,50 +1,47 @@
 # Tube Archivist
 
-[Tube Archivist](https://www.tubearchivist.com/) archives and indexes YouTube subscriptions. This app runs the [official Docker stack](https://docs.tubearchivist.com/installation/docker-compose/) (Tube Archivist, Redis, Elasticsearch 8) on Kubernetes with **Gateway API** exposure. User docs: [https://docs.tubearchivist.com](https://docs.tubearchivist.com).
+[Tube Archivist](https://www.tubearchivist.com/) — official Docker stack (Tube Archivist, Redis, Elasticsearch 8) on Kubernetes with Gateway API and **Authentik forward-auth**.
+
+## Access
+
+- Host: `https://tubearchivist.net.ecksd.ee` (Gateway `shared`)
+
+Forward auth needs **authentik** applied first. **`TA_AUTH_PROXY_LOGOUT_URL`** points at Authentik. After first forward-auth login, grant admin in **Settings → User** using local **`TA_USERNAME`** / **`TA_PASSWORD`**.
 
 ## Layout
 
 | File | Purpose |
 |------|---------|
-| `kustomization.yaml` | Namespace, **`pvc.yaml`**, Elasticsearch, Redis, Tube Archivist Deployment, Service, HTTPRoute. |
-| `namespace.yaml` | **`tubearchivist`** namespace; **Pod Security `privileged`** labels for Elasticsearch. |
-| `pvc.yaml` | **`tubearchivist-youtube`**: static **NFS** PV + claim (**ReadWriteMany**, **`Retain`**). **`tubearchivist-cache`**, **`tubearchivist-redis`**, **`tubearchivist-es`**: **Synology** `storageClass` **`synology`** (**ReadWriteOnce**). |
-| `elasticsearch.yaml` | **`archivist-es`** StatefulSet + Service (`bbilly1/tubearchivist-es:latest`, port **9200**). |
-| `redis.yaml` | **`archivist-redis`** StatefulSet + Service (`redis:7-alpine`, port **6379**). |
-| `bgutil-provider.yaml` | **[bgutil-ytdlp-pot-provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider)** (`brainicism/bgutil-ytdlp-pot-provider:1.3.1`, port **4416**). |
-| `deployment.yaml` | **`tubearchivist`** Deployment (`bbilly1/tubearchivist:v0.5.10`), mounts **`/youtube`** and **`/cache`**, **`Recreate`** strategy; **`TA_ENABLE_AUTH_PROXY`** and Authentik username header for forward auth. |
-| `service.yaml` | ClusterIP **`tubearchivist`** → port **8000** (HTTPRoute backend). |
-| `httproute.yaml` | Gateway **`shared`** in **`gateway`**; hostname **`tubearchivist.net.ecksd.ee`**. |
-| `securitypolicy-forward-auth.yaml` | Envoy Gateway forward auth to Authentik for this HTTPRoute. |
-
-Forward auth needs **authentik** applied first (shared **ReferenceGrant** and outpost route). See **`apps/authentik/README.md`**. **`securitypolicy-forward-auth.yaml`** forwards **`X-Authentik-Username`** to the app; **`TA_AUTH_PROXY_LOGOUT_URL`** points at Authentik so logout does not immediately re-login.
-
-After the first forward-auth login, grant admin in **Settings → User** using the local **`TA_USERNAME`** / **`TA_PASSWORD`** account (see [forward auth](https://docs.tubearchivist.com/configuration/forward-auth/)).
+| `kustomization.yaml` | Namespace, PVCs, ES, Redis, bgutil, Deployment, Service, HTTPRoute |
+| `namespace.yaml` | **`tubearchivist`**; Pod Security **`privileged`** (Elasticsearch) |
+| `pvc.yaml` | **`tubearchivist-youtube`**: NFS RWX (`Retain`); cache/redis/es on **`synology`** |
+| `elasticsearch.yaml` | **`archivist-es`** StatefulSet + Service (port 9200) |
+| `redis.yaml` | **`archivist-redis`** StatefulSet + Service (port 6379) |
+| `bgutil-provider.yaml` | [bgutil-ytdlp-pot-provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider) (port 4416) |
+| `deployment.yaml` | **`tubearchivist`** Deployment; **`TA_AUTO_UPDATE_YTDLP=release`**; **`Recreate`** strategy |
+| `httproute.yaml` | `tubearchivist.net.ecksd.ee` |
+| `securitypolicy-forward-auth.yaml` | Envoy forward-auth |
 
 ## Resources
 
-Memory requests/limits are set from [upstream compose](https://github.com/tubearchivist/tubearchivist/blob/master/docker-compose.yml) defaults and live `kubectl top` on the cluster (May 2026). Adjust if your index grows.
-
-| Workload | Request | Limit | Notes |
-|----------|---------|-------|--------|
-| `archivist-es` | 1536Mi | 3Gi | Heap **1g** (upstream); index **~35Mi** / 2.3k videos — prior 1536m heap was oversized, not index-driven |
-| `tubearchivist` | 768Mi | 1536Mi | ~730Mi observed |
-| `archivist-redis` | 64Mi | 256Mi | ~5Mi idle |
-| `bgutil-provider` | 128Mi | 384Mi | ~70Mi observed |
+| Workload | Request | Limit |
+|----------|---------|-------|
+| `archivist-es` | 1536Mi | 3Gi |
+| `tubearchivist` | 768Mi | 1536Mi |
+| `archivist-redis` | 64Mi | 256Mi |
+| `bgutil-provider` | 128Mi | 384Mi |
 
 ## VPN egress
 
-YouTube-related pods use **[pod-gateway](https://github.com/angelnu/pod-gateway)** per-pod label **`vpn-gateway: "true"`** on `tubearchivist` and `bgutil-provider` only ([vpn-gateway](../vpn-gateway/README.md)). The namespace is labeled **`allows-vpn-gateway: "true"`** so the webhook can run there. Elasticsearch and Redis have no pod label and stay on normal cluster routing.
+YouTube-related pods (`tubearchivist`, `bgutil-provider`) use **pod-gateway** label **`vpn-gateway: "true"`** ([vpn-gateway](../vpn-gateway/README.md)). Namespace **`allows-vpn-gateway: "true"`**. Elasticsearch and Redis stay on normal cluster routing.
 
 ## PO token provider
 
-Tube Archivist talks to the provider over the cluster network. After sync, set **Settings → Application → PO Token Provider URL** to:
+**Settings → Application → PO Token Provider URL**:
 
 ```text
 http://bgutil-provider:4416
 ```
-
-See [Application settings](https://docs.tubearchivist.com/settings/application/#po-token-provider-url). The image tag matches **v0.5.10** (`bgutil-ytdlp-pot-provider==1.3.1` in upstream `requirements.plugins.txt`).
 
 ## Apply
 
@@ -52,3 +49,5 @@ See [Application settings](https://docs.tubearchivist.com/settings/application/#
 kubectl kustomize "$HOME/Projects/xd-net-apps/apps/vpn-gateway" --enable-helm | kubectl apply -f -
 kubectl apply -k "$HOME/Projects/xd-net-apps/apps/tubearchivist"
 ```
+
+**Argo CD Image Updater** tracks `bbilly1/tubearchivist` via `kustomization.yaml` write-back in `apps/argocd-image-updater/image-updater.yaml`. Elasticsearch, Redis, and bgutil images are pinned in manifests and bumped manually.

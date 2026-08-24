@@ -61,7 +61,7 @@ kubectl exec -n tubearchivist deploy/tubearchivist -c tubearchivist -- curl -4 -
 kubectl exec -n tubearchivist deploy/archivist-es -- curl -4 -sS --max-time 15 https://api.ipify.org
 ```
 
-The first command should print your VPN exit IP; the second should print your cluster/home IP.
+The first command prints the VPN exit IP; the second prints the cluster/home IP.
 
 ## Add another VPN-routed pod
 

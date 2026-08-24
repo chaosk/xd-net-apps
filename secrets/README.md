@@ -1,70 +1,33 @@
 # secrets
 
-YAML in this directory is synced by Argo CD **platform-secrets** (see
-**xd-net** `apps/argocd-gitops.tf`). Files should be **SOPS-encrypted**
-before you push.
+SOPS-encrypted Kubernetes Secrets synced by Argo CD **platform-secrets** (**xd-net** `apps/argocd-gitops.tf`). Each file sets `metadata.namespace` to the target namespace.
 
-## Adding new secrets
+## New secrets
 
-1. Add a normal Kubernetes `Secret` manifest under `secrets/<name>.yaml` with the right
-   `metadata.name` and `metadata.namespace` for the app (see the table below for
-   conventions).
-2. Put values in `stringData` (or `data`) as usual. **Only lines you mark are
-   encrypted:** add a **trailing** inline comment `# sops:encrypt` on each **top-level
-   Secret key** scalar (see [`.sops.yaml`](../.sops.yaml):
-   `encrypted_comment_regex: sops:encrypt`). Anything without that marker stays
-   plaintext in the decrypted file (useful for non-secrets like hostnames or usernames
-   you want readable in-cluster after sync).
+1. Add `secrets/<name>.yaml` with `metadata.name` and `metadata.namespace` (see table below).
+2. Put values in `stringData`. Mark sensitive scalars with trailing `# sops:encrypt` (see [`.sops.yaml`](../.sops.yaml): `encrypted_comment_regex: sops:encrypt`). Unmarked keys stay plaintext in the decrypted file.
 
-   **Exception — nested config in one key** (`secrets/immich-config.yaml`,
-   `secrets/peanut.yaml`): multiline `stringData` blocks (`immich-config.yaml:`,
-   `settings.yml:`). `# sops:encrypt` *inside* those blocks is literal text in the
-   config file, not a SOPS directive. `.sops.yaml` uses `encrypted_regex` on the key
-   name so the **entire** block is ciphertext in git. Edit with `sops secrets/<file>.yaml`.
+   **Nested config keys** (`secrets/immich-config.yaml`, `secrets/peanut.yaml`): multiline blocks (`immich-config.yaml:`, `settings.yml:`). SOPS encrypts the whole key via `encrypted_regex` on the key name — edit with `sops secrets/<file>.yaml`.
 
-3. Encrypt before you push (never commit plaintext credentials to a shared remote):
+3. Encrypt before commit:
 
    ```bash
    sops --encrypt --in-place secrets/<name>.yaml
    ```
 
-   Alternatively, create and edit in one step: `sops secrets/<name>.yaml` (SOPS writes
-   an encrypted file from the start).
+   Or create encrypted from the start: `sops secrets/<name>.yaml`.
 
-4. If this is a new app or namespace, ensure **platform-secrets** in **xd-net** still
-   includes the path (or pattern) so Argo CD syncs the file.
+## Editing
 
-## Editing existing ones
+```bash
+sops secrets/<name>.yaml
+```
 
-1. Decrypt, edit, and re-encrypt in your editor:
+Requires the age private key matching `.sops.yaml` recipients (`SOPS_AGE_KEY_FILE`).
 
-   ```bash
-   sops secrets/<name>.yaml
-   ```
+Commit ciphertext only.
 
-   You need the **age** private key that matches the recipient in `.sops.yaml` (e.g.
-   `SOPS_AGE_KEY_FILE` or `age` keyring on your machine).
-
-2. Save and commit the updated ciphertext only; CI and peers must not see plaintext
-   diffs on lines that carry `# sops:encrypt`.
-
-### Migrating files that used `encrypted_regex`
-
-Older commits may still have `encrypted_regex: ^(data|stringData)$` inside the file’s
-`sops:` metadata (whole `stringData` / `data` maps were encrypted). To move to comment
-markers:
-
-1. `sops -d secrets/<name>.yaml > /tmp/<name>.yaml` (or `sops secrets/<name>.yaml` and
-   save as plaintext elsewhere briefly).
-2. Edit plaintext: add ` # sops:encrypt` on each value that should stay encrypted; remove
-   the old `sops:` block if present (a decrypt step already strips it).
-3. Replace `secrets/<name>.yaml` with that YAML and run
-   `sops --encrypt --in-place secrets/<name>.yaml`.
-
-Until you do this, existing files still decrypt and work; new encrypts follow
-`.sops.yaml` only when the file is re-encrypted without the old metadata.
-
-## Apps that expect secrets here
+## Inventory
 
 | Encrypted file (example name) | `metadata.namespace` | Purpose |
 |------------------------------|----------------------|---------|

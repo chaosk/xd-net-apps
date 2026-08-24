@@ -11,13 +11,13 @@ Self-hosted [Bitmagnet](https://bitmagnet.io/) DHT crawler and torrent search (W
 | `httproute.yaml` | `bitmagnet.net.ecksd.ee` → Service `bitmagnet-main:3333` (homelab Gateway only). |
 | `private-resource-pangolin.yaml` | Pangolin **private** HTTP at `bitmagnet.ecksd.ee` (Pangolin client required; not public internet). |
 
-## Before you apply
+## Secrets
 
 1. Create and encrypt **`secrets/bitmagnet-db.yaml`** and **`secrets/bitmagnet.yaml`** (Postgres bootstrap + `TMDB_API_KEY` from [TMDB API settings](https://www.themoviedb.org/settings/api)). See `secrets/README.md`.
 
 2. Apply **platform-secrets** (or `kubectl apply` the decrypted secrets) before the CNPG cluster and app.
 
-3. **DHT port 3334** is exposed as ClusterIP TCP/UDP services (`bitmagnet-torrent-tcp`, `bitmagnet-torrent-udp`). For full DHT participation you may need a **NodePort**, **LoadBalancer**, or **hostNetwork** so peers can reach UDP 3334 from outside the cluster.
+3. **DHT port 3334** is exposed as ClusterIP TCP/UDP services (`bitmagnet-torrent-tcp`, `bitmagnet-torrent-udp`). Peers outside the cluster cannot reach UDP 3334 with the current Service type; DHT participation is limited to in-cluster and VPN egress paths.
 
 ## VPN egress
 
@@ -58,4 +58,6 @@ Do **not** add `pangolin-operator/site-ref` to `httproute.yaml` — that would c
 
 ## Prowlarr
 
-Add Bitmagnet as a Torznab/newznab-style indexer using the in-cluster URL or public hostname; see [Bitmagnet docs](https://bitmagnet.io/guides/indexers.html).
+Add Bitmagnet as an indexer via the in-cluster URL or `https://bitmagnet.net.ecksd.ee`; see [Bitmagnet docs](https://bitmagnet.io/guides/indexers.html).
+
+**Argo CD Image Updater** tracks `ghcr.io/bitmagnet-io/bitmagnet` in `apps/argocd-image-updater/image-updater.yaml`.

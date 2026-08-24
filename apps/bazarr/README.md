@@ -19,4 +19,6 @@ Forward auth needs **authentik** applied first (shared **ReferenceGrant** and ou
 kubectl kustomize "$HOME/Projects/xd-net-apps/apps/bazarr" --enable-helm | kubectl apply -f -
 ```
 
-Link Sonarr and Radarr in the Bazarr UI after install. Pin the image `tag` in `values.yaml` when upgrading.
+Link Sonarr and Radarr in the Bazarr UI after install.
+
+**Argo CD Image Updater** tracks `ghcr.io/home-operations/bazarr` in `apps/argocd-image-updater/image-updater.yaml`.

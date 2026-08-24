@@ -1,43 +1,43 @@
 # Paperless-ngx
 
-Deploys [Paperless-ngx](https://docs.paperless-ngx.com/) with the **bjw-s app-template** chart, **CloudNativePG** PostgreSQL, and an in-cluster **Redis** broker.
+[Paperless-ngx](https://docs.paperless-ngx.com/) via bjw-s `app-template`, **CloudNativePG**, in-cluster **Redis**, and **Authentik forward-auth**.
 
 ## Access
 
-- Host: `https://paperless.net.ecksd.ee` (Gateway API via shared cluster Gateway, Authentik forward-auth)
+- Host: `https://paperless.net.ecksd.ee` (Gateway `shared`, Authentik forward-auth)
 
-Forward auth needs **authentik** applied first (shared **ReferenceGrant** and outpost route). See **`apps/authentik/README.md`**.
+Forward auth needs **authentik** applied first. See **`apps/authentik/README.md`**.
 
-## Before sync
+## Secrets
 
-1. **Secret `paperless-db`** in namespace **`paperless-ngx`** — CNPG bootstrap (`postgres.yaml`) and app DB password. Keys: `username`, `password` (owner/database `paperless`). See [`secrets/paperless-db.yaml`](../../secrets/paperless-db.yaml).
+| Secret | Purpose |
+|--------|---------|
+| `paperless-db` | CNPG bootstrap (`username`, `password`; owner/database `paperless`) |
+| `paperless` | `PAPERLESS_SECRET_KEY`, `PAPERLESS_ADMIN_USER`, `PAPERLESS_ADMIN_PASSWORD` (first-run admin) |
+| `homepage-paperless-widget` | `HOMEPAGE_VAR_PAPERLESS_API_TOKEN` — token from **Settings → My Profile** |
 
-2. **Secret `paperless`** in namespace **`paperless-ngx`** — app bootstrap and signing key:
-   - `PAPERLESS_SECRET_KEY` — `openssl rand -hex 32`
-   - `PAPERLESS_ADMIN_USER` — initial admin username (e.g. `admin`; only used on first start when no users exist)
-   - `PAPERLESS_ADMIN_PASSWORD` — initial admin password
+SOPS-encrypt and sync **platform-secrets** before CNPG and the app start.
 
-   Encrypt both secrets with **SOPS** and sync **platform-secrets** before the CNPG cluster and app start ([`secrets/README.md`](../../secrets/README.md)).
+## Storage
 
-3. **Homepage widget (optional)** — create an API token in Paperless (**Settings → My Profile**) and add **`secrets/homepage-paperless-widget.yaml`** (`HOMEPAGE_VAR_PAPERLESS_API_TOKEN`). Wire the env var in `apps/homepage/deployment.yaml` if not already present.
-
-4. **Storage** — `pvc.yaml` uses **`synology`** for data (20Gi) and media (100Gi). Redis uses **`emptyDir`** (task broker only; not on NAS).
+- Document data and media: StorageClass **`synology`** (20Gi + 100Gi)
+- Redis: **`emptyDir`** (task broker only)
 
 ## Layout
 
 | File | Purpose |
 |------|---------|
 | `postgres.yaml` | CNPG cluster `paperless-db` on `local-path` |
-| `redis.yaml` | Task queue broker required when using PostgreSQL |
-| `pvc.yaml` | Document data and media on Synology |
-| `values.yaml` | Paperless container env, probes, resources |
-| `httproute.yaml` | `paperless.net.ecksd.ee` + Homepage discovery |
+| `redis.yaml` | Task queue broker |
+| `pvc.yaml` | Data and media on Synology |
+| `values.yaml` | Paperless env, probes |
+| `httproute.yaml` | `paperless.net.ecksd.ee` + Homepage |
 | `securitypolicy-forward-auth.yaml` | Authentik Envoy forward-auth |
 
-## Apply (local test)
+## Apply
 
 ```bash
-kubectl kustomize "$REPO_ROOT/apps/paperless-ngx" --enable-helm | kubectl apply -f -
+kubectl kustomize "$HOME/Projects/xd-net-apps/apps/paperless-ngx" --enable-helm | kubectl apply -f -
 ```
 
-Wait for **`paperless-db`** to report ready before the app pod stays healthy. On first login use the admin credentials from **`paperless`** Secret, then change the password in the UI.
+**Argo CD Image Updater** tracks `ghcr.io/paperless-ngx/paperless-ngx` in `apps/argocd-image-updater/image-updater.yaml`.
