@@ -82,12 +82,12 @@ Edit **`macvlan-network.yaml`** for **`master`**, **`subnet`**, **`rangeStart`/`
 
 1. Deploy the app (without OIDC credentials the init container only installs the custom component).
 2. Open **`https://homeassistant.net.ecksd.ee`**, complete the **onboarding wizard** (creates `configuration.yaml`).
-3. **Restart** the Home Assistant pod so the init container writes **`oidc/http.yaml`** (Envoy reverse proxy) and, once the secret is synced, **`auth_oidc`** config.
+3. **Restart** the Home Assistant pod so the init container writes **`auth_oidc`** config once the secret is synced.
 4. Commit/push **`secrets/home-assistant.yaml`** and sync **platform-secrets** if not already done.
 5. **Restart** again if the secret appeared after the first restart, so OIDC YAML is written.
 6. Sign in via **Authentik** at **`https://homeassistant.net.ecksd.ee/auth/oidc/welcome`** (hass-oidc-auth entry point; **`/`** may show “Login aborted” until upstream improves that flow). With **`default_redirect`**, the welcome page sends you straight to Authentik on desktop.
 
-Set **Settings → System → Network → Home Assistant URL** to `https://homeassistant.net.ecksd.ee`.
+Under **Settings → System → Network**: set **Home Assistant URL** to `https://homeassistant.net.ecksd.ee`, and keep reverse-proxy HTTP settings there (`use_x_forwarded_for`, `trusted_proxies` for the pod/Service CIDRs). Home Assistant 2026.8+ ignores `http:` in `configuration.yaml`; the OIDC init container strips any leftover `http: !include oidc/http.yaml` on pod start.
 
 ## Layout
 

@@ -1,6 +1,10 @@
 # Installs hass-oidc-auth and merges Authentik OIDC config on the HA config PVC.
 # https://github.com/christiaangoossens/hass-oidc-auth
 # https://integrations.goauthentik.io/miscellaneous/home-assistant/
+#
+# HTTP reverse-proxy settings (use_x_forwarded_for / trusted_proxies) are UI-managed
+# since HA 2026.8 — do not put an http: block in configuration.yaml.
+# https://www.home-assistant.io/integrations/http/#migrating-from-yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -34,18 +38,20 @@ data:
       echo "hass-oidc-auth ${OIDC_VERSION} installed"
     }
 
-    normalize_configuration() {
-      if [ ! -f "$CONFIG/configuration.yaml" ]; then
-        return 0
+    # Drop deprecated http: YAML (migrated to Settings → System → Network) and legacy files.
+    strip_http_yaml() {
+      if [ -f "$CONFIG/configuration.yaml" ]; then
+        if grep -qE '^(http: !include oidc/http\.yaml|# xd-net-reverse-proxy)$' "$CONFIG/configuration.yaml"; then
+          awk '
+            /^# xd-net-reverse-proxy$/ { next }
+            /^http: !include oidc\/http\.yaml$/ { next }
+            { print }
+          ' "$CONFIG/configuration.yaml" > "$CONFIG/configuration.yaml.tmp" \
+            && mv "$CONFIG/configuration.yaml.tmp" "$CONFIG/configuration.yaml"
+          echo "Removed deprecated http: include from configuration.yaml"
+        fi
       fi
-      # Older init appended http under both xd-net-authentik and xd-net-reverse-proxy.
-      if grep -q 'xd-net-reverse-proxy' "$CONFIG/configuration.yaml"; then
-        awk '
-          /^http: !include oidc\/http.yaml$/ && prev ~ /xd-net-authentik/ { next }
-          { prev=$0; print }
-        ' "$CONFIG/configuration.yaml" > "$CONFIG/configuration.yaml.tmp" \
-          && mv "$CONFIG/configuration.yaml.tmp" "$CONFIG/configuration.yaml"
-      fi
+      rm -f "$CONFIG/oidc/http.yaml"
     }
 
     configure_ha() {
@@ -54,14 +60,7 @@ data:
         return 0
       fi
 
-      mkdir -p "$CONFIG/oidc"
-      printf '%s\n' \
-        'use_x_forwarded_for: true' \
-        'trusted_proxies:' \
-        '  - 10.0.0.0/8' \
-        '  - 172.16.0.0/12' \
-        '  - 192.168.0.0/16' \
-        > "$CONFIG/oidc/http.yaml"
+      strip_http_yaml
 
       if [ -f /run/secrets/oidc/OIDC_CLIENT_ID ]; then
         OIDC_CLIENT_ID=$(cat /run/secrets/oidc/OIDC_CLIENT_ID)
@@ -71,13 +70,11 @@ data:
       fi
       if [ -z "${OIDC_CLIENT_ID:-}" ] || [ -z "${OIDC_CLIENT_SECRET:-}" ] || \
          echo "$OIDC_CLIENT_ID" | grep -q '^REPLACE'; then
-        echo "OIDC credentials not set; wrote http.yaml only"
-        if ! grep -q "$MARKER" "$CONFIG/configuration.yaml"; then
-          printf '\n# %s\nhttp: !include oidc/http.yaml\n' "$MARKER" >> "$CONFIG/configuration.yaml"
-        fi
+        echo "OIDC credentials not set; skipped auth_oidc config"
         return 0
       fi
 
+      mkdir -p "$CONFIG/oidc"
       printf '%s\n' \
         "client_id: \"${OIDC_CLIENT_ID}\"" \
         'client_secret: !secret authentik_client_secret' \
@@ -95,14 +92,19 @@ data:
         > "$CONFIG/secrets.yaml"
 
       if ! grep -q "$MARKER" "$CONFIG/configuration.yaml"; then
-        printf '\n# %s\nhttp: !include oidc/http.yaml\nhomeassistant: !include oidc/homeassistant.yaml\nauth_oidc: !include oidc/auth_oidc.yaml\n' "$MARKER" >> "$CONFIG/configuration.yaml"
+        printf '\n# %s\nhomeassistant: !include oidc/homeassistant.yaml\nauth_oidc: !include oidc/auth_oidc.yaml\n' "$MARKER" >> "$CONFIG/configuration.yaml"
         echo "Appended Authentik OIDC includes to configuration.yaml"
-      elif ! grep -q 'oidc/homeassistant.yaml' "$CONFIG/configuration.yaml"; then
-        printf '\nhomeassistant: !include oidc/homeassistant.yaml\n' >> "$CONFIG/configuration.yaml"
-        echo "Appended homeassistant auth_providers include to configuration.yaml"
+      else
+        if ! grep -q 'oidc/homeassistant.yaml' "$CONFIG/configuration.yaml"; then
+          printf '\nhomeassistant: !include oidc/homeassistant.yaml\n' >> "$CONFIG/configuration.yaml"
+          echo "Appended homeassistant auth_providers include to configuration.yaml"
+        fi
+        if ! grep -q 'oidc/auth_oidc.yaml' "$CONFIG/configuration.yaml"; then
+          printf '\nauth_oidc: !include oidc/auth_oidc.yaml\n' >> "$CONFIG/configuration.yaml"
+          echo "Appended auth_oidc include to configuration.yaml"
+        fi
       fi
-      normalize_configuration
-      echo "Wrote oidc/http.yaml, oidc/homeassistant.yaml, oidc/auth_oidc.yaml, and secrets.yaml"
+      echo "Wrote oidc/homeassistant.yaml, oidc/auth_oidc.yaml, and secrets.yaml"
     }
 
     install_component
