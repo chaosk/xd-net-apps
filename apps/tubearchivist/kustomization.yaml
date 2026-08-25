@@ -14,5 +14,5 @@ resources:
 # Main app image only (ES/redis/bgutil are pinned separately in their manifests).
 images:
   - name: bbilly1/tubearchivist
-    newTag: v0.5.11
+    newTag: v0.5.12
     newName: bbilly1/tubearchivist
