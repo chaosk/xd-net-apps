@@ -37,6 +37,23 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
+  name: cnpg-invidious-db
+  labels:
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - invidious
+  selector:
+    matchLabels:
+      cnpg.io/cluster: invidious-db
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
   name: cnpg-tracearr-db
   labels:
     release: kube-prometheus-stack

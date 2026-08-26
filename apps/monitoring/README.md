@@ -7,6 +7,9 @@ Prometheus, Grafana, and Loki for the xd-net cluster, installed with upstream He
 | [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) | 85.3.0 | Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics |
 | [loki](https://github.com/grafana/loki/tree/main/production/helm/loki) | 7.0.0 | Log storage (SingleBinary, Synology PVC) |
 | [alloy](https://github.com/grafana/alloy/tree/main/operations/helm/charts/alloy) | 1.8.1 | Pod log collection |
+
+Chart versions are **not** managed by Argo CD Image Updater (that tracks container images, not Helm chart pins). Bump them deliberately — see **Chart upgrades** below.
+
 ## Access
 
 - **Grafana:** `https://grafana.net.ecksd.ee` (shared Gateway TLS covers `*.net.ecksd.ee`)
@@ -25,7 +28,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
-| `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`, `miniflux-db`, `mealie-db`, `grafana-db`. |
+| `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `invidious-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`, `miniflux-db`, `mealie-db`, `grafana-db`. |
 | `scrape-apps.yaml` | Authentik server PodMonitor; Immich, Bitmagnet, and Speedtest Tracker ServiceMonitors. |
 | `scrape-platform.yaml` | Envoy Gateway controller + dataplane; Cilium agent ServiceMonitor. |
 | `dashboards/` | CNPG, Cilium, Envoy Gateway, Speedtest Tracker, PeaNUT, and UniFi Poller Grafana dashboards (ConfigMaps for sidecar). |
@@ -92,6 +95,36 @@ Envoy Gateway addon dashboards live under `dashboards/` with upstream filenames 
 4. **Metrics Server** — `apps/metrics-server` (for node/pod metrics in Grafana).
 5. **Synology `storageClass`** — `synology` (same as other apps).
 6. **Pod Security** — namespace uses **`privileged`** so `prometheus-node-exporter` can use host network, hostPath, and port 9100 (cluster default is baseline).
+
+## Chart upgrades
+
+Pins live in `kustomization.yaml` under `helmCharts[].version` (and the version table at the top of this README). Fetched chart tarballs land under `apps/monitoring/charts/` and are gitignored — do not vendor them.
+
+1. Pick a target chart version from upstream release notes:
+   - [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/releases?q=kube-prometheus-stack)
+   - [loki](https://github.com/grafana/loki/releases?q=helm-loki)
+   - [alloy](https://github.com/grafana/alloy/releases?q=helm-chart)
+2. Set the matching `helmCharts[].version` in `kustomization.yaml` and update the version table above.
+3. Diff values against the new chart defaults (breaking renames are common on kube-prometheus-stack major/minor bumps):
+
+   ```bash
+   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+   helm repo add grafana https://grafana.github.io/helm-charts
+   helm repo update
+   helm show values prometheus-community/kube-prometheus-stack --version <new> > /tmp/kps-values.yaml
+   # likewise: grafana/loki --version <new>, grafana/alloy --version <new>
+   diff -u values-prometheus.yaml /tmp/kps-values.yaml   # review; do not overwrite our values wholesale
+   ```
+
+4. Render and review the full manifest before syncing:
+
+   ```bash
+   kubectl kustomize "$HOME/Projects/xd-net-apps/apps/monitoring" --enable-helm > /tmp/monitoring-render.yaml
+   ```
+
+5. Commit the pin + any `values-*.yaml` / `patchesJson6902` adjustments, then sync the **monitoring** Argo CD Application (or apply as below). Watch Prometheus Operator CRD upgrades and Grafana rollout; re-apply `patchesJson6902` hostNetwork strips if the chart reintroduces those fields.
+
+Bump one chart at a time when possible so a bad render is easy to bisect.
 
 ## Apply
 
