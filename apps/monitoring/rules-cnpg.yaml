@@ -1,0 +1,34 @@
+# Critical CNPG alerts for Alertmanager → Home Assistant routing.
+# Metrics from PodMonitors in scrape-cnpg.yaml (cnpg_collector_*).
+# https://cloudnative-pg.io/documentation/current/monitoring/
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cnpg-critical
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: cnpg.critical
+      rules:
+        - alert: CNPGInstanceDown
+          expr: cnpg_collector_up == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "CNPG instance {{ $labels.namespace }}/{{ $labels.pod }} is down"
+            description: >-
+              CloudNativePG exporter reports PostgreSQL not up on cluster
+              {{ $labels.cluster }} (pod {{ $labels.pod }}).
+        - alert: CNPGClusterDown
+          expr: sum by (namespace, cluster) (cnpg_collector_up) == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "CNPG cluster {{ $labels.namespace }}/{{ $labels.cluster }} has no up instances"
+            description: >-
+              No instance in CloudNativePG cluster {{ $labels.cluster }}
+              (namespace {{ $labels.namespace }}) reports cnpg_collector_up=1.
