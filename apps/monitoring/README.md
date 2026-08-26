@@ -24,7 +24,8 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `namespace.yaml` | **`monitoring`** namespace; Pod Security **`privileged`** (node-exporter). |
 | `postgres.yaml` | CNPG cluster **`grafana-db`** (Grafana internal metadata on `local-path`). |
 | `kustomization.yaml` | Namespace, HTTPRoute, three Helm releases, dashboard ConfigMaps. |
-| `values-prometheus.yaml` | Retention, Synology PVCs for Prometheus and Alertmanager, Grafana Postgres + admin Secret, thin apiserver scrape. |
+| `values-prometheus.yaml` | Retention, Synology PVCs for Prometheus and Alertmanager, Grafana Postgres + admin Secret, thin apiserver scrape, Alertmanager → Home Assistant routing. |
+| `rules-cnpg.yaml` | Critical `PrometheusRule` for CNPG (`CNPGInstanceDown`, `CNPGClusterDown`). |
 | `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
@@ -92,9 +93,73 @@ Envoy Gateway addon dashboards live under `dashboards/` with upstream filenames 
 1. **Secret `grafana-admin`** in namespace `monitoring` — see `secrets/grafana-admin.yaml`. Generate a password, add `# sops:encrypt` on `admin-password`, then `sops --encrypt --in-place secrets/grafana-admin.yaml` and sync **platform-secrets** before the stack can start. Keeps break-glass local login when OAuth auto-login is enabled.
 2. **Secret `grafana-db`** in namespace `monitoring` — CNPG bootstrap for `postgres.yaml` (`username`, `password`; owner/database `grafana`). See `secrets/grafana-db.yaml`. Encrypt with SOPS and sync **platform-secrets** before the **`grafana-db`** cluster and Grafana pod start.
 3. **Secret `grafana-oidc`** in namespace `monitoring` — Authentik OAuth2 client credentials (`client_id`, `client_secret`) for Generic OAuth. See `secrets/grafana-oidc.yaml`. Provider slug **`grafana`**, redirect URI **`https://grafana.net.ecksd.ee/login/generic_oauth`**. Encrypt with SOPS and sync **platform-secrets** before enabling OAuth in `values-prometheus.yaml`.
-4. **Metrics Server** — `apps/metrics-server` (for node/pod metrics in Grafana).
-5. **Synology `storageClass`** — `synology` (same as other apps).
-6. **Pod Security** — namespace uses **`privileged`** so `prometheus-node-exporter` can use host network, hostPath, and port 9100 (cluster default is baseline).
+4. **Secret `alertmanager-ha`** in namespace `monitoring` — Home Assistant webhook URL for Alertmanager (`url`). See `secrets/alertmanager-ha.yaml` and **Alerting** below. Sync **platform-secrets** before Alertmanager can notify.
+5. **Metrics Server** — `apps/metrics-server` (for node/pod metrics in Grafana).
+6. **Synology `storageClass`** — `synology` (same as other apps).
+7. **Pod Security** — namespace uses **`privileged`** so `prometheus-node-exporter` can use host network, hostPath, and port 9100 (cluster default is baseline).
+
+## Alerting
+
+Alertmanager is enabled. The default receiver is **`null`** (no outbound notify). A whitelist route sends a small critical set to **Home Assistant** via webhook; everything else stays in-cluster (Grafana / Alertmanager UI).
+
+### What pages the phone
+
+| Alert | Source | Role |
+|-------|--------|------|
+| **Watchdog** | kube-prometheus-stack defaults | Daily canary (`repeat_interval: 24h`) that Alertmanager → HA still works |
+| **KubeNodeNotReady**, **KubeNodeUnreachable**, **KubeAPIDown** | chart defaults | Node / API failure |
+| **KubePersistentVolumeFillingUp**, **KubePersistentVolumeInodesFillingUp**, **NodeFilesystemSpaceFillingUp**, **NodeFilesystemAlmostOutOfSpace** | chart defaults | PVC / node disk pressure |
+| **CNPGInstanceDown**, **CNPGClusterDown** | `rules-cnpg.yaml` | CloudNativePG instance or whole cluster not up |
+
+Warnings (CrashLoop, TargetDown on optional scrapes, CPU/memory, etc.) are **not** routed to HA.
+
+### Home Assistant setup
+
+1. Sync **platform-secrets** so Secret **`alertmanager-ha`** exists (`url` points at `http://home-assistant.home-assistant.svc.cluster.local:8123/api/webhook/<webhook_id>`).
+2. In HA, create an automation with a **Webhook** trigger. Use the same `webhook_id` as in the secret (default in repo: **`xdnet_alertmanager_9559984c05d4cb89fbb23a98f4d019f1`**). Prefer **`local_only: true`** so only in-cluster / LAN callers can fire it.
+3. Action: call your companion notify service (replace the entity id):
+
+```yaml
+alias: Alertmanager → mobile
+description: Critical xd-net alerts from Prometheus Alertmanager
+trigger:
+  - platform: webhook
+    webhook_id: xdnet_alertmanager_9559984c05d4cb89fbb23a98f4d019f1
+    allowed_methods:
+      - POST
+    local_only: true
+action:
+  - service: notify.mobile_app_YOUR_DEVICE
+    data:
+      title: >-
+        {% if trigger.json.status == 'resolved' %}Resolved{% else %}Alert{% endif %}
+        {{ trigger.json.commonLabels.alertname | default('Alertmanager') }}
+      message: >-
+        {% for a in trigger.json.alerts -%}
+        {{ a.annotations.summary | default(a.labels.alertname) }}
+        {% if not loop.last %} · {% endif %}
+        {%- endfor %}
+mode: queued
+```
+
+Find the notify entity under **Developer tools → Actions** (`notify.mobile_app_*`). To rotate the webhook id: `sops secrets/alertmanager-ha.yaml`, update the URL path, sync **platform-secrets**, and match the automation.
+
+### Silences
+
+```bash
+kubectl -n monitoring port-forward svc/kube-prometheus-stack-alertmanager 9093:9093
+# open http://localhost:9093/#/silences
+```
+
+Create a silence with matchers (for example `alertname=Watchdog` if the daily canary is noisy). Silences persist on the Alertmanager PVC.
+
+### Secrets
+
+| File | Secret | Keys |
+|------|--------|------|
+| `secrets/alertmanager-ha.yaml` | `alertmanager-ha` | `url` (full webhook URL; `# sops:encrypt`) |
+
+Alertmanager mounts that Secret at `/etc/alertmanager/secrets/alertmanager-ha/` and reads `url` via `url_file` in `values-prometheus.yaml`.
 
 ## Chart upgrades
 

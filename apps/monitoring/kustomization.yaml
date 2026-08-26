@@ -10,6 +10,7 @@ resources:
   - scrape-cnpg.yaml
   - scrape-apps.yaml
   - scrape-platform.yaml
+  - rules-cnpg.yaml
   - dashboards/
 
 # kube-prometheus-stack renders hostNetwork: false explicitly; the API/operator often
