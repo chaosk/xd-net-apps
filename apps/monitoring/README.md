@@ -106,12 +106,13 @@ Alertmanager is enabled. The default receiver is **`null`** (no outbound notify)
 
 | Alert | Source | Role |
 |-------|--------|------|
-| **Watchdog** | kube-prometheus-stack defaults | Daily canary (`repeat_interval: 24h`) that Alertmanager → HA still works |
 | **KubeNodeNotReady**, **KubeNodeUnreachable**, **KubeAPIDown** | chart defaults | Node / API failure |
 | **KubePersistentVolumeFillingUp**, **KubePersistentVolumeInodesFillingUp**, **NodeFilesystemSpaceFillingUp**, **NodeFilesystemAlmostOutOfSpace** | chart defaults | PVC / node disk pressure |
 | **CNPGInstanceDown**, **CNPGClusterDown** | `rules-cnpg.yaml` | CloudNativePG instance or whole cluster not up |
 
-Warnings (CrashLoop, TargetDown on optional scrapes, CPU/memory, etc.) are **not** routed to HA.
+**Watchdog** stays on receiver **`null`** (always-firing heartbeat; do not page the phone). Warnings (CrashLoop, TargetDown on optional scrapes, CPU/memory, etc.) also stay on **`null`**.
+
+In the Alertmanager UI, **`null` is a real receiver name** (the default sink), not “unconfigured.” Most firing alerts show `null` on purpose. Whitelist names only appear under **`home-assistant`** while they are actively firing (they are quiet when the cluster is healthy).
 
 ### Home Assistant setup
 
@@ -151,7 +152,7 @@ kubectl -n monitoring port-forward svc/kube-prometheus-stack-alertmanager 9093:9
 # open http://localhost:9093/#/silences
 ```
 
-Create a silence with matchers (for example `alertname=Watchdog` if the daily canary is noisy). Silences persist on the Alertmanager PVC.
+Create a silence with matchers (for example `alertname=KubeAPIDown` during maintenance). Silences persist on the Alertmanager PVC.
 
 ### Secrets
 
