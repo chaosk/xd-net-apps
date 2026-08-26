@@ -188,7 +188,7 @@ spec:
     - namePattern: metrics-server
       images:
         - alias: metrics-server
-          imageName: registry.k8s.io/metrics-server/metrics-server:~v0.7
+          imageName: registry.k8s.io/metrics-server/metrics-server:~v0.9
           manifestTargets:
             helm:
               name: image.repository
