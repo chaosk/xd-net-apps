@@ -113,7 +113,8 @@ spec:
               name: controllers.main.containers.main.image.repository
               tag: controllers.main.containers.main.image.tag
         - alias: matter-server
-          imageName: ghcr.io/home-assistant-libs/python-matter-server:~8
+          # Registry moved with the org rename; home-assistant-libs only goes through 8.1.0.
+          imageName: ghcr.io/matter-js/python-matter-server:~8
           commonUpdateSettings:
             updateStrategy: semver
             # 8.1.2 is the final python-matter-server line; keep betas (8.1.0b*) out.
