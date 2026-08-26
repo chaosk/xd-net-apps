@@ -8,6 +8,7 @@ resources:
   - nfs-library.yaml
   - httproute.yaml
   - postgres.yaml
+  - backup.yaml
 
 helmCharts:
   - name: immich

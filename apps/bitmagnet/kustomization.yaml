@@ -7,6 +7,7 @@ resources:
   - namespace.yaml
   - pvc-config.yaml
   - postgres.yaml
+  - backup.yaml
   - httproute.yaml
   - private-resource-pangolin.yaml
 

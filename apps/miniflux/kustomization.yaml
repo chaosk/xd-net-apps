@@ -6,6 +6,7 @@ namespace: miniflux
 resources:
   - namespace.yaml
   - postgres.yaml
+  - backup.yaml
   - httproute.yaml
 
 helmCharts:
