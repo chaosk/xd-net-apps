@@ -71,13 +71,11 @@ alertmanager:
       repeat_interval: 4h
       receiver: "null"
       routes:
-        # Dead-man's canary: daily ping that Alertmanager → HA still works.
-        - receiver: home-assistant
+        # Watchdog is always firing; keep it on null (no phone spam). Use an
+        # external dead-man's snitch later if you want "Alertmanager died" paging.
+        - receiver: "null"
           matchers:
             - alertname = Watchdog
-          group_wait: 0s
-          group_interval: 5m
-          repeat_interval: 24h
         - receiver: home-assistant
           matchers:
             - alertname =~ "^(KubeNodeNotReady|KubeNodeUnreachable|KubeAPIDown|KubePersistentVolumeFillingUp|KubePersistentVolumeInodesFillingUp|NodeFilesystemSpaceFillingUp|NodeFilesystemAlmostOutOfSpace|CNPGInstanceDown|CNPGClusterDown)$"
