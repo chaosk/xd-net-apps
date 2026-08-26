@@ -1,8 +1,12 @@
 fullnameOverride: plex
 
-# Pin PMS image (chart 1.5.0 defaults to 1.43.0.10492-121068a07).
+# Pin PMS image (chart 1.5.0 defaults to index.docker.io + 1.43.0.10492-…).
+# Use docker.io (not index.docker.io) so the rendered image matches Image Updater's
+# imageName docker.io/plexinc/pms-docker — otherwise updates are skipped.
 image:
-  tag: "1.43.3.10828-00f62d37d"
+  registry: docker.io
+  repository: plexinc/pms-docker
+  tag: "1.43.3.10896-cb3ebc72d"
 
 ingress:
   enabled: false
