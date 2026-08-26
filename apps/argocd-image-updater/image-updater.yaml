@@ -324,7 +324,10 @@ spec:
     - namePattern: tracearr
       images:
         - alias: tracearr
-          imageName: ghcr.io/connorgallopo/tracearr:~1
+          imageName: ghcr.io/connorgallopo/tracearr:~2
+          commonUpdateSettings:
+            updateStrategy: semver
+            ignoreTags: ["*-rc*", "*-beta*", "*dev*", "latest"]
           manifestTargets:
             helm:
               name: tracearr.image.repository

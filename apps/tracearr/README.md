@@ -12,7 +12,7 @@
 | `image-catalog.yaml` | CNPG **ImageCatalog** for `timescale/timescaledb:2.25.1-pg18` (PG 18 / Timescale 2.25, same lineage as the chart’s bundled image). |
 | `postgres.yaml` | CNPG cluster **`tracearr-db`** (Timescale image, **`postgresUID`/`postgresGID` 70**, **10Gi** `local-path`, `postInitApplicationSQL` for Timescale + `pg_trgm`). |
 | `values.yaml` | Helm overrides: **`timescale.enabled: false`**, **`externalDatabase.host: tracearr-db-rw`**, app/Redis **resources**, backups/cache storage, `ingress.enabled: false`. |
-| `vendor/tracearr-0.1.0/tracearr/` | Vendored copy of upstream [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) so `helm` does not need a separate `git clone`. |
+| `vendor/tracearr-0.2.2/tracearr/` | Vendored copy of upstream [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) so `helm` does not need a separate `git clone`. |
 
 PostgreSQL is **[CloudNativePG](https://cloudnative-pg.io/)** (operator from **xd-net**), not the chart’s bundled TimescaleDB StatefulSet. The chart still deploys **Redis** and the Tracearr app.
 
@@ -23,7 +23,7 @@ The chart itself is maintained upstream; this directory is wiring for **xd-net**
 - **Gateway API** HTTPRoute parent `shared` in namespace `gateway` (same pattern as other apps in this repo).
 - **StorageClass** `local-path` for the database (`postgres.yaml`); **`synology`** for Redis/backups/cache in `values.yaml`.
 - **CloudNativePG operator** installed cluster-wide (see **xd-net** / `cnpg-system`).
-- **Helm 3** (used by Kustomize to render the vendored chart under `vendor/tracearr-0.1.0/tracearr/`).
+- **Helm 3** (used by Kustomize to render the vendored chart under `vendor/tracearr-0.2.2/tracearr/`).
 
 The upstream chart is not on a public Helm repo index; this app **vendors** it so `kubectl kustomize --enable-helm` can install app + Redis alongside the HTTPRoute and CNPG cluster in one apply.
 
