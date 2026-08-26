@@ -7,7 +7,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/paperless-ngx/paperless-ngx
-          tag: "2.20.15"
+          tag: "3.0.5"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
