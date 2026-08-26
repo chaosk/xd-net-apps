@@ -11,6 +11,7 @@ creates the `Application` and `ApplicationSet`).
 | `apps/<name>/` | Plain Kubernetes YAML; each directory becomes one Argo CD Application and (by convention) a namespace named `<name>`. |
 | `apps/argocd-image-updater/` | Argo CD Image Updater controller (`argocd` namespace). Opt-in apps are listed in `image-updater.yaml`. |
 | `secrets/` | SOPS-encrypted YAML consumed by the **platform-secrets** Application. |
+| `docs/` | Cluster-wide ops runbooks (worker wipe, CNPG restore, Gateway pin, Pangolin, Age/SOPS). Per-app install docs stay under `apps/<name>/`. |
 
 ## Argo CD behavior
 
@@ -33,7 +34,11 @@ Most apps use plain YAML or Kustomize under `apps/<app>/`; some add `kustomizati
 
 ## SOPS and secrets
 
-See `secrets/README.md` for directory-specific notes.
+See `secrets/README.md` for directory-specific notes. Age key rotation checklist: `docs/sops-age-rotation.md`.
+
+## Platform runbooks
+
+See [`docs/README.md`](docs/README.md) for day-2 failure modes that cross app boundaries.
 
 ## Git hooks
 
