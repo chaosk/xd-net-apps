@@ -113,10 +113,11 @@ spec:
               name: controllers.main.containers.main.image.repository
               tag: controllers.main.containers.main.image.tag
         - alias: matter-server
-          imageName: ghcr.io/home-assistant-libs/python-matter-server:~6
+          imageName: ghcr.io/home-assistant-libs/python-matter-server:~8
           commonUpdateSettings:
             updateStrategy: semver
-            ignoreTags: ["*-rc*", "*-beta*", "*dev*", "stable", "latest"]
+            # 8.1.2 is the final python-matter-server line; keep betas (8.1.0b*) out.
+            ignoreTags: ["*-b*", "*-rc*", "*-beta*", "*dev*", "stable", "latest"]
           manifestTargets:
             helm:
               name: controllers.main.containers.matter-server.image.repository

@@ -81,7 +81,7 @@ controllers:
       matter-server:
         image:
           repository: ghcr.io/home-assistant-libs/python-matter-server
-          tag: 6.6.1
+          tag: 8.1.2
           pullPolicy: IfNotPresent
         probes:
           liveness:
