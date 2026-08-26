@@ -333,7 +333,7 @@ spec:
     - namePattern: unpoller
       images:
         - alias: unpoller
-          imageName: ghcr.io/unpoller/unpoller:~v3
+          imageName: ghcr.io/unpoller/unpoller:~v4
           commonUpdateSettings:
             updateStrategy: semver
             ignoreTags: ["*-rc*", "*-beta*", "*-dev*", "latest"]

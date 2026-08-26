@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   repository: ghcr.io/unpoller/unpoller
-  tag: v3.5.0
+  tag: v4.0.1
 dashboards:
   create: false
   grafana:
