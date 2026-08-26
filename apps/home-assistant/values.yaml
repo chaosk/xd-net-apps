@@ -80,8 +80,9 @@ controllers:
             memory: 2Gi
       matter-server:
         image:
-          repository: ghcr.io/home-assistant-libs/python-matter-server
-          tag: 8.1.0
+          # Image moved from home-assistant-libs → matter-js after 8.1.0 (8.1.2 not on old registry).
+          repository: ghcr.io/matter-js/python-matter-server
+          tag: 8.1.2
           pullPolicy: IfNotPresent
         probes:
           liveness:
