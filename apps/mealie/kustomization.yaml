@@ -6,6 +6,7 @@ namespace: mealie
 resources:
   - namespace.yaml
   - postgres.yaml
+  - backup.yaml
   - pvc.yaml
   - httproute.yaml
 

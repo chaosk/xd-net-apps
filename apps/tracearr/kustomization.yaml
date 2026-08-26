@@ -8,6 +8,7 @@ resources:
   - httproute.yaml
   - image-catalog.yaml
   - postgres.yaml
+  - backup.yaml
 
 helmGlobals:
   chartHome: vendor/tracearr-0.2.2

@@ -6,6 +6,7 @@ namespace: authentik
 resources:
   - namespace.yaml
   - postgres.yaml
+  - backup.yaml
   - pvc-authentik-data.yaml
   - referencegrants/
   - httproute-pangolin.yaml

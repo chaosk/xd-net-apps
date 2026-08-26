@@ -1,16 +1,12 @@
 # CNPG restore
 
-CloudNativePG clusters live under `apps/*/postgres.yaml` (ten clusters today). The operator is installed from **xd-net** (`apps/postgres-operator.tf`, namespace `cnpg-system`).
+CloudNativePG clusters live under `apps/*/postgres.yaml` (ten clusters today). The operator and Barman Cloud plugin are installed from **xd-net** (`apps/postgres-operator.tf`, `apps/postgres-barman-plugin.tf`, namespace `cnpg-system`).
 
-## Current durability (honest)
+## Durability model
 
-As of this writing:
-
-- Every cluster uses **`instances: 1`**, **`enablePDB: false`**, **`storageClass: local-path`**.
-- There is **no** `backup` / Barman object-store / `ScheduledBackup` configuration in Git.
-- `local-path` data lives on the worker **data disk** (`scsi1` → UserVolume `/var/mnt/local-path-data`), so a [worker EPHEMERAL wipe](worker-ephemeral-wipe.md) does **not** erase those PVCs. Losing the VM/data disk, wiping that UserVolume, or a failed node with no dump still loses the database.
-
-Until object-store backups land (tracked separately), the only practical recovery paths are **logical dumps you took beforehand** or **re-bootstrap + app reconfigure**.
+- Every cluster uses **`instances: 1`**, **`enablePDB: false`**, **`storageClass: local-path`** (fast worker data disk; not Synology iSCSI).
+- `local-path` data lives on the worker **data disk** (`scsi1` → UserVolume `/var/mnt/local-path-data`), so a [worker EPHEMERAL wipe](worker-ephemeral-wipe.md) does **not** erase those PVCs. Losing the VM/data disk, wiping that UserVolume, or a failed node with no backup still loses the live database.
+- Continuous WAL archiving + scheduled base backups go to **Garage** on the NAS (`https://s3.nas.net.ecksd.ee`, bucket `cnpg-barman`) via the Barman Cloud plugin (`ObjectStore` + `ScheduledBackup` in each app’s `backup.yaml`).
 
 ## Inventory
 
@@ -27,11 +23,96 @@ Until object-store backups land (tracked separately), the only practical recover
 | `mealie-db` | `mealie` | |
 | `grafana-db` | `monitoring` | Grafana internal metadata |
 
-Bootstrap secrets (`*-db` in `secrets/`) must exist before a Cluster can `initdb` again — see `secrets/README.md`.
+Bootstrap secrets (`*-db` in `secrets/`) must exist before a Cluster can `initdb` again — see `secrets/README.md`. Barman credentials are per-namespace Secret `cnpg-barman-s3` (`ACCESS_KEY_ID`, `ACCESS_SECRET_KEY`, `REGION=garage`).
 
-## Before risky work (recommended)
+## Garage credentials (once per workspace)
 
-Take a logical dump while the cluster is healthy:
+On the NAS (from [XD-24](https://github.com/chaosk/xd-nas) bootstrap):
+
+```bash
+alias garage='docker exec -it garage /garage'
+garage bucket create cnpg-barman          # if not already created
+garage key create cnpg-barman-key         # print Key ID + secret once
+garage bucket allow cnpg-barman --read --write --owner --key cnpg-barman-key
+```
+
+Then create SOPS secrets (same key values in every CNPG namespace):
+
+```bash
+# Example for authentik; repeat for immich, monitoring, invidious, tracearr,
+# bitmagnet, paperless-ngx, speedtest-tracker, miniflux, mealie.
+cat > secrets/authentik-cnpg-barman-s3.yaml <<'EOF'
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cnpg-barman-s3
+  namespace: authentik
+  labels:
+    cnpg.io/reload: "true"
+stringData:
+  ACCESS_KEY_ID: "PASTE_KEY_ID" # sops:encrypt
+  ACCESS_SECRET_KEY: "PASTE_SECRET_KEY" # sops:encrypt
+  REGION: "garage"
+EOF
+sops --encrypt --in-place secrets/authentik-cnpg-barman-s3.yaml
+```
+
+Commit ciphertext only. Argo **platform-secrets** syncs them before (or with) the app Applications.
+
+## Verify backups
+
+```bash
+kubectl -n authentik get objectstore,scheduledbackup,backup
+kubectl -n authentik describe backup   # newest Completed?
+# On the NAS (Garage CLI): list objects under s3://cnpg-barman/
+```
+
+Nightly schedules are staggered between 03:00–04:30 UTC (`apps/*/backup.yaml`). Authentik / Immich / Grafana set `immediate: true` so the first backup runs on sync.
+
+## Restore from Garage (PITR / base backup)
+
+1. Confirm a Completed `Backup` exists and WALs are archiving for the source cluster name (Barman `serverName` defaults to the Cluster name).
+
+2. Scale down or remove the broken Cluster (and PVC if empty/corrupt). Keep the `cnpg-barman-s3` Secret and `ObjectStore` `garage` in the namespace.
+
+3. Temporarily change `apps/<app>/postgres.yaml` to recover instead of `initdb` (do **not** leave this as the steady-state Git config). Example for Authentik:
+
+```yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: authentik-db
+spec:
+  instances: 1
+  enablePDB: false
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.3
+  # Keep storage / resources / plugins as in Git
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: garage
+  bootstrap:
+    recovery:
+      source: garage-source
+  externalClusters:
+    - name: garage-source
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: garage
+          serverName: authentik-db
+```
+
+4. Apply, wait for the primary to become Ready, then restore the steady-state `bootstrap.initdb` stanza in Git (recovery is one-shot). For Immich, keep the VectorChord `imageName` and extension-related fields.
+
+5. Restart the app Deployment/Pods; watch CNPG and app logs.
+
+Upstream detail: [Barman Cloud plugin — Restoring a Cluster](https://cloudnative-pg.io/plugin-barman-cloud/docs/usage/).
+
+## Logical dump escape hatch
+
+Still useful before risky work or if the object store is unavailable:
 
 ```bash
 NS=authentik
@@ -42,31 +123,11 @@ kubectl -n "$NS" exec -i "${CLUSTER}-1" -c postgres -- \
   pg_dump -Fc -d "$DB" > "${CLUSTER}-$(date +%F).dump"
 ```
 
-Store the dump off-cluster (Synology share, encrypted backup, etc.). For Immich use the same pattern against `immich` / `immich-db-1`, keeping dumps paired with the VectorChord major.
+Restore into a fresh primary:
 
-## After PVC / node loss (no object-store backup)
+```bash
+kubectl -n "$NS" exec -i "${CLUSTER}-1" -c postgres -- \
+  pg_restore -d "$DB" --clean --if-exists < "${CLUSTER}-YYYY-MM-DD.dump"
+```
 
-1. Confirm the Cluster is unhealthy and the PVC is gone or empty:
-
-   ```bash
-   kubectl -n "$NS" get cluster,pods,pvc -l cnpg.io/cluster="$CLUSTER"
-   ```
-
-2. If the Cluster object still exists but the volume is empty, delete the Cluster (and orphaned PVC if needed) so CNPG can recreate, **or** keep the object and follow upstream [recovery](https://cloudnative-pg.io/documentation/current/recovery/) once Barman backups exist.
-
-3. With only `bootstrap.initdb` in Git, a fresh Cluster runs **empty** `initdb` using the existing `*-db` Secret. Apps that expect existing schema/data need either:
-   - restore from your `pg_dump` into the new primary, or
-   - accept a clean slate (Authentik: re-run first install; Grafana: lose preferences; Immich: catastrophic without a dump).
-
-4. Example restore into a new primary (adjust names):
-
-   ```bash
-   kubectl -n "$NS" exec -i "${CLUSTER}-1" -c postgres -- \
-     pg_restore -d "$DB" --clean --if-exists < "${CLUSTER}-YYYY-MM-DD.dump"
-   ```
-
-5. Restart the app Deployment/Pods so they reconnect; watch CNPG and app logs.
-
-## When object-store backups exist (future)
-
-Add CNPG `backup` + `ScheduledBackup` (and preferably Synology-backed storage) per cluster. Restore then uses `bootstrap.recovery` / PITR from the object store as documented upstream — update this runbook when that lands. Do not invent a recovery stanza until the backup destination and credentials are real.
+Store dumps off-cluster when you take them. For Immich keep dumps paired with the VectorChord major.

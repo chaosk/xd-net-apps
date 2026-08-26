@@ -7,6 +7,7 @@ resources:
   - namespace.yaml
   - pvc.yaml
   - postgres.yaml
+  - backup.yaml
   - httproute.yaml
 
 helmCharts:

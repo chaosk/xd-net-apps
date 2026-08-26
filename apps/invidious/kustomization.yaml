@@ -6,6 +6,7 @@ namespace: invidious
 resources:
   - namespace.yaml
   - postgres.yaml
+  - backup.yaml
   - service-companion.yaml
   - httproute.yaml
   - securitypolicy-forward-auth.yaml
