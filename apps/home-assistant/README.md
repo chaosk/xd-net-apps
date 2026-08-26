@@ -78,6 +78,8 @@ Edit **`macvlan-network.yaml`** for **`master`**, **`subnet`**, **`rangeStart`/`
 
 **`secrets/homepage-homeassistant-widget.yaml`** — long-lived access token from HA **Profile → Security** → `HOMEPAGE_VAR_HOMEASSISTANT_TOKEN`.
 
+Cluster alerts from Prometheus Alertmanager can push to the companion app via a HA webhook automation — see **`apps/monitoring/README.md`** (Alerting).
+
 ## First-time setup order
 
 1. Deploy the app (without OIDC credentials the init container only installs the custom component).

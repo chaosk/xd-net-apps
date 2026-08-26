@@ -70,4 +70,5 @@ Commit ciphertext only.
 | `grafana-oidc.yaml` | `monitoring` | Authentik Generic OAuth (`grafana-oidc`, keys `client_id`, `client_secret`). See `apps/monitoring/README.md`. |
 | `home-assistant.yaml` | `home-assistant` | Authentik OIDC for [hass-oidc-auth](https://github.com/christiaangoossens/hass-oidc-auth) (`OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`). See `apps/home-assistant/README.md`. |
 | `grafana-db.yaml` | `monitoring` | CNPG bootstrap (`grafana-db`, keys `username`, `password`; owner/database `grafana` in `apps/monitoring/postgres.yaml`). |
+| `alertmanager-ha.yaml` | `monitoring` | Alertmanager → Home Assistant webhook URL (`alertmanager-ha`, key `url`). See `apps/monitoring/README.md` (Alerting). |
 | `unpoller.yaml` | `unpoller` | UniFi API (`unpoller-unifi`, keys `unifi-url`, `unifi-user`, `password`). See `apps/unpoller/README.md`. |
