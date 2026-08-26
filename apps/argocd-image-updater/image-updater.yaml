@@ -211,7 +211,7 @@ spec:
     - namePattern: paperless-ngx
       images:
         - alias: paperless
-          imageName: ghcr.io/paperless-ngx/paperless-ngx:~2
+          imageName: ghcr.io/paperless-ngx/paperless-ngx:~3
           commonUpdateSettings:
             updateStrategy: semver
             ignoreTags: ["*-rc*", "*-beta*", "*dev*", "latest"]
