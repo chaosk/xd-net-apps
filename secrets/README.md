@@ -70,5 +70,6 @@ Commit ciphertext only.
 | `grafana-oidc.yaml` | `monitoring` | Authentik Generic OAuth (`grafana-oidc`, keys `client_id`, `client_secret`). See `apps/monitoring/README.md`. |
 | `home-assistant.yaml` | `home-assistant` | Authentik OIDC for [hass-oidc-auth](https://github.com/christiaangoossens/hass-oidc-auth) (`OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`). See `apps/home-assistant/README.md`. |
 | `grafana-db.yaml` | `monitoring` | CNPG bootstrap (`grafana-db`, keys `username`, `password`; owner/database `grafana` in `apps/monitoring/postgres.yaml`). |
+| `*-cnpg-barman-s3.yaml` (one file per CNPG app namespace, e.g. `authentik-cnpg-barman-s3.yaml`) | matching app ns | Garage S3 credentials for CNPG Barman (`cnpg-barman-s3`, keys `ACCESS_KEY_ID`, `ACCESS_SECRET_KEY`, plaintext `REGION: garage`). Create after minting the Garage key for bucket `cnpg-barman` (see `docs/cnpg-restore.md`). Label with `cnpg.io/reload: "true"`. |
 | `alertmanager-ha.yaml` | `monitoring` | Alertmanager → Home Assistant webhook URL (`alertmanager-ha`, key `url`). See `apps/monitoring/README.md` (Alerting). |
 | `unpoller.yaml` | `unpoller` | UniFi API (`unpoller-unifi`, keys `unifi-url`, `unifi-user`, `password`). See `apps/unpoller/README.md`. |
