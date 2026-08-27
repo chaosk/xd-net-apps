@@ -30,13 +30,14 @@ Favicon and logo are in `images/`. Kustomize packs them into the `homepage-image
 
 Most tiles come from **Gateway API HTTPRoutes** annotated with `gethomepage.dev/*`. Homepage discovers them via `kubernetes.yaml` (`gateway: true`). Each app’s `httproute.yaml` (or Helm values) sets group, weight, icon, href, and widget fields.
 
-Three **Management** tiles are defined manually in `services.yaml` because they are external or not on a discovered route:
+Tiles defined manually in `services.yaml` because they are external or not on a discovered route:
 
-| Tile | Weight | Widget | Credentials |
-|------|--------|--------|-------------|
-| UniFi | 10 | UniFi controller | `secrets/homepage-unifi-widget.yaml` — same local admin as UniFi Poller (`secrets/unpoller.yaml`) |
-| Pangolin | 35 | Pangolin Integration API | `secrets/homepage-pangolin-widget.yaml` — List Sites, List Resources |
-| DSM | 45 | Disk Station (`volume_1`) | `secrets/homepage-dsm-widget.yaml` |
+| Tile | Group | Weight | Widget | Credentials |
+|------|-------|--------|--------|-------------|
+| UniFi | Management | 10 | UniFi controller | `secrets/homepage-unifi-widget.yaml` — same local admin as UniFi Poller (`secrets/unpoller.yaml`) |
+| Pangolin | Management | 35 | Pangolin Integration API | `secrets/homepage-pangolin-widget.yaml` — List Sites, List Resources |
+| DSM | Management | 45 | Disk Station (`volume_1`) | `secrets/homepage-dsm-widget.yaml` |
+| Garage | Data storage | 5 | — | — (Web UI at `garage.nas.net.ecksd.ee`; status via unauthenticated S3 endpoint `s3.nas.net.ecksd.ee`) |
 
 The **Arr!** group includes an **Upcoming** calendar tile (`weight: -1`) backed by the Sonarr integration in `services.yaml`.
 
@@ -64,7 +65,7 @@ Homepage sorts tiles by `weight` (lower first). Layout groups are in `settings.y
 
 **Media**: Plex `0`, Sonarr `10`, Radarr `20`.
 
-**Data storage**: Paperless `10`, Immich `20`, Actual Budget `30`, Tube Archivist `30`.
+**Data storage**: Garage `5` (manual), Paperless `10`, Immich `20`, Actual Budget `30`, Tube Archivist `30`.
 
 **Misc**: Tracearr `0`, Speedtest Tracker `20`, Miniflux `30`, Home Assistant `30`, Bambuddy `35`, Spoolman `36`, Mealie `40`, Bitmagnet `100`.
 
