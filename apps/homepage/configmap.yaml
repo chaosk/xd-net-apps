@@ -85,6 +85,14 @@ data:
               username: "{{HOMEPAGE_VAR_DSM_USERNAME}}"
               password: "{{HOMEPAGE_VAR_DSM_PASSWORD}}"
               volume: volume_1
+    - Data storage:
+        - Garage:
+            href: https://garage.nas.net.ecksd.ee
+            description: S3-compatible object storage
+            weight: 5
+            icon: mdi-bucket-outline
+            siteMonitor: https://s3.nas.net.ecksd.ee
+            statusStyle: ""
 
   widgets.yaml: |
     - logo:
