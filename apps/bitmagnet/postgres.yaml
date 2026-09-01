@@ -7,7 +7,6 @@ spec:
   enablePDB: false
   plugins:
     - name: barman-cloud.cloudnative-pg.io
-      isWALArchiver: true
       parameters:
         barmanObjectName: garage
   imageName: ghcr.io/cloudnative-pg/postgresql:18.3
