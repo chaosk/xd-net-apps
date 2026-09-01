@@ -6,7 +6,8 @@ Self-hosted [Bitmagnet](https://bitmagnet.io/) DHT crawler and torrent search (W
 |------|---------|
 | `kustomization.yaml` | Namespace, config PVC, CNPG cluster, HTTPRoute, Helm chart. |
 | `pvc-config.yaml` | App config on StorageClass `synology` (5Gi) at `/root/.config/bitmagnet`. |
-| `postgres.yaml` | CloudNativePG cluster `bitmagnet-db` (PostgreSQL 18.3, `local-path` 300Gi). |
+| `postgres.yaml` | CloudNativePG cluster `bitmagnet-db` (PostgreSQL 18.3, `local-path` 300Gi). Barman plugin for scheduled base backups only (no WAL archiving). |
+| `backup.yaml` | Daily base backup to Garage (`cnpg-barman`), 7-day retention — shorter than other apps because the DHT index is large and re-crawlable. |
 | `values.yaml` | Image `ghcr.io/bitmagnet-io/bitmagnet`, workers via `worker run --all`, DB env from secret. |
 | `httproute.yaml` | `bitmagnet.net.ecksd.ee` → Service `bitmagnet-main:3333` (homelab Gateway only). |
 | `private-resource-pangolin.yaml` | Pangolin **private** HTTP at `bitmagnet.ecksd.ee` (Pangolin client required; not public internet). |
