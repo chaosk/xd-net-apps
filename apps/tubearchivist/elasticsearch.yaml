@@ -14,18 +14,11 @@ spec:
       labels:
         app: archivist-es
     spec:
-      initContainers:
-        - name: sysctl
-          image: busybox:1.36
-          command:
-            - sh
-            - -c
-            - sysctl -w vm.max_map_count=262144
-          securityContext:
-            privileged: true
       containers:
         - name: elasticsearch
-          image: bbilly1/tubearchivist-es:latest
+          # Pin to the ES version shipped by Tube Archivist (also available as :latest).
+          # Node-level vm.max_map_count is set in xd-net Talos patches — no privileged sysctl init.
+          image: bbilly1/tubearchivist-es:8.19.0
           ports:
             - containerPort: 9200
               name: http
