@@ -5,7 +5,8 @@ metadata:
   labels:
     name: tubearchivist
     allows-vpn-gateway: "true"
-    # Elasticsearch needs privileged sysctl init + IPC_LOCK; cluster default is baseline.
+    # Stay privileged: pod-gateway injects NET_ADMIN/NET_RAW; Elasticsearch needs a
+    # privileged sysctl init and IPC_LOCK (baseline forbids all of these).
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/audit: privileged
     pod-security.kubernetes.io/warn: privileged

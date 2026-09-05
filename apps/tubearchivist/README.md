@@ -13,7 +13,7 @@ Forward auth needs **authentik** applied first. **`TA_AUTH_PROXY_LOGOUT_URL`** p
 | File | Purpose |
 |------|---------|
 | `kustomization.yaml` | Namespace, PVCs, ES, Redis, bgutil, Deployment, Service, HTTPRoute |
-| `namespace.yaml` | **`tubearchivist`**; Pod Security **`privileged`** (Elasticsearch) |
+| `namespace.yaml` | **`tubearchivist`**; Pod Security **`privileged`** (pod-gateway `NET_ADMIN`/`NET_RAW` + Elasticsearch privileged sysctl / `IPC_LOCK`) |
 | `pvc.yaml` | **`tubearchivist-youtube`**: NFS RWX (`Retain`); cache/redis/es on **`synology`** |
 | `elasticsearch.yaml` | **`archivist-es`** StatefulSet + Service (port 9200) |
 | `redis.yaml` | **`archivist-redis`** StatefulSet + Service (port 6379) |
