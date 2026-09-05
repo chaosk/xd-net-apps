@@ -4,6 +4,7 @@ metadata:
   name: vpn-gateway
   labels:
     name: vpn-gateway
+    # pod-gateway + Gluetun need NET_ADMIN (VXLAN, WireGuard, iptables).
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/audit: privileged
     pod-security.kubernetes.io/warn: privileged
