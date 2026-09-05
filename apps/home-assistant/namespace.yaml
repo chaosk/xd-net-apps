@@ -4,6 +4,8 @@ metadata:
   name: home-assistant
   labels:
     name: home-assistant
-    pod-security.kubernetes.io/enforce: privileged
-    pod-security.kubernetes.io/audit: privileged
-    pod-security.kubernetes.io/warn: privileged
+    # Init containers run as root to write the config PVC; baseline allows that.
+    # Restricted would require non-root and is not viable without chart changes.
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/warn: baseline
