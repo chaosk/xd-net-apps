@@ -59,7 +59,7 @@ Home Assistant gets a **second NIC** on **192.168.2.0/24** via [Multus](https://
 1. **`apps/`** — `multus_enabled = true` (Multus + `cni.exclusive=false`, includes **macvlan** and **sbr** binaries). See **`apps/multus.tf`**. The Multus DaemonSet labels each node **`multus.io/ready=true`** when **`multus.sock`** is up; macvlan pods require that label via **`nodeSelector`** in `values.yaml`.
 2. **`infra/`** — workers get a **second Proxmox NIC** on **`worker_iot_vlan_id`** (default **2** / 192.168.2.0/24) and Talos **`ens19`** with no address (`patches/worker-iot-nic.yaml`).
 
-The namespace uses **`pod-security: privileged`** because the OIDC init container runs as root to write the config PVC.
+The namespace uses **`pod-security: baseline`**. Init containers run as root to write the config PVC (allowed under baseline; **`restricted`** would need non-root and is not viable without chart changes).
 
 **After sync:**
 
@@ -95,7 +95,7 @@ Under **Settings → System → Network**: set **Home Assistant URL** to `https:
 
 | File | Purpose |
 |------|---------|
-| `namespace.yaml` | **`home-assistant`** namespace (`pod-security: privileged`) |
+| `namespace.yaml` | **`home-assistant`** namespace (`pod-security: baseline`) |
 | `pvc.yaml` | Config volume on Synology (`/config`, **10Gi**) |
 | `pvc-matter.yaml` | Matter fabric storage on Synology (`/data`, **2Gi**) |
 | `values.yaml` | HA + **python-matter-server** sidecar, probes, Multus annotation |
