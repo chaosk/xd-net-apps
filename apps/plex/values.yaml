@@ -1,24 +1,21 @@
 fullnameOverride: plex
-
 # Pin PMS image (chart 1.5.0 defaults to index.docker.io + 1.43.0.10492-…).
 # Use docker.io (not index.docker.io) so the rendered image matches Image Updater's
 # imageName docker.io/plexinc/pms-docker — otherwise updates are skipped.
 image:
   registry: docker.io
   repository: plexinc/pms-docker
-  tag: "1.43.3.10896-cb3ebc72d"
-
+  tag: "1.43.4.10903-e5521bd8c"
 ingress:
   enabled: false
-
 httpRoute:
   enabled: true
   parentRefs:
-    - name: shared
-      namespace: gateway
-      sectionName: https
+  - name: shared
+    namespace: gateway
+    sectionName: https
   hostnames:
-    - plex.net.ecksd.ee
+  - plex.net.ecksd.ee
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/group: Media
@@ -35,14 +32,11 @@ httpRoute:
     gethomepage.dev/widget.enableUser: "true"
     gethomepage.dev/widget.expandOneStreamToTwoRows: "true"
     gethomepage.dev/widget.showEpisodeNumber: "true"
-
 service:
   type: ClusterIP
   port: 32400
-
 nodeSelector:
   "intel.feature.node.kubernetes.io/gpu": "true"
-
 pms:
   configExistingClaim: plex-config
   resources:
@@ -54,7 +48,6 @@ pms:
       memory: 4Gi
       cpu: "4"
       gpu.intel.com/i915: 1
-
 extraEnv:
   TZ: UTC
   # LAN clients use plex-lan LoadBalancer (192.168.4.202:32400) so Plex sees real source IPs.
@@ -62,74 +55,70 @@ extraEnv:
   ADVERTISE_IP: "http://192.168.4.202:32400,https://plex.net.ecksd.ee:443,https://plex.ecksd.ee:443"
   # VA-API uses the GPU passed through by the Intel GPU device plugin (gpu.intel.com/i915).
   # In Plex: Settings → Transcoder → enable hardware acceleration.
-
 extraVolumeMounts:
-  - name: media
-    # Library root inside the container (many examples use /data; this app uses /media).
-    mountPath: /media
-
+- name: media
+  # Library root inside the container (many examples use /data; this app uses /media).
+  mountPath: /media
 # Tube Archivist Plex integration — https://github.com/tubearchivist/tubearchivist-plex
 extraInitContainers:
-  - name: tubearchivist-plex
-    image: alpine:3.22
-    imagePullPolicy: IfNotPresent
-    command: ["/bin/sh", "/install/install.sh"]
-    env:
-      - name: TA_URL
-        valueFrom:
-          secretKeyRef:
-            name: plex-tubearchivist-plex
-            key: TA_URL
-            optional: true
-      - name: TA_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: plex-tubearchivist-plex
-            key: TA_API_KEY
-    volumeMounts:
-      - name: pms-config
-        mountPath: /config
-      - name: tubearchivist-plex-install
-        mountPath: /install
-        readOnly: true
-    resources:
-      requests:
-        cpu: 50m
-        memory: 64Mi
-      limits:
-        memory: 256Mi
-
-extraVolumes:
-  - name: media
-    persistentVolumeClaim:
-      claimName: plex-media
+- name: tubearchivist-plex
+  image: alpine:3.22
+  imagePullPolicy: IfNotPresent
+  command: ["/bin/sh", "/install/install.sh"]
+  env:
+  - name: TA_URL
+    valueFrom:
+      secretKeyRef:
+        name: plex-tubearchivist-plex
+        key: TA_URL
+        optional: true
+  - name: TA_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: plex-tubearchivist-plex
+        key: TA_API_KEY
+  volumeMounts:
+  - name: pms-config
+    mountPath: /config
   - name: tubearchivist-plex-install
-    configMap:
-      name: plex-tubearchivist-plex-install
-      defaultMode: 0755
-
+    mountPath: /install
+    readOnly: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+extraVolumes:
+- name: media
+  persistentVolumeClaim:
+    claimName: plex-media
+- name: tubearchivist-plex-install
+  configMap:
+    name: plex-tubearchivist-plex-install
+    defaultMode: 0755
 # PMS logs to files under /config, not stdout. Alloy (monitoring) ships container logs to Loki.
 extraContainers:
-  - name: log-tailer
-    image: busybox:1.37
-    command:
-      - sh
-      - -c
-      - |
-        set -eu
-        logdir="/config/Library/Application Support/Plex Media Server/Logs"
-        until [ -f "$logdir/Plex Media Server.log" ]; do
-          echo "log-tailer: waiting for Plex Media Server.log"
-          sleep 5
-        done
-        exec tail -n 500 -F "$logdir/Plex Media Server.log"
-    resources:
-      requests:
-        cpu: 5m
-        memory: 16Mi
-      limits:
-        memory: 64Mi
-    volumeMounts:
-      - name: pms-config
-        mountPath: /config
-        readOnly: true
+- name: log-tailer
+  image: busybox:1.37
+  command:
+  - sh
+  - -c
+  - |
+    set -eu
+    logdir="/config/Library/Application Support/Plex Media Server/Logs"
+    until [ -f "$logdir/Plex Media Server.log" ]; do
+      echo "log-tailer: waiting for Plex Media Server.log"
+      sleep 5
+    done
+    exec tail -n 500 -F "$logdir/Plex Media Server.log"
+  resources:
+    requests:
+      cpu: 5m
+      memory: 16Mi
+    limits:
+      memory: 64Mi
+  volumeMounts:
+  - name: pms-config
+    mountPath: /config
+    readOnly: true
