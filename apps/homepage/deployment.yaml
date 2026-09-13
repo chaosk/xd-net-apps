@@ -31,6 +31,33 @@ spec:
         # Avoid ~500ms IPv6 attempt per widget proxy call on dual-stack Talos nodes.
         - name: HOMEPAGE_PROXY_DISABLE_IPV6
           value: "true"
+        # Built-in auth (Homepage v2+) — Authentik OIDC; see secrets/homepage-oidc.yaml.
+        # https://gethomepage.dev/installation/#security-authentication
+        - name: HOMEPAGE_AUTH_ENABLED
+          value: "true"
+        - name: HOMEPAGE_EXTERNAL_URL
+          value: https://net.ecksd.ee
+        - name: HOMEPAGE_OIDC_ISSUER
+          value: https://authentik.net.ecksd.ee/application/o/homepage/
+        - name: HOMEPAGE_OIDC_NAME
+          value: Authentik
+        - name: HOMEPAGE_OIDC_AUTO_LOGIN
+          value: "true"
+        - name: HOMEPAGE_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: homepage-oidc
+              key: HOMEPAGE_AUTH_SECRET
+        - name: HOMEPAGE_OIDC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: homepage-oidc
+              key: HOMEPAGE_OIDC_CLIENT_ID
+        - name: HOMEPAGE_OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: homepage-oidc
+              key: HOMEPAGE_OIDC_CLIENT_SECRET
         - name: HOMEPAGE_VAR_AUTHENTIK_TOKEN
           valueFrom:
             secretKeyRef:

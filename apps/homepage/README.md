@@ -10,6 +10,16 @@ kubectl apply -k apps/homepage
 
 Widget API keys and credentials live in `secrets/homepage-*.yaml`. SOPS-encrypt each file, add it to the **platform-secrets** Application in xd-net, and sync. The Deployment maps those Secrets to `HOMEPAGE_VAR_*` environment variables.
 
+## Authentication (OIDC)
+
+Homepage v2 built-in auth with Authentik OIDC ([docs](https://gethomepage.dev/installation/#security-authentication)). Envoy forward-auth is **not** used so `/api/auth/*` stays app-local.
+
+1. Sync **`secrets/homepage-oidc.yaml`** via **platform-secrets** (`HOMEPAGE_AUTH_SECRET`, `HOMEPAGE_OIDC_CLIENT_ID`, `HOMEPAGE_OIDC_CLIENT_SECRET`).
+2. In Authentik, create an **OAuth2/OpenID Provider** + Application with slug **`homepage`**, grant types **`authorization_code`** and **`refresh_token`**, redirect URI **`https://net.ecksd.ee/api/auth/callback/homepage-oidc`** (strict). Set the provider **Client ID** / **Client Secret** to the values in the Secret (`sops -d secrets/homepage-oidc.yaml`).
+3. Issuer used by Homepage: **`https://authentik.net.ecksd.ee/application/o/homepage/`**. Access is whoever Authentik authorizes for this client (no extra claim checks in Homepage).
+
+`HOMEPAGE_OIDC_AUTO_LOGIN=true` skips the local login page. Use **`/auth/signin?autologin=0`** if you need the sign-in page without redirecting.
+
 ## Config
 
 All YAML is in the `homepage-config` ConfigMap (`configmap.yaml`), mounted at `/app/config`.
@@ -75,4 +85,4 @@ Image tag is set in `kustomization.yaml` and updated by Argo CD Image Updater.
 
 `HOMEPAGE_ALLOWED_HOSTS=net.ecksd.ee`. `HOMEPAGE_PROXY_DISABLE_IPV6=true` avoids IPv6 timeout on dual-stack Talos nodes during widget proxy calls.
 
-The ServiceAccount has RBAC to read cluster state for the Kubernetes widget and HTTPRoute discovery.
+The ServiceAccount ClusterRole is limited to what this install uses: Gateway API discovery (`gateways`, `httproutes`), core objects for the Kubernetes widget / pod-selector (`namespaces`, `pods`, `nodes`), and `metrics.k8s.io`. Ingress, Traefik, apps workloads, and `watch` are omitted (`ingress: false`, `traefik: false` in `kubernetes.yaml`).

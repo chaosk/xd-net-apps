@@ -28,7 +28,8 @@ controllers:
           pullPolicy: IfNotPresent
         env:
           WEB_PORT: "8080"
-          # UI behind Gateway only; metrics and Homepage widget use in-cluster HTTP.
+          # Native PeaNUT auth off: Gateway uses Authentik forward-auth; Prometheus
+          # and the Homepage widget call the in-cluster Service (no Gateway).
           AUTH_DISABLED: "true"
         probes:
           liveness:
