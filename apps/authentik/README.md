@@ -77,6 +77,10 @@ In **xd-net** `config.auto.tfvars` (gitignored): set **`argocd_oidc_issuer`**, *
 
 Grafana uses native **Generic OAuth** in `apps/monitoring/values-prometheus.yaml`, not forward auth. Authentik provider slug **`grafana`**, redirect URI **`https://grafana.net.ecksd.ee/login/generic_oauth`**, grant types **`authorization_code`** and **`refresh_token`**, plus scoped **`profile`** (no groups) and **`groups`** mappings (**`Grafana Admins`** / **`Grafana Editors`** only). Credentials live in **`secrets/grafana-oidc.yaml`**. See `apps/monitoring/README.md`.
 
+## Homepage (OIDC)
+
+Homepage uses built-in OIDC auth ([docs](https://gethomepage.dev/installation/#security-authentication)), not Envoy forward auth. Authentik provider slug **`homepage`**, redirect URI **`https://net.ecksd.ee/api/auth/callback/homepage-oidc`** (strict), grant types **`authorization_code`** and **`refresh_token`**. Set the provider **Client ID** / **Client Secret** to match **`secrets/homepage-oidc.yaml`** (`sops -d`). Issuer in the Deployment: **`https://authentik.net.ecksd.ee/application/o/homepage/`**. See `apps/homepage/README.md`.
+
 ## Home Assistant (OIDC)
 
 Home Assistant has no built-in OIDC. This repo installs **[hass-oidc-auth](https://github.com/christiaangoossens/hass-oidc-auth)** via an init container and configures **`auth_oidc`** in `configuration.yaml` when **`secrets/home-assistant.yaml`** is present. Authentik provider slug **`home-assistant`**, redirect URI **`https://homeassistant.net.ecksd.ee/auth/oidc/callback`** (strict), grant types **`authorization_code`** and **`refresh_token`**. See [Authentik integration guide](https://integrations.goauthentik.io/miscellaneous/home-assistant/) and `apps/home-assistant/README.md`. Envoy forward auth is **not** used (WebSockets and the mobile app).

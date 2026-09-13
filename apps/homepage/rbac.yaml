@@ -10,18 +10,14 @@ kind: ClusterRole
 metadata:
   name: homepage-kubernetes-discovery
 rules:
+  # Kubernetes widget (cluster + nodes) and pod-selector status on discovered tiles.
   - apiGroups: [""]
-    resources: ["pods", "nodes", "namespaces", "services", "endpoints"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["apps"]
-    resources: ["deployments", "replicasets", "statefulsets", "daemonsets"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["networking.k8s.io"]
-    resources: ["ingresses"]
-    verbs: ["get", "list", "watch"]
+    resources: ["namespaces", "pods", "nodes"]
+    verbs: ["get", "list"]
+  # Gateway API HTTPRoute discovery (kubernetes.yaml gateway: true). Ingress/Traefik off.
   - apiGroups: ["gateway.networking.k8s.io"]
-    resources: ["gateways", "httproutes", "grpcroutes", "tlsroutes", "tcproutes", "udproutes"]
-    verbs: ["get", "list", "watch"]
+    resources: ["gateways", "httproutes"]
+    verbs: ["get", "list"]
   - apiGroups: ["metrics.k8s.io"]
     resources: ["pods", "nodes"]
     verbs: ["get", "list"]
@@ -38,4 +34,3 @@ subjects:
   - kind: ServiceAccount
     name: homepage
     namespace: homepage
-

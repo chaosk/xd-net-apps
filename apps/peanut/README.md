@@ -17,16 +17,20 @@ After sync, enable **Prometheus** in PeaNUT **Settings** and allow in-cluster sc
 
 ## Access
 
-- UI: `https://peanut.net.ecksd.ee` (Gateway `shared`, Management group on Homepage)
+- UI: `https://peanut.net.ecksd.ee` (Gateway `shared`, Authentik forward-auth; Management group on Homepage)
+- In-cluster: `http://peanut.peanut.svc.cluster.local:8080` (no forward auth — Prometheus and Homepage widget)
+
+Forward auth needs **authentik** applied first (ReferenceGrant **`forward-auth-peanut`** and outpost route). Domain-level Proxy provider on **`net.ecksd.ee`** covers this hostname; see **`apps/authentik/README.md`**.
 
 ## Layout
 
 | File | Purpose |
 |------|---------|
-| `kustomization.yaml` | Namespace, PVC, Helm `app-template`, HTTPRoute, ServiceMonitor |
+| `kustomization.yaml` | Namespace, PVC, Helm `app-template`, HTTPRoute, SecurityPolicy, ServiceMonitor |
 | `values.yaml` | PeaNUT container, PVC `/config`, init seeds `settings.yml` from Secret |
 | `pvc.yaml` | `peanut-config` on `synology` |
-| `httproute.yaml` | `peanut.net.ecksd.ee` + Homepage widget |
+| `httproute.yaml` | `peanut.net.ecksd.ee` + outpost path + Homepage widget |
+| `securitypolicy-forward-auth.yaml` | Envoy Gateway forward auth to Authentik |
 | `servicemonitor.yaml` | `/api/v1/metrics` for kube-prometheus-stack |
 
 ## Apply
