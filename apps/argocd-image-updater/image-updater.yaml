@@ -245,8 +245,8 @@ spec:
             ignoreTags: ["*beta*", "*dev*", "latest"]
           manifestTargets:
             helm:
-              # Tag only: chart splits registry + repository; writing the full image into
-              # image.repository would double-prefix (docker.io/docker.io/…).
+              # name = repository only; registry stays image.registry (avoid docker.io/docker.io/…).
+              name: image.repository
               tag: image.tag
 
     - namePattern: prowlarr
