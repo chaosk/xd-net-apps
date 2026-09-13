@@ -58,9 +58,11 @@ spec:
             - name: kubectl
               image: registry.k8s.io/kubectl:v1.36.0
               command:
-                - /bin/sh
-                - -c
-                - kubectl rollout restart deployment/invidious-main deployment/invidious-companion
+                - kubectl
+                - rollout
+                - restart
+                - deployment/invidious-main
+                - deployment/invidious-companion
               securityContext:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: true
