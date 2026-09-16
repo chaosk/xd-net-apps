@@ -1,0 +1,27 @@
+# Blackbox HTTP probes for Pangolin edge (remote access).
+# Requires prometheus-blackbox-exporter Helm release in this kustomization.
+# probeSelector on kube-prometheus-stack matches label release: kube-prometheus-stack.
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: pangolin-edge
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobName: pangolin-edge
+  interval: 60s
+  scrapeTimeout: 15s
+  module: http_2xx
+  prober:
+    url: prometheus-blackbox-exporter.monitoring.svc:9115
+    path: /probe
+  targets:
+    staticConfig:
+      labels:
+        service: pangolin
+      static:
+        # Dashboard / app API path used by the edge Docker healthcheck.
+        - https://pangolin.ecksd.ee/api/v1/
+        # Integration API (pangolin-operator / Homepage widget).
+        - https://pangolin-api.ecksd.ee/v1/docs

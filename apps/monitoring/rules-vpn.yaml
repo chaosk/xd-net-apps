@@ -1,0 +1,60 @@
+# Critical VPN / remote-access alerts for Alertmanager → Home Assistant routing.
+# Pangolin edge: blackbox Probe in probes-vpn.yaml (probe_success).
+# Newt: kube-state-metrics (deployment availability).
+# vpn-gateway: same metric; Gluetun readinessProbe on the health HTTP server
+# (apps/vpn-gateway) drops available replicas when the tunnel healthcheck fails.
+# Intentionally not paging on generic KubePodCrashLooping / TargetDown.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: vpn-critical
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: vpn.critical
+      rules:
+        - alert: PangolinEdgeDown
+          expr: probe_success{job="pangolin-edge"} == 0
+          for: 3m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pangolin edge probe failed for {{ $labels.instance }}"
+            description: >-
+              Blackbox http_2xx probe against Pangolin ({{ $labels.instance }})
+              has been failing for more than 3m. Remote access dashboard or
+              Integration API is unreachable from the cluster.
+
+        - alert: PangolinNewtDown
+          expr: >-
+            kube_deployment_status_replicas_available{
+              namespace="pangolin-operator",
+              deployment="xd-net"
+            } == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pangolin Newt site xd-net has no available replicas"
+            description: >-
+              Deployment pangolin-operator/xd-net (NewtSite tunnel client) has
+              zero available replicas. Cluster-side Pangolin connectivity is down
+              even if the edge VM still answers HTTP.
+
+        - alert: VpnGatewayDown
+          expr: >-
+            kube_deployment_status_replicas_available{
+              namespace="vpn-gateway",
+              deployment="vpn-gateway-pod-gateway-main"
+            } == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "vpn-gateway (Gluetun egress) has no available replicas"
+            description: >-
+              Deployment vpn-gateway/vpn-gateway-pod-gateway-main has zero
+              available replicas (pod down or Gluetun readiness failing on the
+              VPN health server). Pods labeled vpn-gateway=true lose VPN egress.
