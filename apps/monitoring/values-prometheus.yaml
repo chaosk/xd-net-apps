@@ -78,7 +78,7 @@ alertmanager:
             - alertname = Watchdog
         - receiver: home-assistant
           matchers:
-            - alertname =~ "^(KubeNodeNotReady|KubeNodeUnreachable|KubeAPIDown|KubePersistentVolumeFillingUp|KubePersistentVolumeInodesFillingUp|NodeFilesystemSpaceFillingUp|NodeFilesystemAlmostOutOfSpace|CNPGInstanceDown|CNPGClusterDown)$"
+            - alertname =~ "^(KubeNodeNotReady|KubeNodeUnreachable|KubeAPIDown|KubePersistentVolumeFillingUp|KubePersistentVolumeInodesFillingUp|NodeFilesystemSpaceFillingUp|NodeFilesystemAlmostOutOfSpace|CNPGInstanceDown|CNPGClusterDown|PangolinEdgeDown|PangolinNewtDown|VpnGatewayDown)$"
     receivers:
       - name: "null"
       - name: home-assistant

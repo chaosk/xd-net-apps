@@ -12,6 +12,8 @@ resources:
   - scrape-apps.yaml
   - scrape-platform.yaml
   - rules-cnpg.yaml
+  - rules-vpn.yaml
+  - probes-vpn.yaml
   - dashboards/
 
 # kube-prometheus-stack renders hostNetwork: false explicitly; the API/operator often
@@ -58,3 +60,9 @@ helmCharts:
     releaseName: alloy
     namespace: monitoring
     valuesFile: values-alloy.yaml
+  - name: prometheus-blackbox-exporter
+    repo: https://prometheus-community.github.io/helm-charts
+    version: 11.10.0
+    releaseName: prometheus-blackbox-exporter
+    namespace: monitoring
+    valuesFile: values-blackbox.yaml

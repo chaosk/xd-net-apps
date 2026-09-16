@@ -5,6 +5,7 @@ Prometheus, Grafana, and Loki for the xd-net cluster, installed with upstream He
 | Chart | Version | Role |
 |-------|---------|------|
 | [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) | 85.3.0 | Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics |
+| [prometheus-blackbox-exporter](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-blackbox-exporter) | 11.10.0 | HTTP probes for Pangolin edge (`Probe` CRs) |
 | [loki](https://github.com/grafana/loki/tree/main/production/helm/loki) | 7.0.0 | Log storage (SingleBinary, Synology PVC) |
 | [alloy](https://github.com/grafana/alloy/tree/main/operations/helm/charts/alloy) | 1.8.1 | Pod log collection |
 
@@ -25,7 +26,10 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `postgres.yaml` | CNPG cluster **`grafana-db`** (Grafana internal metadata on `local-path`). |
 | `kustomization.yaml` | Namespace, HTTPRoute, three Helm releases, dashboard ConfigMaps. |
 | `values-prometheus.yaml` | Retention, Synology PVCs for Prometheus and Alertmanager, Grafana Postgres + admin Secret, thin apiserver scrape, Alertmanager → Home Assistant routing. |
+| `values-blackbox.yaml` | prometheus-blackbox-exporter (HTTP modules for `Probe` CRs). |
 | `rules-cnpg.yaml` | Critical `PrometheusRule` for CNPG (`CNPGInstanceDown`, `CNPGClusterDown`). |
+| `rules-vpn.yaml` | Critical VPN / remote-access rules (`PangolinEdgeDown`, `PangolinNewtDown`, `VpnGatewayDown`). |
+| `probes-vpn.yaml` | Blackbox `Probe` for Pangolin dashboard API and Integration API. |
 | `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
@@ -109,8 +113,21 @@ Alertmanager is enabled. The default receiver is **`null`** (no outbound notify)
 | **KubeNodeNotReady**, **KubeNodeUnreachable**, **KubeAPIDown** | chart defaults | Node / API failure |
 | **KubePersistentVolumeFillingUp**, **KubePersistentVolumeInodesFillingUp**, **NodeFilesystemSpaceFillingUp**, **NodeFilesystemAlmostOutOfSpace** | chart defaults | PVC / node disk pressure |
 | **CNPGInstanceDown**, **CNPGClusterDown** | `rules-cnpg.yaml` | CloudNativePG instance or whole cluster not up |
+| **PangolinEdgeDown** | `rules-vpn.yaml` + `probes-vpn.yaml` | Pangolin HTTP probe fail (dashboard `/api/v1/` or Integration API `/v1/docs`), `for: 3m` |
+| **PangolinNewtDown** | `rules-vpn.yaml` | NewtSite deployment `pangolin-operator/xd-net` has zero available replicas, `for: 2m` |
+| **VpnGatewayDown** | `rules-vpn.yaml` | Gluetun gateway `vpn-gateway/vpn-gateway-pod-gateway-main` has zero available replicas, `for: 2m` |
 
-**Watchdog** stays on receiver **`null`** (always-firing heartbeat; do not page the phone). Warnings (CrashLoop, TargetDown on optional scrapes, CPU/memory, etc.) also stay on **`null`**.
+**Watchdog** stays on receiver **`null`** (always-firing heartbeat; do not page the phone). Warnings (CrashLoop, TargetDown on optional scrapes, CPU/memory, etc.) also stay on **`null`**. Generic pod CrashLoop for VPN workloads is intentionally **not** phone-paged; use the named VPN alerts above instead.
+
+### VPN / remote-access notes
+
+| Surface | What “unavailable” means here | Limitation / follow-up |
+|---------|-------------------------------|-------------------------|
+| Pangolin edge | In-cluster blackbox `http_2xx` to public HTTPS URLs | Proves path from the cluster (hairpin/LAN), not a pure WAN client path. An external probe (outside the homelab) would catch ISP/WAN-only failures. |
+| Newt | kube-state-metrics: no available Newt replicas | Does not detect “pod Ready but Gerbil/UDP tunnel broken”. |
+| vpn-gateway / Gluetun | kube-state-metrics: gateway Deployment unavailable | Does not detect “pod Ready but WireGuard egress dead”. Follow-up: Gluetun control-server + exporter, or an egress probe from a `vpn-gateway=true` pod. |
+
+Silence examples (Alertmanager UI or API): `alertname=PangolinEdgeDown`, `alertname=VpnGatewayDown`, or `alertname=~"Pangolin.*|VpnGatewayDown"` during maintenance.
 
 In the Alertmanager UI, **`null` is a real receiver name** (the default sink), not “unconfigured.” Most firing alerts show `null` on purpose. Whitelist names only appear under **`home-assistant`** while they are actively firing (they are quiet when the cluster is healthy).
 
@@ -168,6 +185,7 @@ Pins live in `kustomization.yaml` under `helmCharts[].version` (and the version 
 
 1. Pick a target chart version from upstream release notes:
    - [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/releases?q=kube-prometheus-stack)
+   - [prometheus-blackbox-exporter](https://github.com/prometheus-community/helm-charts/releases?q=prometheus-blackbox-exporter)
    - [loki](https://github.com/grafana/loki/releases?q=helm-loki)
    - [alloy](https://github.com/grafana/alloy/releases?q=helm-chart)
 2. Set the matching `helmCharts[].version` in `kustomization.yaml` and update the version table above.
@@ -178,7 +196,7 @@ Pins live in `kustomization.yaml` under `helmCharts[].version` (and the version 
    helm repo add grafana https://grafana.github.io/helm-charts
    helm repo update
    helm show values prometheus-community/kube-prometheus-stack --version <new> > /tmp/kps-values.yaml
-   # likewise: grafana/loki --version <new>, grafana/alloy --version <new>
+   # likewise: prometheus-community/prometheus-blackbox-exporter, grafana/loki, grafana/alloy
    diff -u values-prometheus.yaml /tmp/kps-values.yaml   # review; do not overwrite our values wholesale
    ```
 

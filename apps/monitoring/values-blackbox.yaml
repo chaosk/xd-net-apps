@@ -1,0 +1,35 @@
+# https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-blackbox-exporter
+# Used by Probe CRs in probes-vpn.yaml (Pangolin edge HTTP checks).
+
+# Do not set releaseLabel: true — that stamps release=<helm release name>, which
+# does not match kube-prometheus-stack's ServiceMonitor/Probe selector.
+releaseLabel: false
+
+replicas: 1
+
+resources:
+  requests:
+    cpu: 20m
+    memory: 32Mi
+  limits:
+    memory: 64Mi
+
+config:
+  modules:
+    http_2xx:
+      prober: http
+      timeout: 10s
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        follow_redirects: true
+        preferred_ip_protocol: "ip4"
+        # Public edge certs are publicly trusted; do not skip verify.
+        tls_config:
+          insecure_skip_verify: false
+
+serviceMonitor:
+  selfMonitor:
+    enabled: true
+    labels:
+      release: kube-prometheus-stack
+    interval: 60s
