@@ -32,7 +32,9 @@ Helm release **`vpn-gateway`** (`angelnu-charts/pod-gateway`) via `kustomization
 
 ## Tunnel health → Ready
 
-Gluetun exposes an HTTP health server (200 = tunnel OK, 500 = healthcheck failing). `values-pod-gateway.yaml` sets **`HEALTH_SERVER_ADDRESS=0.0.0.0:9999`** and a **readinessProbe** on that port so a dead WireGuard path marks the gateway pod NotReady (available replicas drop). That drives the **`VpnGatewayDown`** alert in `apps/monitoring` without waiting for a container crash.
+Gluetun exposes a local HTTP health server (200 = tunnel OK, 500 = healthcheck failing). A **readinessProbe** runs `/gluetun-entrypoint healthcheck` inside the container so a dead WireGuard path marks the gateway pod NotReady (available replicas drop). That drives **`VpnGatewayDown`** in `apps/monitoring`.
+
+Do **not** use kubelet `httpGet` against the pod IP for this: Gluetun’s firewall typically times out node→pod probes to `:9999` even when `http://127.0.0.1:9999/` is healthy inside the container.
 
 Gluetun may still log “restarting VPN because it failed to pass the healthcheck” while NotReady; that is expected until the provider path recovers.
 
@@ -42,9 +44,12 @@ Gluetun may still log “restarting VPN because it failed to pass the healthchec
 kubectl get pods -n vpn-gateway -o wide
 kubectl get pods -n tubearchivist -o wide
 
-# Health server (200 when tunnel OK; 500 while Gluetun's healthcheck is failing)
+# Local health (200 when tunnel OK; 500 while Gluetun's healthcheck is failing)
 kubectl exec -n vpn-gateway deploy/vpn-gateway-pod-gateway-main -c gluetun -- \
   wget -qO- -S http://127.0.0.1:9999/ 2>&1 | head
+# Same check the readinessProbe runs (exit 0 = Ready path)
+kubectl exec -n vpn-gateway deploy/vpn-gateway-pod-gateway-main -c gluetun -- \
+  /gluetun-entrypoint healthcheck; echo exit:$?
 
 kubectl exec -n tubearchivist deploy/tubearchivist -c tubearchivist -- wget -qO- https://api.ipify.org
 kubectl exec -n tubearchivist deploy/archivist-es -- wget -qO- https://api.ipify.org
