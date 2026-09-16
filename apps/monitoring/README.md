@@ -115,7 +115,7 @@ Alertmanager is enabled. The default receiver is **`null`** (no outbound notify)
 | **CNPGInstanceDown**, **CNPGClusterDown** | `rules-cnpg.yaml` | CloudNativePG instance or whole cluster not up |
 | **PangolinEdgeDown** | `rules-vpn.yaml` + `probes-vpn.yaml` | Pangolin HTTP probe fail (dashboard `/api/v1/` or Integration API `/v1/docs`), `for: 3m` |
 | **PangolinNewtDown** | `rules-vpn.yaml` | NewtSite deployment `pangolin-operator/xd-net` has zero available replicas, `for: 2m` |
-| **VpnGatewayDown** | `rules-vpn.yaml` | Gluetun gateway `vpn-gateway/vpn-gateway-pod-gateway-main` has zero available replicas, `for: 2m` |
+| **VpnGatewayDown** | `rules-vpn.yaml` + Gluetun readiness in `apps/vpn-gateway` | Gateway has zero available replicas (pod down **or** Gluetun health HTTP 500 / tunnel healthcheck failing), `for: 2m` |
 
 **Watchdog** stays on receiver **`null`** (always-firing heartbeat; do not page the phone). Warnings (CrashLoop, TargetDown on optional scrapes, CPU/memory, etc.) also stay on **`null`**. Generic pod CrashLoop for VPN workloads is intentionally **not** phone-paged; use the named VPN alerts above instead.
 
@@ -125,7 +125,7 @@ Alertmanager is enabled. The default receiver is **`null`** (no outbound notify)
 |---------|-------------------------------|-------------------------|
 | Pangolin edge | In-cluster blackbox `http_2xx` to public HTTPS URLs | Proves path from the cluster (hairpin/LAN), not a pure WAN client path. An external probe (outside the homelab) would catch ISP/WAN-only failures. |
 | Newt | kube-state-metrics: no available Newt replicas | Does not detect “pod Ready but Gerbil/UDP tunnel broken”. |
-| vpn-gateway / Gluetun | kube-state-metrics: gateway Deployment unavailable | Does not detect “pod Ready but WireGuard egress dead”. Follow-up: Gluetun control-server + exporter, or an egress probe from a `vpn-gateway=true` pod. |
+| vpn-gateway / Gluetun | kube-state-metrics available replicas; Gluetun `readinessProbe` → health server (`HEALTH_SERVER_ADDRESS=0.0.0.0:9999`) so a failed tunnel healthcheck marks the pod NotReady | Catches the common Gluetun “restarting VPN because healthcheck failed” loop without a separate exporter. Still not a full egress IP assertion (e.g. ipify from a routed pod). |
 
 Silence examples (Alertmanager UI or API): `alertname=PangolinEdgeDown`, `alertname=VpnGatewayDown`, or `alertname=~"Pangolin.*|VpnGatewayDown"` during maintenance.
 

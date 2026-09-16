@@ -1,6 +1,8 @@
 # Critical VPN / remote-access alerts for Alertmanager → Home Assistant routing.
 # Pangolin edge: blackbox Probe in probes-vpn.yaml (probe_success).
-# Newt + vpn-gateway: kube-state-metrics (deployment availability).
+# Newt: kube-state-metrics (deployment availability).
+# vpn-gateway: same metric; Gluetun readinessProbe on the health HTTP server
+# (apps/vpn-gateway) drops available replicas when the tunnel healthcheck fails.
 # Intentionally not paging on generic KubePodCrashLooping / TargetDown.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -54,4 +56,5 @@ spec:
             summary: "vpn-gateway (Gluetun egress) has no available replicas"
             description: >-
               Deployment vpn-gateway/vpn-gateway-pod-gateway-main has zero
-              available replicas. Pods labeled vpn-gateway=true lose VPN egress.
+              available replicas (pod down or Gluetun readiness failing on the
+              VPN health server). Pods labeled vpn-gateway=true lose VPN egress.

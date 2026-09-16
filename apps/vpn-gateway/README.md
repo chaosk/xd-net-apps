@@ -30,11 +30,21 @@ Helm release **`vpn-gateway`** (`angelnu-charts/pod-gateway`) via `kustomization
 2. `kubectl kustomize apps/vpn-gateway --enable-helm | kubectl apply -f -`
 3. Recreate opted-in pods (e.g. `kubectl apply -k apps/tubearchivist`, `kubectl apply` for qBittorrent) with **`vpn-gateway: "true"`** on the pod template
 
+## Tunnel health → Ready
+
+Gluetun exposes an HTTP health server (200 = tunnel OK, 500 = healthcheck failing). `values-pod-gateway.yaml` sets **`HEALTH_SERVER_ADDRESS=0.0.0.0:9999`** and a **readinessProbe** on that port so a dead WireGuard path marks the gateway pod NotReady (available replicas drop). That drives the **`VpnGatewayDown`** alert in `apps/monitoring` without waiting for a container crash.
+
+Gluetun may still log “restarting VPN because it failed to pass the healthcheck” while NotReady; that is expected until the provider path recovers.
+
 ## Verify
 
 ```bash
 kubectl get pods -n vpn-gateway -o wide
 kubectl get pods -n tubearchivist -o wide
+
+# Health server (200 when tunnel OK; 500 while Gluetun's healthcheck is failing)
+kubectl exec -n vpn-gateway deploy/vpn-gateway-pod-gateway-main -c gluetun -- \
+  wget -qO- -S http://127.0.0.1:9999/ 2>&1 | head
 
 kubectl exec -n tubearchivist deploy/tubearchivist -c tubearchivist -- wget -qO- https://api.ipify.org
 kubectl exec -n tubearchivist deploy/archivist-es -- wget -qO- https://api.ipify.org
