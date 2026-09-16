@@ -46,23 +46,19 @@ controllers:
           VPN_TYPE: wireguard
           # Allow gateway dnsmasq and VXLAN clients to reach cluster Service/Pod CIDRs.
           FIREWALL_OUTBOUND_SUBNETS: "10.96.0.0/12,10.244.0.0/16,192.168.0.0/16,172.16.0.0/12"
-          # Bind health HTTP so kubelet httpGet (pod IP:9999) can see tunnel health.
-          # Default 127.0.0.1:9999 is unreachable from the probe path.
-          HEALTH_SERVER_ADDRESS: "0.0.0.0:9999"
-        # Gluetun returns 200 when the VPN healthcheck passes and 500 while it is
-        # restarting a dead tunnel. Without this, the pod stays Ready and
-        # VpnGatewayDown (available replicas) never fires.
+        # Tunnel health → Ready for VpnGatewayDown. Use exec (not httpGet): Gluetun's
+        # firewall drops kubelet→podIP:9999 probes (context deadline exceeded) even
+        # when http://127.0.0.1:9999/ returns 200 inside the container.
         probes:
           readiness:
             enabled: true
             custom: true
             spec:
-              httpGet:
-                path: /
-                port: 9999
+              exec:
+                command: ["/gluetun-entrypoint", "healthcheck"]
               initialDelaySeconds: 30
-              periodSeconds: 10
-              timeoutSeconds: 3
+              periodSeconds: 15
+              timeoutSeconds: 10
               failureThreshold: 3
         envFrom:
         - secretRef:
