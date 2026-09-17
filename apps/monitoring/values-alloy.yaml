@@ -8,6 +8,8 @@ controller:
 
 alloy:
   enableReporting: false
+  # Default timeout is 1s; loki.source.kubernetes stalls /-/ready and Argo flaps Progressing.
+  timeoutSeconds: 5
   extraEnv:
     - name: NODE_NAME
       valueFrom:
@@ -88,6 +90,6 @@ alloy:
   resources:
     requests:
       cpu: 50m
-      memory: 128Mi
-    limits:
       memory: 256Mi
+    limits:
+      memory: 512Mi
