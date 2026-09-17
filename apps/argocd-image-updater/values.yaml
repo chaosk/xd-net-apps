@@ -6,6 +6,11 @@ createClusterRoles: true
 rbac:
   enabled: true
 
+# Startup cache warm-up never completes here (readyz stays 500 / pod Never Ready on v1.3.0).
+# Same workaround as upstream https://github.com/argoproj-labs/argocd-image-updater/issues/1368
+extraArgs:
+  - --warmup-cache=false
+
 config:
   argocd.namespace: argocd
   log.level: info
