@@ -22,6 +22,14 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana/folder: Platform
+  - name: grafana-dashboard-spegel
+    files:
+      - spegel.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: Platform
   - name: grafana-dashboard-envoy
     files:
       - envoy-gateway-global.json

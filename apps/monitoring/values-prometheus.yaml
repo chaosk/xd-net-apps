@@ -171,17 +171,6 @@ grafana:
       isDefault: false
       jsonData:
         maxLines: 1000
-    # Spegel Helm chart dashboard embeds grafana.com export uid ${DS_PROMETHEUS}.
-    - name: Prometheus (Spegel dashboard)
-      type: prometheus
-      uid: DS_PROMETHEUS
-      access: proxy
-      url: http://kube-prometheus-stack-prometheus.monitoring:9090/
-      isDefault: false
-      editable: false
-      jsonData:
-        httpMethod: POST
-        timeInterval: 30s
 
 prometheus:
   prometheusSpec:
