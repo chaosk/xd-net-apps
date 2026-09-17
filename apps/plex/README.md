@@ -36,6 +36,6 @@ Plex logs to **`Plex Media Server.log`** on the config volume. A **`log-tailer`*
 
 ## Upgrades
 
-**Argo CD Image Updater** tracks `docker.io/plexinc/pms-docker` with **semver** (`>=1.43.4`) in `apps/argocd-image-updater/image-updater.yaml`. PMS tags are four-part plus a hash; **newest-build** ranks Hub image *created* date and can write an older version.
+**Argo CD Image Updater** tracks `docker.io/plexinc/pms-docker` with **alphabetical** sort and `allowTags` `1.<two-digit>.…` (so `1.43`…`1.50` match and `1.9.x` does not) in `apps/argocd-image-updater/image-updater.yaml`. Do not use **newest-build**: Hub build dates are not PMS versions.
 
 Helm chart version is pinned in **`kustomization.yaml`** (`helmCharts.version`); bump manually when the upstream chart changes.
