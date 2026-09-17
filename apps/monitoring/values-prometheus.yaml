@@ -157,6 +157,11 @@ grafana:
     users:
       auto_assign_org: true
       auto_assign_org_role: Viewer
+    feature_toggles:
+      grafanaAdvisor: true
+  # Explicit install; feature toggle may also auto-install on some versions.
+  plugins:
+    - grafana-advisor-app
   resources:
     requests:
       cpu: 100m
