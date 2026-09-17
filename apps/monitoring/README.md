@@ -35,7 +35,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
 | `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `invidious-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`, `miniflux-db`, `mealie-db`, `grafana-db`. |
 | `scrape-apps.yaml` | Authentik server PodMonitor; Immich, Bitmagnet, and Speedtest Tracker ServiceMonitors. |
-| `scrape-platform.yaml` | Envoy Gateway controller + dataplane; Cilium agent ServiceMonitor. |
+| `scrape-platform.yaml` | Envoy Gateway controller + dataplane; Cilium agent ServiceMonitors. |
 | `dashboards/` | CNPG, Cilium, Envoy Gateway, Speedtest Tracker, PeaNUT, and UniFi Poller Grafana dashboards (ConfigMaps for sidecar). |
 
 Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: kube-prometheus-stack`** so the stack’s Prometheus picks them up (`serviceMonitorSelectorNilUsesHelmValues` is left at the chart default).
@@ -52,6 +52,7 @@ Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: ku
 | Envoy Gateway controller | `scrape-platform.yaml` | Service `envoy-gateway:19001/metrics`. |
 | Envoy dataplane (`shared`) | `scrape-platform.yaml` | Pod port `metrics`, path `/stats/prometheus`. |
 | Cilium agent | `scrape-platform.yaml` | Service `cilium-agent` port `metrics` in `kube-system`. |
+| Spegel | Spegel Helm (**xd-net**) | Chart `serviceMonitor` on Service `spegel` port `metrics` (9090) in `spegel`; label `release: kube-prometheus-stack`. |
 | UniFi Poller | `apps/unpoller` PodMonitor | Pod port `tcp` (9130), path `/metrics` (default). Requires `secrets/unpoller.yaml`. |
 | PeaNUT | `apps/peanut` ServiceMonitor | `/api/v1/metrics` on Service `peanut:8080`. Enable Prometheus in PeaNUT UI; Synology NUT must allow the pod IP. |
 
@@ -65,12 +66,13 @@ kube-prometheus-stack ships the usual Kubernetes, node, and Prometheus dashboard
 |--------|-----------|--------|----------------|
 | *(default)* | **CloudNativePG** | [Grafana 20417](https://grafana.com/grafana/dashboards/20417-cloudnativepg/) (`dashboards/cnpg.json`) | CNPG PodMonitors (`scrape-cnpg.yaml`) |
 | **Platform** | **Cilium Agent Metrics** | [Grafana 16611](https://grafana.com/grafana/dashboards/16611-cilium-metrics/) | `cilium-agent` ServiceMonitor |
+| **Platform** | **Spegel** | Spegel Helm chart `grafanaDashboard` ([upstream JSON](https://github.com/spegel-org/spegel/blob/main/charts/spegel/monitoring/grafana-dashboard.json); [Grafana 22104](https://grafana.com/grafana/dashboards/22104-spegel-monitoring-dashboard/)) in **xd-net** | Spegel chart `serviceMonitor` |
 | **Platform** | **Envoy Gateway Global** | [envoy-gateway-global.json](https://github.com/envoyproxy/gateway/blob/main/charts/gateway-addons-helm/dashboards/envoy-gateway-global.json) | Envoy Gateway controller (`scrape-platform.yaml`) |
 | **Platform** | **Envoy Global** | [envoy-proxy-global.json](https://github.com/envoyproxy/gateway/blob/main/charts/gateway-addons-helm/dashboards/envoy-proxy-global.json) | Shared Gateway dataplane PodMonitor |
 | **Platform** | **Envoy Clusters** | [envoy-clusters.json](https://github.com/envoyproxy/gateway/blob/main/charts/gateway-addons-helm/dashboards/envoy-clusters.json) | Per-route upstream cluster stats from the dataplane |
 | **Platform** | **Resources Monitor** | [resources-monitor.gen.json](https://github.com/envoyproxy/gateway/blob/main/charts/gateway-addons-helm/dashboards/resources-monitor.gen.json) | Controller and dataplane CPU/memory (`container_*` metrics) |
 
-JSON dashboards live under `dashboards/`; Kustomize builds ConfigMaps with label **`grafana_dashboard=1`** for the Grafana sidecar. Datasource placeholders are rewritten to **`Prometheus`**.
+JSON dashboards live under `dashboards/`; Kustomize builds ConfigMaps with label **`grafana_dashboard=1`** for the Grafana sidecar. Datasource placeholders are rewritten to **`Prometheus`**. Spegel’s board is provisioned by the Spegel Helm release (ConfigMap in `spegel`); a second Prometheus datasource with uid **`DS_PROMETHEUS`** satisfies the chart’s grafana.com export placeholders.
 
 Use **Explore → Loki** for log queries (`{namespace="homepage"}`, etc.). Apps that log to files only (for example **Plex**) need a sidecar so lines reach container stdout; Plex uses `{namespace="plex", container="log-tailer"}` with timestamp and **`level`** parsing in `values-alloy.yaml`.
 
