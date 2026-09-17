@@ -44,25 +44,25 @@ patchesJson6902:
 helmCharts:
   - name: kube-prometheus-stack
     repo: https://prometheus-community.github.io/helm-charts
-    version: 85.3.0
+    version: 91.4.1
     releaseName: kube-prometheus-stack
     namespace: monitoring
     valuesFile: values-prometheus.yaml
   - name: loki
     repo: https://grafana.github.io/helm-charts
-    version: 7.0.0
+    version: 7.3.0
     releaseName: loki
     namespace: monitoring
     valuesFile: values-loki.yaml
   - name: alloy
     repo: https://grafana.github.io/helm-charts
-    version: 1.8.1
+    version: 1.12.1
     releaseName: alloy
     namespace: monitoring
     valuesFile: values-alloy.yaml
   - name: prometheus-blackbox-exporter
     repo: https://prometheus-community.github.io/helm-charts
-    version: 11.10.0
+    version: 11.18.0
     releaseName: prometheus-blackbox-exporter
     namespace: monitoring
     valuesFile: values-blackbox.yaml

@@ -4,10 +4,10 @@ Prometheus, Grafana, and Loki for the xd-net cluster, installed with upstream He
 
 | Chart | Version | Role |
 |-------|---------|------|
-| [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) | 85.3.0 | Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics |
-| [prometheus-blackbox-exporter](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-blackbox-exporter) | 11.10.0 | HTTP probes for Pangolin edge (`Probe` CRs) |
-| [loki](https://github.com/grafana/loki/tree/main/production/helm/loki) | 7.0.0 | Log storage (SingleBinary, Synology PVC) |
-| [alloy](https://github.com/grafana/alloy/tree/main/operations/helm/charts/alloy) | 1.8.1 | Pod log collection |
+| [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) | 91.4.1 | Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics |
+| [prometheus-blackbox-exporter](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-blackbox-exporter) | 11.18.0 | HTTP probes for Pangolin edge (`Probe` CRs) |
+| [loki](https://github.com/grafana/loki/tree/main/production/helm/loki) | 7.3.0 | Log storage (SingleBinary, Synology PVC) |
+| [alloy](https://github.com/grafana/alloy/tree/main/operations/helm/charts/alloy) | 1.12.1 | Pod log collection |
 
 Chart versions are **not** managed by Argo CD Image Updater (that tracks container images, not Helm chart pins). Bump them deliberately — see **Chart upgrades** below.
 
