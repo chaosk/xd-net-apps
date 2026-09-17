@@ -113,6 +113,11 @@ grafana:
     existingSecret: grafana-admin
     userKey: admin-user
     passwordKey: admin-password
+  envValueFrom:
+    GF_SECURITY_SECRET_KEY:
+      secretKeyRef:
+        name: grafana-admin
+        key: secret-key
   ingress:
     enabled: false
   # Internal metadata DB (users, prefs, secure values) — not metrics storage.

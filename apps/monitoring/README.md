@@ -96,7 +96,7 @@ Envoy Gateway addon dashboards live under `dashboards/` with upstream filenames 
 
 ## Prerequisites
 
-1. **Secret `grafana-admin`** in namespace `monitoring` — see `secrets/grafana-admin.yaml`. Generate a password, add `# sops:encrypt` on `admin-password`, then `sops --encrypt --in-place secrets/grafana-admin.yaml` and sync **platform-secrets** before the stack can start. Keeps break-glass local login when OAuth auto-login is enabled.
+1. **Secret `grafana-admin`** in namespace `monitoring` — see `secrets/grafana-admin.yaml`. Keys: `admin-user`, `admin-password` (break-glass login), and `secret-key` (Grafana `[security] secret_key`; not the chart default). Mark sensitive scalars with `# sops:encrypt`, then `sops --encrypt --in-place secrets/grafana-admin.yaml` and sync **platform-secrets** before the stack can start.
 2. **Secret `grafana-db`** in namespace `monitoring` — CNPG bootstrap for `postgres.yaml` (`username`, `password`; owner/database `grafana`). See `secrets/grafana-db.yaml`. Encrypt with SOPS and sync **platform-secrets** before the **`grafana-db`** cluster and Grafana pod start.
 3. **Secret `grafana-oidc`** in namespace `monitoring` — Authentik OAuth2 client credentials (`client_id`, `client_secret`) for Generic OAuth. See `secrets/grafana-oidc.yaml`. Provider slug **`grafana`**, redirect URI **`https://grafana.net.ecksd.ee/login/generic_oauth`**. Encrypt with SOPS and sync **platform-secrets** before enabling OAuth in `values-prometheus.yaml`.
 4. **Secret `alertmanager-ha`** in namespace `monitoring` — Home Assistant webhook URL for Alertmanager (`url`). See `secrets/alertmanager-ha.yaml` and **Alerting** below. Sync **platform-secrets** before Alertmanager can notify.
