@@ -87,6 +87,9 @@ controllers:
               secretKeyRef:
                 name: invidious
                 key: companion_key
+          # Default is */5 * * * *; each run spins JSDOM and has leaked memory (iv-org/invidious-companion#21).
+          # Combined with a 512Mi cap that OOM-kills (exit 137) and stalls /healthz past the 5s probe timeout.
+          JOBS_YOUTUBE_SESSION_FREQUENCY: "0 * * * *"
         probes:
           liveness:
             enabled: true
@@ -119,10 +122,10 @@ controllers:
         resources:
           requests:
             cpu: 50m
-            memory: 64Mi
+            memory: 256Mi
           limits:
             cpu: "1"
-            memory: 512Mi
+            memory: 1Gi
 service:
   # Only the Invidious web Service is rendered by the chart (kept named `invidious`). A second chart
   # Service would suffix both to invidious-main / invidious-companion and break the HTTPRoute
