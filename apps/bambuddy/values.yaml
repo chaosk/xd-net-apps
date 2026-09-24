@@ -61,7 +61,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/maziggy/bambu-studio-api
-          tag: "bambuddy-1.2.5.5"
+          tag: "bambuddy-1.2.5.6"
           pullPolicy: IfNotPresent
         env:
           NODE_ENV: production
