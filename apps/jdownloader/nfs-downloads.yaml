@@ -1,0 +1,32 @@
+# NFS ingest at /volume1/ingest/downloads.
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jdownloader-downloads-pv
+spec:
+  capacity:
+    storage: 8Ti
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - nfsvers=4.1
+    - hard
+  nfs:
+    server: nas.net.ecksd.ee
+    path: /volume1/ingest/downloads
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jdownloader-downloads
+  namespace: jdownloader
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 8Ti
+  volumeName: jdownloader-downloads-pv
+  storageClassName: ""

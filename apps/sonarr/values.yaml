@@ -54,6 +54,11 @@ persistence:
     existingClaim: sonarr-torrents
     globalMounts:
     - path: /data/torrents
+  downloads:
+    enabled: true
+    existingClaim: sonarr-downloads
+    globalMounts:
+    - path: /data/downloads
 defaultPodOptions:
   securityContext:
     fsGroup: 568

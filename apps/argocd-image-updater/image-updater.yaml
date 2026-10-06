@@ -271,6 +271,19 @@ spec:
               name: controllers.main.containers.main.image.repository
               tag: controllers.main.containers.main.image.tag
 
+    - namePattern: jdownloader
+      images:
+        - alias: jdownloader
+          imageName: docker.io/jlesage/jdownloader-2
+          commonUpdateSettings:
+            updateStrategy: newest-build
+            allowTags: "regexp:^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+            ignoreTags: ["latest", "*-amd64*", "*-arm64*"]
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
     - namePattern: radarr
       images:
         - alias: radarr

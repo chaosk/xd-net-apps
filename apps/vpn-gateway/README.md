@@ -15,6 +15,9 @@ tubearchivist / bgutil (vpn-gateway=true)
 qbittorrent (vpn-gateway=true)
   → same path (torrent client egress only)
 
+jdownloader (vpn-gateway=true)
+  → same path (hoster / HTTP downloads)
+
 bitmagnet (vpn-gateway=true)
   → same path (DHT and torrent egress; Postgres stays in-cluster via bitmagnet-db-rw)
 

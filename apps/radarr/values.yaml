@@ -53,6 +53,11 @@ persistence:
     existingClaim: radarr-torrents
     globalMounts:
     - path: /data/torrents
+  downloads:
+    enabled: true
+    existingClaim: radarr-downloads
+    globalMounts:
+    - path: /data/downloads
 defaultPodOptions:
   securityContext:
     fsGroup: 568

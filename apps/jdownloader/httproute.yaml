@@ -1,0 +1,38 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: jdownloader
+  namespace: jdownloader
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: "Arr!"
+    gethomepage.dev/weight: "31"
+    gethomepage.dev/name: JDownloader
+    gethomepage.dev/description: Hoster download manager
+    gethomepage.dev/icon: mdi-download
+    gethomepage.dev/href: "https://jdownloader.net.ecksd.ee"
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=jdownloader
+spec:
+  parentRefs:
+    - name: shared
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - jdownloader.net.ecksd.ee
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - name: authentik-server
+          namespace: authentik
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: jdownloader
+          port: 5800
