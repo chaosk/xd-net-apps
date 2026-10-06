@@ -22,6 +22,8 @@ controllers:
           OIDC_CONFIGURATION_URL: https://authentik.net.ecksd.ee/application/o/mealie/.well-known/openid-configuration
           OIDC_ADMIN_GROUP: mealie-admins
           OIDC_AUTO_REDIRECT: "true"
+          # Authentik defaults email_verified to false; Mealie rejects that since v3.21.
+          OIDC_REQUIRES_EMAIL_VERIFICATION: "false"
           OIDC_CLIENT_ID:
             valueFrom:
               secretKeyRef:

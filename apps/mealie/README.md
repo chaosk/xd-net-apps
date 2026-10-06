@@ -14,7 +14,7 @@
 | `mealie-db` | CNPG bootstrap (`username`, `password`; owner/database `mealie`) |
 | `mealie` | `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` from Authentik provider slug **`mealie`** |
 
-Authentik **OAuth2/OpenID Provider** **`mealie`**: redirect URI `https://mealie.net.ecksd.ee/login`. Discovery URL in `values.yaml`: `https://authentik.net.ecksd.ee/application/o/mealie/.well-known/openid-configuration`. Users in Authentik group **`mealie-admins`** become Mealie admins; `OIDC_AUTO_REDIRECT=true`.
+Authentik **OAuth2/OpenID Provider** **`mealie`**: redirect URI `https://mealie.net.ecksd.ee/login`. Discovery URL in `values.yaml`: `https://authentik.net.ecksd.ee/application/o/mealie/.well-known/openid-configuration`. Users in Authentik group **`mealie-admins`** become Mealie admins; `OIDC_AUTO_REDIRECT=true`. Authentik leaves `email_verified` false by default, so Mealie uses `OIDC_REQUIRES_EMAIL_VERIFICATION=false` (required since Mealie v3.21).
 
 SOPS-encrypt and sync **platform-secrets** before CNPG and the app start.
 
