@@ -44,6 +44,8 @@ server:
 machine-learning:
   controllers:
     main:
+      # Same as server: one GPU node; RollingUpdate double-books CPU/GPU and stalls Pending.
+      strategy: Recreate
       pod:
         nodeSelector:
           intel.feature.node.kubernetes.io/gpu: "true"
