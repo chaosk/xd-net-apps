@@ -71,7 +71,7 @@ geoip:
 worker:
   resources:
     requests:
-      cpu: 250m
+      cpu: 100m
       memory: 512Mi
     limits:
       cpu: "2"
@@ -125,7 +125,7 @@ worker:
 server:
   resources:
     requests:
-      cpu: 250m
+      cpu: 100m
       memory: 512Mi
     limits:
       cpu: "2"

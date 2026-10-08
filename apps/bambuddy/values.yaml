@@ -50,7 +50,7 @@ controllers:
               timeoutSeconds: 5
         resources:
           requests:
-            cpu: 250m
+            cpu: 50m
             memory: 512Mi
           limits:
             cpu: "2"

@@ -42,7 +42,7 @@ pms:
   resources:
     requests:
       memory: 512Mi
-      cpu: 250m
+      cpu: 100m
       gpu.intel.com/i915: 1
     limits:
       memory: 4Gi
