@@ -53,7 +53,7 @@ machine-learning:
         main:
           image:
             repository: ghcr.io/immich-app/immich-machine-learning
-            tag: v3.3.0-openvino
+            tag: v3.3.1-openvino
           resources:
             requests:
               cpu: 100m
@@ -67,7 +67,7 @@ controllers:
     containers:
       main:
         image:
-          tag: v3.3.0
+          tag: v3.3.1
         env:
           DB_HOSTNAME:
             valueFrom:
