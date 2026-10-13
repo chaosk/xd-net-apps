@@ -187,6 +187,19 @@ spec:
               name: controllers.main.containers.main.image.repository
               tag: controllers.main.containers.main.image.tag
 
+    - namePattern: marian
+      images:
+        - alias: marian
+          imageName: ghcr.io/chaosk/marian
+          commonUpdateSettings:
+            updateStrategy: semver
+            allowTags: "regexp:^[0-9]+\\.[0-9]+\\.[0-9]+$"
+            ignoreTags: ["latest"]
+          manifestTargets:
+            helm:
+              name: controllers.main.containers.main.image.repository
+              tag: controllers.main.containers.main.image.tag
+
     - namePattern: metrics-server
       images:
         - alias: metrics-server

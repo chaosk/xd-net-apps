@@ -1,0 +1,89 @@
+# bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
+# Marian — https://github.com/chaosk/marian
+# One process owns the SQLite file. Keep a single replica and Recreate.
+controllers:
+  main:
+    strategy: Recreate
+    containers:
+      main:
+        image:
+          repository: ghcr.io/chaosk/marian
+          tag: "0.1.0"
+          pullPolicy: IfNotPresent
+        env:
+          TZ: UTC
+          PORT: "8080"
+          MARIAN_DB: /data/marian.db
+          MARIAN_PUBLIC_URL: https://marian.ecksd.ee
+          MARIAN_STATUS: "marian.ecksd.ee | /event"
+          DISCORD_TOKEN:
+            valueFrom:
+              secretKeyRef:
+                name: marian
+                key: DISCORD_TOKEN
+          DISCORD_CLIENT_ID:
+            valueFrom:
+              secretKeyRef:
+                name: marian
+                key: DISCORD_CLIENT_ID
+          DISCORD_CLIENT_SECRET:
+            valueFrom:
+              secretKeyRef:
+                name: marian
+                key: DISCORD_CLIENT_SECRET
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /healthz
+                port: 8080
+              initialDelaySeconds: 5
+              periodSeconds: 20
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /readyz
+                port: 8080
+              initialDelaySeconds: 2
+              periodSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+service:
+  main:
+    controller: main
+    ports:
+      http:
+        port: 8080
+persistence:
+  data:
+    enabled: true
+    existingClaim: marian-data
+    globalMounts:
+      - path: /data
+  tmp:
+    type: emptyDir
+    globalMounts:
+      - path: /tmp
+defaultPodOptions:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
+    fsGroupChangePolicy: OnRootMismatch
+    seccompProfile:
+      type: RuntimeDefault
