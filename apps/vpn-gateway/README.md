@@ -65,6 +65,8 @@ After changing `values-pod-gateway.yaml` or the VPN secret:
 
 Routed pods use gateway dnsmasq (`172.16.0.1`). `cluster.local` queries must be forwarded to **CoreDNS**, not Gluetun/VPN DNS. Set **`DNS_LOCAL_SERVER`** in `values-pod-gateway.yaml` to your kube-dns ClusterIP, and **`FIREWALL_OUTBOUND_SUBNETS`** on Gluetun so the gateway can reach Service/Pod networks.
 
+pod-gateway is pinned to a `dev` digest in `values-pod-gateway.yaml`. Release `v1.13.0` only trusts KSK-2017, and the root DNSKEY set is signed by KSK-2024, so that image returns SERVFAIL for signed names. The same tag is injected into client init containers and sidecars. Image updater does not track this image, because `~v1` would replace the pin with `v1.13.0`.
+
 ```bash
 kubectl get svc -n kube-system -l k8s-app=kube-dns -o jsonpath='{.items[0].spec.clusterIP}{"\n"}'
 kubectl exec -n tubearchivist deploy/tubearchivist -c tubearchivist -- getent hosts archivist-redis.tubearchivist.svc.cluster.local

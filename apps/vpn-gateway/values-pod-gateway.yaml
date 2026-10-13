@@ -36,7 +36,10 @@ controllers:
       main:
         image:
           repository: ghcr.io/angelnu/pod-gateway
-          tag: v1.13.0
+          # v1.13.0 only trusts KSK-2017. This dev digest (Alpine 3.24.2, dnsmasq 2.92)
+          # also trusts KSK-2024 (38696), which signs the root DNSKEY set.
+          # Digest is in the tag because the chart copies repository:tag onto injected sidecars.
+          tag: dev@sha256:78ed34722014c7a73b2813ea8092023131b2b88275f4d53037b64f40d2c79870
       gluetun:
         enabled: true
         image:

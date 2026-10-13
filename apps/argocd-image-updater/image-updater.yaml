@@ -396,12 +396,8 @@ spec:
             helm:
               name: controllers.main.containers.gluetun.image.repository
               tag: controllers.main.containers.gluetun.image.tag
-        - alias: gateway
-          imageName: ghcr.io/angelnu/pod-gateway:~v1
-          manifestTargets:
-            helm:
-              name: controllers.main.containers.main.image.repository
-              tag: controllers.main.containers.main.image.tag
+        # pod-gateway stays pinned by digest in values-pod-gateway.yaml.
+        # Tracking ~v1 would rewrite that tag back to v1.13.0.
         - alias: admission
           imageName: ghcr.io/angelnu/gateway-admision-controller:~v3
           manifestTargets:
