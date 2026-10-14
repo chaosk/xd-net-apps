@@ -26,7 +26,7 @@ In the Discord application, add redirect **`https://marian.ecksd.ee/auth/discord
 https://discord.com/api/oauth2/authorize?client_id=YOUR_ID&permissions=326686174272&scope=bot%20applications.commands
 ```
 
-The gateway needs egress to `discord.com` and `gateway.discord.gg`. Nothing needs to reach the pod for Discord interactions.
+The gateway needs egress to `discord.com` and `gateway.discord.gg`. Nothing needs to reach the pod for Discord interactions. Spans go to Tempo over OTLP/HTTP at `http://tempo.monitoring.svc.cluster.local:4318` (`OTEL_EXPORTER_OTLP_ENDPOINT`).
 
 `ghcr.io/chaosk/marian` is a private package. The cluster pulls public GHCR images with no per-app pull secret, so make this package public (GitHub → Packages → Package settings → Change visibility) or the pod cannot pull `0.1.0`.
 

@@ -16,6 +16,7 @@ controllers:
           MARIAN_DB: /data/marian.db
           MARIAN_PUBLIC_URL: https://marian.ecksd.ee
           MARIAN_STATUS: "marian.ecksd.ee | /event"
+          OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo.monitoring.svc.cluster.local:4318
           DISCORD_TOKEN:
             valueFrom:
               secretKeyRef:
