@@ -1,6 +1,6 @@
 # Monitoring
 
-Prometheus, Grafana, and Loki for the xd-net cluster, installed with upstream Helm charts via Kustomize.
+Prometheus, Grafana, Loki, and Tempo for the xd-net cluster, installed with upstream Helm charts via Kustomize.
 
 | Chart | Version | Role |
 |-------|---------|------|
@@ -8,6 +8,7 @@ Prometheus, Grafana, and Loki for the xd-net cluster, installed with upstream He
 | [prometheus-blackbox-exporter](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-blackbox-exporter) | 11.18.0 | HTTP probes for Pangolin edge (`Probe` CRs) |
 | [loki](https://github.com/grafana/loki/tree/main/production/helm/loki) | 7.3.0 | Log storage (SingleBinary, Synology PVC) |
 | [alloy](https://github.com/grafana/alloy/tree/main/operations/helm/charts/alloy) | 1.12.1 | Pod log collection |
+| [tempo](https://github.com/grafana-community/helm-charts/tree/main/charts/tempo) | 3.1.0 | Trace storage (single binary, Synology PVC) |
 
 Chart versions are **not** managed by Argo CD Image Updater (that tracks container images, not Helm chart pins). Bump them deliberately — see **Chart upgrades** below.
 
@@ -16,7 +17,7 @@ Chart versions are **not** managed by Argo CD Image Updater (that tracks contain
 - **Grafana:** `https://grafana.net.ecksd.ee` (shared Gateway TLS covers `*.net.ecksd.ee`)
 - **Prometheus / Alertmanager:** ClusterIP only (`kube-prometheus-stack-prometheus`, `kube-prometheus-stack-alertmanager` in `monitoring`). Use Grafana’s Prometheus datasource or port-forward for ad-hoc queries.
 
-Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.cluster.local:3100`.
+Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.cluster.local:3100` and a **Tempo** datasource at `http://tempo.monitoring.svc.cluster.local:3200`. Send spans with OTLP to `tempo.monitoring.svc.cluster.local:4317` (gRPC) or `:4318` (HTTP). Alloy only ships logs.
 
 ## Layout
 
@@ -24,13 +25,14 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 |------|---------|
 | `namespace.yaml` | **`monitoring`** namespace; Pod Security **`privileged`** (node-exporter). |
 | `postgres.yaml` | CNPG cluster **`grafana-db`** (Grafana internal metadata on `local-path`). |
-| `kustomization.yaml` | Namespace, HTTPRoute, three Helm releases, dashboard ConfigMaps. |
+| `kustomization.yaml` | Namespace, HTTPRoute, Helm releases, dashboard ConfigMaps. |
 | `values-prometheus.yaml` | Retention, Synology PVCs for Prometheus and Alertmanager, Grafana Postgres + admin Secret, thin apiserver scrape, Alertmanager → Home Assistant routing. |
 | `values-blackbox.yaml` | prometheus-blackbox-exporter (HTTP modules for `Probe` CRs). |
 | `rules-cnpg.yaml` | Critical `PrometheusRule` for CNPG (`CNPGInstanceDown`, `CNPGClusterDown`). |
 | `rules-vpn.yaml` | Critical VPN / remote-access rules (`PangolinEdgeDown`, `PangolinNewtDown`, `VpnGatewayDown`). |
 | `probes-vpn.yaml` | Blackbox `Probe` for Pangolin dashboard API and Integration API. |
 | `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
+| `values-tempo.yaml` | Monolithic Tempo on Synology PVC (10Gi, 72h retention). |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
 | `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `invidious-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`, `miniflux-db`, `mealie-db`, `grafana-db`. |
@@ -190,15 +192,17 @@ Pins live in `kustomization.yaml` under `helmCharts[].version` (and the version 
    - [prometheus-blackbox-exporter](https://github.com/prometheus-community/helm-charts/releases?q=prometheus-blackbox-exporter)
    - [loki](https://github.com/grafana/loki/releases?q=helm-loki)
    - [alloy](https://github.com/grafana/alloy/releases?q=helm-chart)
+   - [tempo](https://github.com/grafana-community/helm-charts/releases?q=tempo-)
 2. Set the matching `helmCharts[].version` in `kustomization.yaml` and update the version table above.
 3. Diff values against the new chart defaults (breaking renames are common on kube-prometheus-stack major/minor bumps):
 
    ```bash
    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
    helm repo add grafana https://grafana.github.io/helm-charts
+   helm repo add grafana-community https://grafana-community.github.io/helm-charts
    helm repo update
    helm show values prometheus-community/kube-prometheus-stack --version <new> > /tmp/kps-values.yaml
-   # likewise: prometheus-community/prometheus-blackbox-exporter, grafana/loki, grafana/alloy
+   # likewise: prometheus-community/prometheus-blackbox-exporter, grafana/loki, grafana/alloy, grafana-community/tempo
    diff -u values-prometheus.yaml /tmp/kps-values.yaml   # review; do not overwrite our values wholesale
    ```
 

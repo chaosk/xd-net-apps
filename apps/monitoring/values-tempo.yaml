@@ -1,0 +1,18 @@
+# https://github.com/grafana-community/helm-charts/tree/main/charts/tempo
+# Homelab: monolithic Tempo, traces on a Synology PVC. Grafana queries port 3200.
+# OTLP: grpc 4317, http 4318 on Service tempo.
+
+tempo:
+  reportingEnabled: false
+  retention: 72h
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+
+persistence:
+  enabled: true
+  storageClassName: synology
+  size: 10Gi

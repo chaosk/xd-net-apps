@@ -60,6 +60,12 @@ helmCharts:
     releaseName: alloy
     namespace: monitoring
     valuesFile: values-alloy.yaml
+  - name: tempo
+    repo: https://grafana-community.github.io/helm-charts
+    version: 3.1.0
+    releaseName: tempo
+    namespace: monitoring
+    valuesFile: values-tempo.yaml
   - name: prometheus-blackbox-exporter
     repo: https://prometheus-community.github.io/helm-charts
     version: 11.18.0
