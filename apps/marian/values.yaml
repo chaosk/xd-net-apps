@@ -8,7 +8,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/chaosk/marian
-          tag: "0.1.0"
+          tag: "0.2.0"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -56,7 +56,7 @@ controllers:
           readOnlyRootFilesystem: true
           capabilities:
             drop:
-              - ALL
+            - ALL
         resources:
           requests:
             cpu: 50m
@@ -74,11 +74,11 @@ persistence:
     enabled: true
     existingClaim: marian-data
     globalMounts:
-      - path: /data
+    - path: /data
   tmp:
     type: emptyDir
     globalMounts:
-      - path: /tmp
+    - path: /tmp
 defaultPodOptions:
   securityContext:
     runAsNonRoot: true
