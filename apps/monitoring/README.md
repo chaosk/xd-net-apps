@@ -17,7 +17,7 @@ Chart versions are **not** managed by Argo CD Image Updater (that tracks contain
 - **Grafana:** `https://grafana.net.ecksd.ee` (shared Gateway TLS covers `*.net.ecksd.ee`)
 - **Prometheus / Alertmanager:** ClusterIP only (`kube-prometheus-stack-prometheus`, `kube-prometheus-stack-alertmanager` in `monitoring`). Use Grafana’s Prometheus datasource or port-forward for ad-hoc queries.
 
-Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.cluster.local:3100` and a **Tempo** datasource at `http://tempo.monitoring.svc.cluster.local:3200`. Send spans with OTLP to `tempo.monitoring.svc.cluster.local:4317` (gRPC) or `:4318` (HTTP). Alloy only ships logs.
+Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.cluster.local:3100` and a **Tempo** datasource at `http://tempo.monitoring.svc.cluster.local:3200`. Send spans with OTLP to `tempo.monitoring.svc.cluster.local:4317` (gRPC) or `:4318` (HTTP). Alloy only ships logs. Tempo's metrics generator remote-writes span metrics and service-graph metrics to Prometheus, and the Tempo datasource reads those for the Service Graph view (rate, errors, duration). Metrics start when the generator is running; stored traces are not backfilled.
 
 ## Layout
 
@@ -32,7 +32,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `rules-vpn.yaml` | Critical VPN / remote-access rules (`PangolinEdgeDown`, `PangolinNewtDown`, `VpnGatewayDown`). |
 | `probes-vpn.yaml` | Blackbox `Probe` for Pangolin dashboard API and Integration API. |
 | `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
-| `values-tempo.yaml` | Monolithic Tempo on Synology PVC (10Gi, 72h retention). |
+| `values-tempo.yaml` | Monolithic Tempo on Synology PVC (10Gi, 72h retention). Metrics generator writes span and service-graph metrics to Prometheus. |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
 | `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `invidious-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`, `miniflux-db`, `mealie-db`, `grafana-db`. |

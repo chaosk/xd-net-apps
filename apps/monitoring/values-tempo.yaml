@@ -5,6 +5,19 @@
 tempo:
   reportingEnabled: false
   retention: 72h
+  # Span metrics and service graphs for Grafana's Service Graph view.
+  # The generator WAL lives on the Tempo volume, next to traces.
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
+    storage:
+      path: /var/tempo/generator
+  overrides:
+    defaults:
+      metrics_generator:
+        processors:
+          - service-graphs
+          - span-metrics
   resources:
     requests:
       cpu: 100m
