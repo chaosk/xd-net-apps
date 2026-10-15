@@ -32,6 +32,16 @@ controllers:
               secretKeyRef:
                 name: marian
                 key: DISCORD_CLIENT_SECRET
+          GOOGLE_CLIENT_ID:
+            valueFrom:
+              secretKeyRef:
+                name: marian
+                key: GOOGLE_CLIENT_ID
+          GOOGLE_CLIENT_SECRET:
+            valueFrom:
+              secretKeyRef:
+                name: marian
+                key: GOOGLE_CLIENT_SECRET
         probes:
           liveness:
             enabled: true

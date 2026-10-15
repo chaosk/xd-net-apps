@@ -18,9 +18,9 @@
 
 ## Secrets
 
-Create **`secrets/marian.yaml`** in namespace **`marian`**, Secret name **`marian`**, with `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, and `DISCORD_CLIENT_SECRET`. Encrypt it (`sops --encrypt --in-place`) and let **platform-secrets** sync it before the pod can start. Marian exits when `DISCORD_TOKEN` is empty. Without `DISCORD_CLIENT_SECRET` the site stays on the landing page.
+Create **`secrets/marian.yaml`** in namespace **`marian`**, Secret name **`marian`**, with `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET`. Encrypt it (`sops --encrypt --in-place`) and let **platform-secrets** sync it before the pod can start. Marian exits when `DISCORD_TOKEN` is empty. Without `DISCORD_CLIENT_SECRET` the site stays on the landing page. Empty Google credentials leave Google Calendar disconnected.
 
-In the Discord application, add redirect **`https://marian.ecksd.ee/auth/discord/callback`**. Invite the bot with permissions integer `326686174272` (View Channel, Send Messages, Manage Messages, Embed Links, Read Message History, Mention Everyone, Add Reactions, Manage Roles, and public threads):
+In the Discord application, add redirect **`https://marian.ecksd.ee/auth/discord/callback`**. In the Google OAuth client, add redirect **`https://marian.ecksd.ee/auth/google/callback`**. Invite the bot with permissions integer `326686174272` (View Channel, Send Messages, Manage Messages, Embed Links, Read Message History, Mention Everyone, Add Reactions, Manage Roles, and public threads):
 
 ```text
 https://discord.com/api/oauth2/authorize?client_id=YOUR_ID&permissions=326686174272&scope=bot%20applications.commands
