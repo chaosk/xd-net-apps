@@ -67,7 +67,8 @@ Commit ciphertext only.
 | `homepage-homeassistant-widget.yaml` | `homepage` | Home Assistant long-lived access token for Homepage widget via env `HOMEPAGE_VAR_HOMEASSISTANT_TOKEN` ([widget](https://gethomepage.dev/widgets/services/homeassistant/)); used on the **Home Assistant** HTTPRoute tile. |
 | `mealie-db.yaml` | `mealie` | CNPG bootstrap (`mealie-db`, keys `username`, `password`; owner/database `mealie` in `apps/mealie/postgres.yaml`). |
 | `mealie.yaml` | `mealie` | `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET` for Mealie Authentik OIDC (`mealie`). |
-| `marian.yaml` | `marian` | Discord bot token and OAuth client, plus Google Calendar OAuth (`marian`, keys `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`). See `apps/marian/README.md`. |
+| `marian-db.yaml` | `marian` | CNPG bootstrap (`marian-db`, keys `username`, `password`; owner/database `marian` in `apps/marian/postgres.yaml`). |
+| `marian.yaml` | `marian` | `DATABASE_URL` (password must match `marian-db`), Discord bot token and OAuth client, plus Google Calendar OAuth (`marian`, keys `DATABASE_URL`, `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`). See `apps/marian/README.md`. |
 | `grafana-admin.yaml` | `monitoring` | Grafana admin login + signing key (`grafana-admin`: `admin-user`, `admin-password`, `secret-key`) for kube-prometheus-stack. See `apps/monitoring/README.md`. |
 | `grafana-oidc.yaml` | `monitoring` | Authentik Generic OAuth (`grafana-oidc`, keys `client_id`, `client_secret`). See `apps/monitoring/README.md`. |
 | `home-assistant.yaml` | `home-assistant` | Authentik OIDC for [hass-oidc-auth](https://github.com/christiaangoossens/hass-oidc-auth) (`OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`). See `apps/home-assistant/README.md`. |

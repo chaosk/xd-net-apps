@@ -1,6 +1,6 @@
 # CNPG restore
 
-CloudNativePG clusters live under `apps/*/postgres.yaml` (ten clusters today). The operator and Barman Cloud plugin are installed from **xd-net** (`apps/postgres-operator.tf`, `apps/postgres-barman-plugin.tf`, namespace `cnpg-system`).
+CloudNativePG clusters live under `apps/*/postgres.yaml` (eleven clusters today). The operator and Barman Cloud plugin are installed from **xd-net** (`apps/postgres-operator.tf`, `apps/postgres-barman-plugin.tf`, namespace `cnpg-system`).
 
 ## Durability model
 
@@ -22,6 +22,7 @@ CloudNativePG clusters live under `apps/*/postgres.yaml` (ten clusters today). T
 | `miniflux-db` | `miniflux` | |
 | `mealie-db` | `mealie` | |
 | `grafana-db` | `monitoring` | Grafana internal metadata |
+| `marian-db` | `marian` | |
 
 Bootstrap secrets (`*-db` in `secrets/`) must exist before a Cluster can `initdb` again — see `secrets/README.md`. Barman credentials are per-namespace Secret `cnpg-barman-s3` (`ACCESS_KEY_ID`, `ACCESS_SECRET_KEY`, `REGION=garage`).
 
@@ -40,7 +41,7 @@ Then create SOPS secrets (same key values in every CNPG namespace):
 
 ```bash
 # Example for authentik; repeat for immich, monitoring, invidious, tracearr,
-# bitmagnet, paperless-ngx, speedtest-tracker, miniflux, mealie.
+# bitmagnet, paperless-ngx, speedtest-tracker, miniflux, mealie, marian.
 cat > secrets/authentik-cnpg-barman-s3.yaml <<'EOF'
 apiVersion: v1
 kind: Secret

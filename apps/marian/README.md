@@ -1,6 +1,6 @@
 # Marian
 
-[Marian](https://github.com/chaosk/marian) Discord scheduler (`ghcr.io/chaosk/marian`). One process opens the Discord gateway outbound and serves the dashboard. SQLite lives on a Synology PVC at `/data/marian.db`. Do not scale past one replica.
+[Marian](https://github.com/chaosk/marian) Discord scheduler (`ghcr.io/chaosk/marian`). One process opens the Discord gateway outbound and serves the dashboard. The live database is CloudNativePG cluster **`marian-db`**. The old SQLite file stays on the Synology PVC at `/data/marian.db` so it can be copied off. Do not scale past one replica.
 
 ## Access
 
@@ -11,14 +11,16 @@
 
 | File | Purpose |
 |------|---------|
-| `kustomization.yaml` | Namespace, data PVC, Pangolin HTTPRoute, Helm chart. |
-| `pvc.yaml` | SQLite data on StorageClass `synology` (1Gi). |
-| `values.yaml` | Image, probes, `/data` mount, public URL. |
+| `kustomization.yaml` | Namespace, SQLite PVC, CNPG cluster, Pangolin HTTPRoute, Helm chart. |
+| `pvc.yaml` | Old SQLite file on StorageClass `synology` (1Gi), kept for a copy. |
+| `postgres.yaml` | CNPG cluster `marian-db` on `local-path`. |
+| `backup.yaml` | Barman backups of `marian-db` to Garage. |
+| `values.yaml` | Image, probes, `/data` mount, public URL, `DATABASE_URL`. |
 | `httproute-pangolin.yaml` | **`marian.ecksd.ee`** only; **`pangolin-operator/site-ref: xd-net`**. |
 
 ## Secrets
 
-Create **`secrets/marian.yaml`** in namespace **`marian`**, Secret name **`marian`**, with `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET`. Encrypt it (`sops --encrypt --in-place`) and let **platform-secrets** sync it before the pod can start. Marian exits when `DISCORD_TOKEN` is empty. Without `DISCORD_CLIENT_SECRET` the site stays on the landing page. Empty Google credentials leave Google Calendar disconnected.
+Create **`secrets/marian-db.yaml`** (CNPG bootstrap: `username`, `password`; owner and database `marian`) and **`secrets/marian.yaml`** in namespace **`marian`**. The app secret holds `DATABASE_URL`, `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET`. The password in `DATABASE_URL` must match `marian-db`. Also create **`secrets/marian-cnpg-barman-s3.yaml`** so WAL archiving can reach Garage. Encrypt each file (`sops --encrypt --in-place`) and let **platform-secrets** sync them before the cluster and the pod start. Marian exits when `DISCORD_TOKEN` is empty. Without `DISCORD_CLIENT_SECRET` the site stays on the landing page. Empty Google credentials leave Google Calendar disconnected.
 
 In the Discord application, add redirect **`https://marian.ecksd.ee/auth/discord/callback`**. In the Google OAuth client, add redirect **`https://marian.ecksd.ee/auth/google/callback`**. Invite the bot with permissions integer `326686174272` (View Channel, Send Messages, Manage Messages, Embed Links, Read Message History, Mention Everyone, Add Reactions, Manage Roles, and public threads):
 

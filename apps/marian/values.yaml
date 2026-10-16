@@ -1,6 +1,7 @@
 # bjw-s app-template — https://bjw-s-labs.github.io/helm-charts/docs/app-template/
 # Marian — https://github.com/chaosk/marian
-# One process owns the SQLite file. Keep a single replica and Recreate.
+# One process owns the Discord gateway. Keep a single replica and Recreate.
+# /data still holds the old SQLite file for a one-off copy. The live database is Postgres.
 controllers:
   main:
     strategy: Recreate
@@ -13,10 +14,14 @@ controllers:
         env:
           TZ: UTC
           PORT: "8080"
-          MARIAN_DB: /data/marian.db
           MARIAN_PUBLIC_URL: https://marian.ecksd.ee
           MARIAN_STATUS: "marian.ecksd.ee | /event"
           OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo.monitoring.svc.cluster.local:4318
+          DATABASE_URL:
+            valueFrom:
+              secretKeyRef:
+                name: marian
+                key: DATABASE_URL
           DISCORD_TOKEN:
             valueFrom:
               secretKeyRef:
