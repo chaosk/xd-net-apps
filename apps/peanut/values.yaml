@@ -24,7 +24,7 @@ controllers:
       main:
         image:
           repository: docker.io/brandawg93/peanut
-          tag: "6.1.0"
+          tag: "6.1.1"
           pullPolicy: IfNotPresent
         env:
           WEB_PORT: "8080"
