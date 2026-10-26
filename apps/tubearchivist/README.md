@@ -1,6 +1,6 @@
 # Tube Archivist
 
-[Tube Archivist](https://www.tubearchivist.com/) — official Docker stack (Tube Archivist, Redis, Elasticsearch 8) on Kubernetes with Gateway API and **Authentik forward-auth**.
+[Tube Archivist](https://www.tubearchivist.com/) — official Docker stack (Tube Archivist, Redis, Elasticsearch 9) on Kubernetes with Gateway API and **Authentik forward-auth**.
 
 ## Access
 
@@ -15,7 +15,7 @@ Forward auth needs **authentik** applied first. **`TA_AUTH_PROXY_LOGOUT_URL`** p
 | `kustomization.yaml` | Namespace, PVCs, ES, Redis, bgutil, Deployment, Service, HTTPRoute |
 | `namespace.yaml` | **`tubearchivist`**; Pod Security **`privileged`** (pod-gateway `NET_ADMIN`/`NET_RAW` + Elasticsearch privileged sysctl / `IPC_LOCK`) |
 | `pvc.yaml` | **`tubearchivist-youtube`**: NFS RWX (`Retain`); cache/redis/es on **`synology`** |
-| `elasticsearch.yaml` | **`archivist-es`** StatefulSet + Service (port 9200) |
+| `elasticsearch.yaml` | **`archivist-es`** StatefulSet + Service (`bbilly1/tubearchivist-es:9.5.5`, port 9200) |
 | `redis.yaml` | **`archivist-redis`** StatefulSet + Service (port 6379) |
 | `bgutil-provider.yaml` | [bgutil-ytdlp-pot-provider](https://github.com/Brainicism/bgutil-ytdlp-pot-provider) (port 4416) |
 | `deployment.yaml` | **`tubearchivist`** Deployment; **`TA_AUTO_UPDATE_YTDLP=release`**; **`Recreate`** strategy |
@@ -51,3 +51,7 @@ kubectl apply -k "$HOME/Projects/xd-net-apps/apps/tubearchivist"
 ```
 
 **Argo CD Image Updater** tracks `bbilly1/tubearchivist` via `kustomization.yaml` write-back in `apps/argocd-image-updater/image-updater.yaml`. Elasticsearch, Redis, and bgutil images are pinned in manifests and bumped manually.
+
+From **v0.6.0**, the app serves media itself (bundled nginx removed); keep Service/HTTPRoute on port **8000**. Elasticsearch upgrades with the app (`8.19.0` → `9.5.5`).
+
+The app container runs as **UID/GID 1000**. An init container `chown`s the **cache** PVC (Synology RWO). The **youtube** NFS share is left as-is: files are already mode `777` under Synology UIDs (`1024`/`1029`), and recursively chowning ~2.6T would fight the NAS. `runAsUser` is set on the app container only so pod-gateway’s `gateway-init` can stay root.

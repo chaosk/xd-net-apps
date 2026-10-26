@@ -1,6 +1,6 @@
 # PO token provider for yt-dlp (Tube Archivist Application settings).
 # https://docs.tubearchivist.com/settings/application/#po-token-provider-url
-# Pin image tag to match bbilly1/tubearchivist v0.5.10 (requirements.plugins.txt).
+# Pin manually; TA bundles the matching yt-dlp pot plugin (see image requirements.txt).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
