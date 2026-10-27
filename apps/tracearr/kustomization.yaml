@@ -11,11 +11,11 @@ resources:
   - backup.yaml
 
 helmGlobals:
-  chartHome: vendor/tracearr-0.2.2
+  chartHome: vendor/tracearr-3.1.0
 
 helmCharts:
   - name: tracearr
     releaseName: tracearr
     namespace: tracearr
-    version: 0.2.2
+    version: 3.1.0
     valuesFile: values.yaml

@@ -14,7 +14,7 @@ spec:
   policyTypes: [Ingress, Egress]
   ingress:
     - ports:
-        - port: 3000
+        - port: {{ include "tracearr.containerPort" . }}
           protocol: TCP
   egress:
     - to:
@@ -52,7 +52,7 @@ spec:
     {{- else }}
     # External Redis
     - ports:
-        - port: 6379
+        - port: {{ include "tracearr.externalRedisPort" . }}
           protocol: TCP
     {{- end }}
     # Outbound: media servers (any port), push notifications, GeoIP, Discord webhooks

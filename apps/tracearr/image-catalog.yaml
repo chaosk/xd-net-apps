@@ -1,4 +1,4 @@
-# CNPG cannot parse tags like timescale/timescaledb:2.25.1-pg18 as a PostgreSQL version.
+# CNPG cannot parse tags like timescale/timescaledb:2.31.0-pg18 as a PostgreSQL version.
 # ImageCatalog declares major 18 explicitly (same PG/Timescale lineage as the chart's pg18.1-ts2.25.0).
 apiVersion: postgresql.cnpg.io/v1
 kind: ImageCatalog
@@ -7,4 +7,4 @@ metadata:
 spec:
   images:
     - major: 18
-      image: timescale/timescaledb:2.25.1-pg18
+      image: timescale/timescaledb:2.31.0-pg18
