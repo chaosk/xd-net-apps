@@ -10,7 +10,7 @@ metadata:
     gethomepage.dev/weight: "36"
     gethomepage.dev/name: Spoolman
     gethomepage.dev/description: Filament spool inventory
-    gethomepage.dev/icon: mdi-filament
+    gethomepage.dev/icon: mdi-printer-3d-nozzle-outline
     gethomepage.dev/href: "https://spoolman.net.ecksd.ee"
     gethomepage.dev/pod-selector: app.kubernetes.io/name=spoolman
 spec:

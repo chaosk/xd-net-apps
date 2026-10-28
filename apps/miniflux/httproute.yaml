@@ -10,7 +10,7 @@ metadata:
     gethomepage.dev/weight: "30"
     gethomepage.dev/name: Miniflux
     gethomepage.dev/description: Minimalist RSS reader
-    gethomepage.dev/icon: si-miniflux
+    gethomepage.dev/icon: mdi-rss
     gethomepage.dev/href: "https://miniflux.net.ecksd.ee"
     gethomepage.dev/pod-selector: app.kubernetes.io/name=miniflux
     gethomepage.dev/widget.type: miniflux

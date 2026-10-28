@@ -10,7 +10,7 @@ metadata:
     gethomepage.dev/weight: "20"
     gethomepage.dev/name: Prowlarr
     gethomepage.dev/description: Indexer manager
-    gethomepage.dev/icon: si-prowlarr
+    gethomepage.dev/icon: mdi-radar
     gethomepage.dev/href: "https://prowlarr.net.ecksd.ee"
     gethomepage.dev/pod-selector: app.kubernetes.io/name=prowlarr
 spec:

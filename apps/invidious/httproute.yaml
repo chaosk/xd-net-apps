@@ -10,7 +10,7 @@ metadata:
     gethomepage.dev/weight: "40"
     gethomepage.dev/name: Invidious
     gethomepage.dev/description: Privacy-friendly YouTube frontend
-    gethomepage.dev/icon: invidious
+    gethomepage.dev/icon: si-invidious
     gethomepage.dev/href: "https://invidious.net.ecksd.ee"
     # Scope to the web controller: the companion controller shares app.kubernetes.io/name=invidious.
     gethomepage.dev/pod-selector: app.kubernetes.io/name=invidious,app.kubernetes.io/controller=main

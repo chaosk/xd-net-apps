@@ -10,7 +10,7 @@ metadata:
     gethomepage.dev/weight: "10"
     gethomepage.dev/name: Bazarr
     gethomepage.dev/description: Subtitles for Sonarr and Radarr
-    gethomepage.dev/icon: si-bazarr
+    gethomepage.dev/icon: mdi-subtitles-outline
     gethomepage.dev/href: "https://bazarr.net.ecksd.ee"
     gethomepage.dev/pod-selector: app.kubernetes.io/name=bazarr
 spec:
