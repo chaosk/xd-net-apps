@@ -10,7 +10,7 @@ metadata:
     gethomepage.dev/weight: "30"
     gethomepage.dev/name: Home Assistant
     gethomepage.dev/description: Home automation
-    gethomepage.dev/icon: mdi-home-assistant
+    gethomepage.dev/icon: si-homeassistant
     gethomepage.dev/href: "https://homeassistant.net.ecksd.ee"
     gethomepage.dev/pod-selector: app.kubernetes.io/name=home-assistant
     gethomepage.dev/widget.type: homeassistant

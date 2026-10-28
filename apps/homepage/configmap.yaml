@@ -63,7 +63,7 @@ data:
             description: Remote access edge
             weight: 35
             href: "{{HOMEPAGE_VAR_PANGOLIN_DASHBOARD_URL}}"
-            icon: mdi-shield-link-variant-outline
+            icon: si-pangolin
             siteMonitor: "{{HOMEPAGE_VAR_PANGOLIN_DASHBOARD_URL}}"
             statusStyle: ""
             widget:

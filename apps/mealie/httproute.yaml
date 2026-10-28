@@ -10,7 +10,7 @@ metadata:
     gethomepage.dev/weight: "40"
     gethomepage.dev/name: Mealie
     gethomepage.dev/description: Recipes and meal planning
-    gethomepage.dev/icon: mdi-silverware-fork-knife
+    gethomepage.dev/icon: si-mealie
     gethomepage.dev/href: "https://mealie.net.ecksd.ee"
     gethomepage.dev/pod-selector: app.kubernetes.io/name=mealie
 spec:

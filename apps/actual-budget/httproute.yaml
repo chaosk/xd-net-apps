@@ -10,7 +10,7 @@ metadata:
     gethomepage.dev/weight: "30"
     gethomepage.dev/name: Actual
     gethomepage.dev/description: Personal finance and envelope budgeting
-    gethomepage.dev/icon: mdi-wallet
+    gethomepage.dev/icon: si-actualbudget
     gethomepage.dev/href: "https://actual.net.ecksd.ee"
     gethomepage.dev/pod-selector: app.kubernetes.io/name=actual-budget
 spec:
