@@ -21,13 +21,6 @@ resources:
 patchesJson6902:
   - target:
       group: monitoring.coreos.com
-      kind: Alertmanager
-      name: kube-prometheus-stack-alertmanager
-    patch: |
-      - op: remove
-        path: /spec/hostNetwork
-  - target:
-      group: monitoring.coreos.com
       kind: Prometheus
       name: kube-prometheus-stack-prometheus
     patch: |
@@ -44,7 +37,7 @@ patchesJson6902:
 helmCharts:
   - name: kube-prometheus-stack
     repo: https://prometheus-community.github.io/helm-charts
-    version: 91.4.1
+    version: 92.14.1
     releaseName: kube-prometheus-stack
     namespace: monitoring
     valuesFile: values-prometheus.yaml

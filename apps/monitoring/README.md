@@ -4,7 +4,7 @@ Prometheus, Grafana, Loki, and Tempo for the xd-net cluster, installed with upst
 
 | Chart | Version | Role |
 |-------|---------|------|
-| [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) | 91.4.1 | Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics |
+| [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) | 92.14.1 | Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics |
 | [prometheus-blackbox-exporter](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-blackbox-exporter) | 11.18.0 | HTTP probes for Pangolin edge (`Probe` CRs) |
 | [loki](https://github.com/grafana/loki/tree/main/production/helm/loki) | 7.3.0 | Log storage (SingleBinary, Synology PVC) |
 | [alloy](https://github.com/grafana/alloy/tree/main/operations/helm/charts/alloy) | 1.12.1 | Pod log collection |

@@ -109,6 +109,9 @@ alertmanager:
 grafana:
   enabled: true
   defaultDashboardsEnabled: true
+  # Helm test hook pod; Argo CD does not run Helm tests.
+  testFramework:
+    enabled: false
   admin:
     existingSecret: grafana-admin
     userKey: admin-user
