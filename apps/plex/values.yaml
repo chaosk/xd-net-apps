@@ -62,7 +62,7 @@ extraVolumeMounts:
 # Tube Archivist Plex integration — https://github.com/tubearchivist/tubearchivist-plex
 extraInitContainers:
 - name: tubearchivist-plex
-  image: alpine:3.22
+  image: alpine:3.24
   imagePullPolicy: IfNotPresent
   command: ["/bin/sh", "/install/install.sh"]
   env:
@@ -100,7 +100,7 @@ extraVolumes:
 # PMS logs to files under /config, not stdout. Alloy (monitoring) ships container logs to Loki.
 extraContainers:
 - name: log-tailer
-  image: busybox:1.37
+  image: busybox:1.38
   command:
   - sh
   - -c

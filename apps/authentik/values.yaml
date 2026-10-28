@@ -153,7 +153,7 @@ server:
     failureThreshold: 3
   initContainers:
   - name: authentik-data-chown
-    image: docker.io/library/busybox:1.36
+    image: docker.io/library/busybox:1.38
     command:
     - sh
     - -ec

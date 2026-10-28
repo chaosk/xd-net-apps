@@ -13,7 +13,7 @@ controllers:
         dependsOn: []
         image:
           repository: docker.io/library/alpine
-          tag: "3.22"
+          tag: "3.24"
           pullPolicy: IfNotPresent
         command:
         - /bin/sh
@@ -25,7 +25,7 @@ controllers:
         - authentik-oidc
         image:
           repository: docker.io/library/alpine
-          tag: "3.22"
+          tag: "3.24"
           pullPolicy: IfNotPresent
         command:
         - /bin/sh
@@ -37,7 +37,7 @@ controllers:
         - hacs
         image:
           repository: docker.io/library/alpine
-          tag: "3.22"
+          tag: "3.24"
           pullPolicy: IfNotPresent
         command:
         - /bin/sh
