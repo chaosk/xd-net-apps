@@ -5,7 +5,7 @@ fullnameOverride: plex
 image:
   registry: docker.io
   repository: plexinc/pms-docker
-  tag: "1.43.6.11085-d1e52e169"
+  tag: "1.43.7.11114-4b588ea35"
 ingress:
   enabled: false
 httpRoute:
