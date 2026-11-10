@@ -18,12 +18,14 @@ tempo:
         processors:
           - service-graphs
           - span-metrics
+  # 1Gi OOM-killed Tempo while it compacted a backlog of ~30k blocks after
+  # the poller was stuck on an empty block (Nov 2026).
   resources:
     requests:
       cpu: 100m
-      memory: 256Mi
+      memory: 512Mi
     limits:
-      memory: 1Gi
+      memory: 2Gi
 
 persistence:
   enabled: true
