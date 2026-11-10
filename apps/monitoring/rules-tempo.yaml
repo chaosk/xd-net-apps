@@ -1,0 +1,64 @@
+# Tempo storage health. Metrics come from the chart ServiceMonitor (values-tempo.yaml).
+# Background (2026-11-10): retention silently stopped for ~12 days, the volume filled,
+# and after a full-disk episode the live-store kept accepting spans without completing
+# blocks (stuck writer), so no new traces were searchable. Warnings only: not paging.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: tempo-storage
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: tempo.storage
+      rules:
+        - alert: TempoMetricsMissing
+          expr: absent(up{job="tempo", namespace="monitoring"} == 1)
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Tempo is not being scraped"
+            description: >-
+              Prometheus has no healthy scrape of Tempo (job="tempo") for 15m.
+              The other Tempo storage alerts depend on these metrics and stay silent without them.
+
+        - alert: TempoRetentionNotDeleting
+          expr: >-
+            sum(increase(tempodb_retention_deleted_total[6h])) == 0
+            and sum(tempodb_blocklist_length) > 0
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Tempo retention has deleted nothing for 6h"
+            description: >-
+              Tempo holds {{ with query "sum(tempodb_blocklist_length)" }}{{ . | first | value }}{{ end }}
+              blocks but retention deleted none in the last 6h. Expired traces will pile up until the
+              storage-tempo-0 volume fills (KubePersistentVolumeFillingUp).
+
+        - alert: TempoNotCompletingBlocks
+          expr: >-
+            sum(rate(tempo_distributor_spans_received_total[15m])) > 0
+            and sum(increase(tempo_live_store_blocks_completed_total[2h])) == 0
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Tempo receives spans but completes no blocks"
+            description: >-
+              Spans are arriving, but no live-store block was completed in 2h, so new traces are not
+              becoming searchable. Check `kubectl -n monitoring logs tempo-0` for "failed to cut";
+              a stuck writer after a full disk needs a pod restart.
+
+        - alert: TempoCompactionJobsFailing
+          expr: sum(increase(tempo_backend_scheduler_jobs_failed_total[1h])) > 0
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Tempo compaction/retention jobs are failing"
+            description: >-
+              {{ $value | humanize }} backend-scheduler jobs failed in the last hour. Failing compaction
+              keeps old blocks around and can stall retention.

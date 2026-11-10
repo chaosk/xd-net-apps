@@ -13,6 +13,7 @@ resources:
   - scrape-platform.yaml
   - rules-cnpg.yaml
   - rules-vpn.yaml
+  - rules-tempo.yaml
   - probes-vpn.yaml
   - dashboards/
 
