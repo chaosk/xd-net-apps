@@ -9,7 +9,7 @@ controllers:
       main:
         image:
           repository: ghcr.io/chaosk/marian
-          tag: "0.9.0"
+          tag: "0.9.1"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
