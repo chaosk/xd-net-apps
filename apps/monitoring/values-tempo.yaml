@@ -31,3 +31,11 @@ persistence:
   enabled: true
   storageClassName: synology
   size: 10Gi
+
+# Scrape Tempo's own metrics (tempodb_retention_*, tempodb_blocklist_length, …).
+# The chart's ServiceMonitor skips tempo-headless (prometheus.io/service-monitor: "false").
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  additionalLabels:
+    release: kube-prometheus-stack
