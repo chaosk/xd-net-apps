@@ -12,6 +12,12 @@ tempo:
     remoteWriteUrl: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
     storage:
       path: /var/tempo/generator
+    # Adds http_status_code to traces_spanmetrics_* so dashboards can split 2xx/4xx/5xx.
+    # Apps like Marian don't set an error span status on 5xx, so status_code alone can't.
+    processor:
+      span_metrics:
+        dimensions:
+          - http.status_code
   overrides:
     defaults:
       metrics_generator:

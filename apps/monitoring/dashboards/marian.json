@@ -5,7 +5,7 @@
     "marian",
     "discord"
   ],
-  "description": "Marian's Discord job queue (OTLP metrics pushed to Prometheus once a minute) and its warning/error logs.",
+  "description": "Marian web APM (Tempo span metrics), its Discord job queue (OTLP metrics pushed to Prometheus once a minute), and its warning/error logs.",
   "editable": true,
   "graphTooltip": 1,
   "schemaVersion": 39,
@@ -25,6 +25,13 @@
     {
       "title": "Traces",
       "url": "/explore?schemaVersion=1&panes=%7B%22t%22:%7B%22datasource%22:%22Tempo%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22queryType%22:%22traceql%22,%22query%22:%22%7Bresource.service.name%3D%5C%22marian%5C%22%7D%22%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D%7D%7D",
+      "type": "link",
+      "icon": "external link",
+      "targetBlank": true
+    },
+    {
+      "title": "5xx traces",
+      "url": "/explore?schemaVersion=1&panes={%22t%22:{%22datasource%22:%22Tempo%22,%22queries%22:%5B{%22refId%22:%22A%22,%22queryType%22:%22traceql%22,%22query%22:%22{resource.service.name%3D%5C%22marian%5C%22%20%26%26%20span.http.status_code%20%3E%3D%20500}%22}%5D,%22range%22:{%22from%22:%22${__from}%22,%22to%22:%22${__to}%22}}}",
       "type": "link",
       "icon": "external link",
       "targetBlank": true
@@ -66,6 +73,30 @@
         "hide": 0
       },
       {
+        "name": "route",
+        "label": "Route",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${prometheus}"
+        },
+        "query": {
+          "query": "label_values(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\"}, span_name)",
+          "refId": "route"
+        },
+        "definition": "label_values(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\"}, span_name)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".* /.*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "sort": 1,
+        "hide": 0
+      },
+      {
         "name": "kind",
         "label": "Job kind",
         "type": "query",
@@ -94,7 +125,7 @@
   "panels": [
     {
       "type": "row",
-      "title": "Overview",
+      "title": "Web",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -107,8 +138,8 @@
     },
     {
       "type": "stat",
-      "title": "Jobs / min",
-      "description": "Discord job runs per minute (all outcomes), 5m average.",
+      "title": "Requests / min",
+      "description": "HTTP requests per minute (server spans from Tempo span metrics), 5m average. Health checks and static files aren't traced.",
       "datasource": {
         "type": "prometheus",
         "uid": "${prometheus}"
@@ -135,7 +166,1056 @@
               }
             ]
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "sum(rate(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[5m])) * 60 or vector(0)",
+          "legendFormat": "__auto",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "5xx",
+      "description": "Share of requests in the last 15m answered with a 5xx status.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 3,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "(sum (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\", http_status_code=~\"5..\"}[15m])) or sum (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[15m])) * 0) / sum (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[15m]))",
+          "legendFormat": "__auto",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "4xx",
+      "description": "Share of requests in the last 15m answered with a 4xx status. Includes logged-out visitors and bots.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 4,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 0.3
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "(sum (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\", http_status_code=~\"4..\"}[15m])) or sum (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[15m])) * 0) / sum (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[15m]))",
+          "legendFormat": "__auto",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "p50 latency",
+      "description": "Median request duration over 15m.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 5,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.25
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
+          "decimals": 3
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(traces_spanmetrics_latency_bucket{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[15m])))",
+          "legendFormat": "__auto",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "p95 latency",
+      "description": "95th percentile request duration over 15m.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 6,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.5
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
+          "decimals": 3
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(traces_spanmetrics_latency_bucket{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[15m])))",
+          "legendFormat": "__auto",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Unmatched / min",
+      "description": "Requests to paths no route matches (span \"GET unmatched\"), mostly bots and scanners. Not in the other web panels unless picked under Route.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 7,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "sum(rate(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\".* unmatched\"}[15m])) * 60",
+          "legendFormat": "__auto",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests by status",
+      "description": "Requests per minute by HTTP status class.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 8,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 40,
+            "showPoints": "never",
+            "spanNulls": 120000,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "3xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "4xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "5xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "sum by (class) (label_replace(rate(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[5m]), \"class\", \"${1}xx\", \"http_status_code\", \"([0-9]).*\")) * 60",
+          "legendFormat": "{{class}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency",
+      "description": "Request duration percentiles over 5m windows (Tempo span-metric buckets).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 9,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": 120000,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(traces_spanmetrics_latency_bucket{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(traces_spanmetrics_latency_bucket{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(traces_spanmetrics_latency_bucket{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[5m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Busiest routes",
+      "description": "Requests per minute for the 10 busiest routes in the time range.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 10,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": 120000,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "sum by (span_name) (rate(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[5m])) * 60 and on (span_name) topk(10, sum by (span_name) (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[$__range] @ end())))",
+          "legendFormat": "{{span_name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Slowest routes (p95)",
+      "description": "p95 duration over 15m windows for the 10 routes with the highest p95 across the time range.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 11,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": 120000,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisSoftMin": 0
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "histogram_quantile(0.95, sum by (span_name, le) (rate(traces_spanmetrics_latency_bucket{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[15m]))) and on (span_name) topk(10, histogram_quantile(0.95, sum by (span_name, le) (rate(traces_spanmetrics_latency_bucket{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[$__range] @ end()))))",
+          "legendFormat": "{{span_name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Routes",
+      "description": "Every route over the selected time range. Click a route to open its traces in Tempo.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 12,
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "sum by (span_name) (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[$__range]))",
+          "legendFormat": "__auto",
+          "refId": "A",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "histogram_quantile(0.5, sum by (span_name, le) (rate(traces_spanmetrics_latency_bucket{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[$__range])))",
+          "legendFormat": "__auto",
+          "refId": "B",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "histogram_quantile(0.95, sum by (span_name, le) (rate(traces_spanmetrics_latency_bucket{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[$__range])))",
+          "legendFormat": "__auto",
+          "refId": "C",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "(sum by (span_name) (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\", http_status_code=~\"5..\"}[$__range])) or sum by (span_name) (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[$__range])) * 0) / sum by (span_name) (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[$__range]))",
+          "legendFormat": "__auto",
+          "refId": "D",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          },
+          "expr": "(sum by (span_name) (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\", http_status_code=~\"4..\"}[$__range])) or sum by (span_name) (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[$__range])) * 0) / sum by (span_name) (increase(traces_spanmetrics_calls_total{service=\"marian\", span_kind=\"SPAN_KIND_SERVER\", span_name=~\"$route\"}[$__range]))",
+          "legendFormat": "__auto",
+          "refId": "E",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "span_name": "Route",
+              "Value #A": "Requests",
+              "Value #B": "p50",
+              "Value #C": "p95",
+              "Value #D": "5xx",
+              "Value #E": "4xx"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Requests",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Route"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Traces for this route",
+                    "url": "/explore?schemaVersion=1&panes={%22t%22:{%22datasource%22:%22Tempo%22,%22queries%22:%5B{%22refId%22:%22A%22,%22queryType%22:%22traceql%22,%22query%22:%22{resource.service.name%3D%5C%22marian%5C%22%20%26%26%20name%3D%5C%22${__data.fields.span_name}%5C%22}%22}%5D,%22range%22:{%22from%22:%22${__from}%22,%22to%22:%22${__to}%22}}}",
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 420
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Requests"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "p50|p95"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "decimals",
+                "value": 3
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "5xx"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 0.01
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "4xx"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Discord jobs",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 13,
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Jobs / min",
+      "description": "Discord job runs per minute (all outcomes), 5m average.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "id": 14,
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 33
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
           "decimals": 1
         },
         "overrides": []
@@ -174,12 +1254,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 3,
+      "id": 15,
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 1
+        "y": 33
       },
       "fieldConfig": {
         "defaults": {
@@ -200,7 +1280,18 @@
               }
             ]
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
           "decimals": 0
         },
         "overrides": []
@@ -239,12 +1330,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 4,
+      "id": 16,
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 8,
-        "y": 1
+        "y": 33
       },
       "fieldConfig": {
         "defaults": {
@@ -269,7 +1360,18 @@
               }
             ]
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
           "decimals": 1
         },
         "overrides": []
@@ -308,12 +1410,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 5,
+      "id": 17,
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 12,
-        "y": 1
+        "y": 33
       },
       "fieldConfig": {
         "defaults": {
@@ -338,7 +1440,18 @@
               }
             ]
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
           "decimals": 2
         },
         "overrides": []
@@ -377,12 +1490,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 6,
+      "id": 18,
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 16,
-        "y": 1
+        "y": 33
       },
       "fieldConfig": {
         "defaults": {
@@ -407,7 +1520,18 @@
               }
             ]
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ],
           "decimals": 0
         },
         "overrides": []
@@ -446,12 +1570,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 7,
+      "id": 19,
       "gridPos": {
         "h": 4,
         "w": 4,
         "x": 20,
-        "y": 1
+        "y": 33
       },
       "fieldConfig": {
         "defaults": {
@@ -468,7 +1592,18 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
+                "result": {
+                  "text": "no traffic",
+                  "color": "text"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -515,9 +1650,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 37
       },
-      "id": 8,
+      "id": 20,
       "panels": []
     },
     {
@@ -528,12 +1663,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 9,
+      "id": 21,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 6
+        "y": 38
       },
       "fieldConfig": {
         "defaults": {
@@ -591,12 +1726,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 10,
+      "id": 22,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 6
+        "y": 38
       },
       "fieldConfig": {
         "defaults": {
@@ -700,12 +1835,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 11,
+      "id": 23,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 46
       },
       "fieldConfig": {
         "defaults": {
@@ -763,9 +1898,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 53
       },
-      "id": 12,
+      "id": 24,
       "panels": []
     },
     {
@@ -776,12 +1911,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 13,
+      "id": 25,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 22
+        "y": 54
       },
       "fieldConfig": {
         "defaults": {
@@ -857,12 +1992,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 14,
+      "id": 26,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 22
+        "y": 54
       },
       "fieldConfig": {
         "defaults": {
@@ -920,12 +2055,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 15,
+      "id": 27,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 62
       },
       "fieldConfig": {
         "defaults": {
@@ -983,9 +2118,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 69
       },
-      "id": 16,
+      "id": 28,
       "panels": []
     },
     {
@@ -996,12 +2131,12 @@
         "type": "prometheus",
         "uid": "${prometheus}"
       },
-      "id": 17,
+      "id": 29,
       "gridPos": {
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 70
       },
       "fieldConfig": {
         "defaults": {
@@ -1068,9 +2203,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 77
       },
-      "id": 18,
+      "id": 30,
       "panels": []
     },
     {
@@ -1081,12 +2216,12 @@
         "type": "loki",
         "uid": "${loki}"
       },
-      "id": 19,
+      "id": 31,
       "gridPos": {
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 78
       },
       "options": {
         "showTime": true,

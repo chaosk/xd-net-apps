@@ -32,7 +32,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `rules-vpn.yaml` | Critical VPN / remote-access rules (`PangolinEdgeDown`, `PangolinNewtDown`, `VpnGatewayDown`). |
 | `probes-vpn.yaml` | Blackbox `Probe` for Pangolin dashboard API and Integration API. |
 | `values-loki.yaml` | SingleBinary Loki on Synology PVC (Memcached caches disabled). |
-| `values-tempo.yaml` | Monolithic Tempo on Synology PVC (10Gi, 72h retention). Metrics generator writes span and service-graph metrics to Prometheus. |
+| `values-tempo.yaml` | Monolithic Tempo on Synology PVC (10Gi, 72h retention). Metrics generator writes span and service-graph metrics to Prometheus; span metrics carry `http_status_code`. |
 | `values-alloy.yaml` | DaemonSet Alloy agents (`loki.source.kubernetes`) pushing to in-cluster Loki. |
 | `httproute.yaml` | `grafana.net.ecksd.ee` → `kube-prometheus-stack-grafana:80`. |
 | `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `invidious-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`, `miniflux-db`, `mealie-db`, `grafana-db`, `marian-db`. |
