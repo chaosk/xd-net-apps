@@ -17,6 +17,8 @@ controllers:
           MARIAN_PUBLIC_URL: https://marian.ecksd.ee
           MARIAN_STATUS: "marian.ecksd.ee | /event"
           OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo.monitoring.svc.cluster.local:4318
+          # Full URL, used as given (0.10.0+). Tempo takes no metrics; Prometheus's OTLP receiver does.
+          OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/otlp/v1/metrics
           DATABASE_URL:
             valueFrom:
               secretKeyRef:

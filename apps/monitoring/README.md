@@ -38,7 +38,7 @@ Grafana is pre-wired with a **Loki** datasource at `http://loki.monitoring.svc.c
 | `scrape-cnpg.yaml` | PodMonitors for `authentik-db`, `immich-db`, `invidious-db`, `tracearr-db`, `bitmagnet-db`, `paperless-db`, `speedtest-tracker-db`, `miniflux-db`, `mealie-db`, `grafana-db`, `marian-db`. |
 | `scrape-apps.yaml` | Authentik server PodMonitor; Immich, Bitmagnet, and Speedtest Tracker ServiceMonitors. |
 | `scrape-platform.yaml` | Envoy Gateway controller + dataplane; Cilium agent ServiceMonitors. |
-| `dashboards/` | CNPG, Cilium, Spegel, Envoy Gateway, Speedtest Tracker, PeaNUT, and UniFi Poller Grafana dashboards (ConfigMaps for sidecar). |
+| `dashboards/` | CNPG, Cilium, Spegel, Envoy Gateway, Speedtest Tracker, PeaNUT, Marian, and UniFi Poller Grafana dashboards (ConfigMaps for sidecar). |
 
 Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: kube-prometheus-stack`** so the stack’s Prometheus picks them up (`serviceMonitorSelectorNilUsesHelmValues` is left at the chart default).
 
@@ -57,6 +57,7 @@ Custom `ServiceMonitor` / `PodMonitor` resources must carry label **`release: ku
 | Spegel | Spegel Helm (**xd-net**) | Chart `serviceMonitor` on Service `spegel` port `metrics` (9090); label `release: kube-prometheus-stack`. |
 | UniFi Poller | `apps/unpoller` PodMonitor | Pod port `tcp` (9130), path `/metrics` (default). Requires `secrets/unpoller.yaml`. |
 | PeaNUT | `apps/peanut` ServiceMonitor | `/api/v1/metrics` on Service `peanut:8080`. Enable Prometheus in PeaNUT UI; Synology NUT must allow the pod IP. |
+| Marian | OTLP push (no scrape) | Marian posts OTLP metrics once a minute to Prometheus's OTLP receiver (`enableOTLPReceiver`), `/api/v1/otlp/v1/metrics`. Set via `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` in `apps/marian/values.yaml`. `job` is `marian` (from `service.name`). |
 
 Sonarr/Radarr expose `/metrics` only with app-side auth and are not scraped here.
 

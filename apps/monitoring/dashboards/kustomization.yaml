@@ -69,3 +69,11 @@ configMapGenerator:
         grafana_dashboard: "1"
       annotations:
         grafana/folder: UniFi
+  - name: grafana-dashboard-marian
+    files:
+      - marian.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana/folder: Apps

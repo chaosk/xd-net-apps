@@ -208,6 +208,9 @@ grafana:
 prometheus:
   prometheusSpec:
     enableRemoteWriteReceiver: true
+    # OTLP/HTTP metrics at /api/v1/otlp/v1/metrics (marian pushes here). Prometheus sets
+    # job from service.name, so apps must not use a data-point attribute called job.
+    enableOTLPReceiver: true
     retention: 15d
     retentionSize: 45GB
     resources:
