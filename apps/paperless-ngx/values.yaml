@@ -13,6 +13,9 @@ controllers:
           TZ: UTC
           PAPERLESS_URL: https://paperless.net.ecksd.ee
           PAPERLESS_CSRF_TRUSTED_ORIGINS: https://paperless.net.ecksd.ee
+          # With PAPERLESS_URL set, Paperless only accepts that host (and localhost) unless this
+          # lists more. Homepage's widget calls the Service directly, so allow its name too.
+          PAPERLESS_ALLOWED_HOSTS: paperless-ngx.paperless-ngx.svc.cluster.local
           PAPERLESS_REDIS: redis://paperless-redis.paperless-ngx.svc.cluster.local:6379
           PAPERLESS_DBHOST: paperless-db-rw
           PAPERLESS_DBNAME: paperless
