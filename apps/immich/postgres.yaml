@@ -10,7 +10,10 @@ spec:
       isWALArchiver: true
       parameters:
         barmanObjectName: garage
-  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:16.15-1.1.1
+        # A new name per PostgreSQL major: pg_upgrade starts a new system ID and timeline 1,
+        # and the plugin doesn't keep them apart. PostgreSQL 16 backups stay under immich-db.
+        serverName: immich-db-pg18
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:18.6-1.1.1
   storage:
     storageClass: local-path
     size: 20Gi
