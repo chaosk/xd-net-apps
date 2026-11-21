@@ -86,7 +86,7 @@ metadata:
 spec:
   instances: 1
   enablePDB: false
-  imageName: ghcr.io/cloudnative-pg/postgresql:18.3
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.7-standard-trixie
   # Keep storage / resources / plugins as in Git
   plugins:
     - name: barman-cloud.cloudnative-pg.io

@@ -9,7 +9,7 @@ spec:
     - name: barman-cloud.cloudnative-pg.io
       parameters:
         barmanObjectName: garage
-  imageName: ghcr.io/cloudnative-pg/postgresql:18.3
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.7-standard-trixie
   storage:
     storageClass: local-path
     size: 300Gi
