@@ -18,10 +18,10 @@ spec:
         name: cnpg-barman-s3
         key: REGION
     wal:
-      compression: gzip
+      compression: zstd
       maxParallel: 2
     data:
-      compression: gzip
+      compression: zstd
   instanceSidecarConfiguration:
     env:
       - name: AWS_REQUEST_CHECKSUM_CALCULATION
