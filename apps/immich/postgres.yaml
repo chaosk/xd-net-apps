@@ -10,7 +10,7 @@ spec:
       isWALArchiver: true
       parameters:
         barmanObjectName: garage
-  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:16.9-0.4.3
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:16.15-1.1.1
   storage:
     storageClass: local-path
     size: 20Gi
