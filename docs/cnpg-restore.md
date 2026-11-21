@@ -13,7 +13,7 @@ CloudNativePG clusters live under `apps/*/postgres.yaml` (eleven clusters today)
 | Cluster | Namespace | Notes |
 |---------|-----------|-------|
 | `authentik-db` | `authentik` | Stock Postgres; Identity DB |
-| `immich-db` | `immich` | VectorChord image + extensions — restore must keep the same image family |
+| `immich-db` | `immich` | VectorChord image + extensions — restore must keep the same image family. Barman `serverName` is `immich-db-pg18` since the PostgreSQL 18 upgrade (2026-11-21); `immich-db` holds the PostgreSQL 16 backups and WAL (last: `immich-db-pre-pg18`) |
 | `invidious-db` | `invidious` | |
 | `tracearr-db` | `tracearr` | |
 | `bitmagnet-db` | `bitmagnet` | |
