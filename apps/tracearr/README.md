@@ -9,7 +9,7 @@
 | `kustomization.yaml` | **Namespace**, **HTTPRoute**, **ImageCatalog**, CNPG **`Cluster`**, and **vendored Helm chart** (`helmCharts` + `values.yaml`). |
 | `namespace.yaml` | `tracearr` namespace. |
 | `httproute.yaml` | Gateway route + **[Homepage](https://gethomepage.dev/)** annotations (Media group; **Plex** widget on this tile). |
-| `image-catalog.yaml` | CNPG **ImageCatalog** for `timescale/timescaledb:2.31.0-pg18` (PG 18 / Timescale 2.31, same lineage as the chart’s bundled image). |
+| `image-catalog.yaml` | CNPG **ImageCatalog** for `timescale/timescaledb:2.32.1-pg18` (PG 18 / Timescale 2.32, same lineage as the chart’s bundled image). |
 | `postgres.yaml` | CNPG cluster **`tracearr-db`** (Timescale image, **`postgresUID`/`postgresGID` 70**, **10Gi** `local-path`, `postInitApplicationSQL` for Timescale + `pg_trgm`). |
 | `values.yaml` | Helm overrides: **`timescale.enabled: false`**, **`externalDatabase.host: tracearr-db-rw`**, app/Redis **resources**, backups/cache storage, `ingress.enabled: false`. |
 | `vendor/tracearr-3.1.0/tracearr/` | Vendored copy of upstream [`docker/helm/tracearr`](https://github.com/connorgallopo/Tracearr/tree/main/docker/helm/tracearr) so `helm` does not need a separate `git clone`. |
@@ -58,6 +58,16 @@ The upstream chart is not on a public Helm repo index; this app **vendors** it s
    Wait until `kubectl cnpg status -n tracearr tracearr-db` reports the cluster ready and `kubectl get svc tracearr -n tracearr` exists.
 
 Back up `JWT_SECRET` and `COOKIE_SECRET` from `tracearr-db` after first install; changing them invalidates sessions. The CNPG image includes TimescaleDB and `pg_trgm`; `timescaledb_toolkit` is not preinstalled on this cluster.
+
+### Updating the TimescaleDB image
+
+A new image only ships the new extension library; the database keeps its installed version until it is updated. Right after CNPG has restarted `tracearr-db-1` on the new image, run (as the first statement of a fresh session):
+
+```bash
+kubectl -n tracearr exec tracearr-db-1 -c postgres -- psql -X -d tracearr -c 'ALTER EXTENSION timescaledb UPDATE;'
+```
+
+Read the TimescaleDB release notes first: some releases must be installed before a newer PostgreSQL minor (2.31.0's background jobs all fail on PostgreSQL 18.7; 2.32.1 fixes it).
 
 ## Networking
 
