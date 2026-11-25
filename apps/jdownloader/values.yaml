@@ -6,7 +6,7 @@ controllers:
       main:
         image:
           repository: docker.io/jlesage/jdownloader-2
-          tag: "v26.09.1"
+          tag: "v26.11.1"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
@@ -48,19 +48,19 @@ persistence:
     enabled: true
     existingClaim: jdownloader-config
     globalMounts:
-      - path: /config
+    - path: /config
   downloads:
     enabled: true
     existingClaim: jdownloader-downloads
     globalMounts:
-      - path: /output
+    - path: /output
   # jlesage GUI containers need a larger /dev/shm than the 64Mi Kubernetes default.
   shm:
     type: emptyDir
     medium: Memory
     sizeLimit: 1Gi
     globalMounts:
-      - path: /dev/shm
+    - path: /dev/shm
 defaultPodOptions:
   labels:
     vpn-gateway: "true"
