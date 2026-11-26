@@ -6,7 +6,7 @@ controllers:
       main:
         image:
           repository: docker.io/jlesage/jdownloader-2
-          tag: "v26.11.1"
+          tag: "v26.11.2"
           pullPolicy: IfNotPresent
         env:
           TZ: UTC
