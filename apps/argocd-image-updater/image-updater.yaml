@@ -268,7 +268,7 @@ spec:
           commonUpdateSettings:
             # home-operations publishes 4-part build tags (e.g. 2.3.7.5365); semver ~ constraints skip them.
             updateStrategy: newest-build
-            allowTags: "regexp:^2(\\.[0-9]+)+$"
+            allowTags: "regexp:^3(\\.[0-9]+)+$"
             ignoreTags: ["*-b*", "*beta*", "*dev*", "*rc*", "latest", "*-amd64*", "*-arm64*"]
           manifestTargets:
             helm:
