@@ -303,7 +303,7 @@ spec:
           imageName: ghcr.io/home-operations/radarr
           commonUpdateSettings:
             updateStrategy: newest-build
-            allowTags: "regexp:^6(\\.[0-9]+)+$"
+            allowTags: "regexp:^7(\\.[0-9]+)+$"
             ignoreTags: ["*-b*", "*beta*", "*dev*", "*rc*", "latest", "*-amd64*", "*-arm64*"]
           manifestTargets:
             helm:
