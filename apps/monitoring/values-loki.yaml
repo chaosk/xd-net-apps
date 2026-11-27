@@ -2,14 +2,13 @@
 # Homelab: single binary + filesystem on Synology CSI (no object store).
 
 deploymentMode: SingleBinary
-
 loki:
   # The chart pins its own image tag and doesn't follow appVersion, so set it here.
   # Argo CD Image Updater keeps it current (~3.6, the line chart 7.x targets).
   image:
     registry: docker.io
     repository: grafana/loki
-    tag: "3.6.22"
+    tag: "3.6.23"
   auth_enabled: false
   commonConfig:
     replication_factor: 1
@@ -17,14 +16,13 @@ loki:
     type: filesystem
   schemaConfig:
     configs:
-      - from: "2024-04-01"
-        store: tsdb
-        object_store: filesystem
-        schema: v13
-        index:
-          prefix: loki_index_
-          period: 24h
-
+    - from: "2024-04-01"
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: loki_index_
+        period: 24h
 singleBinary:
   replicas: 1
   resources:
@@ -37,7 +35,6 @@ singleBinary:
     enabled: true
     storageClass: synology
     size: 50Gi
-
 # Not used in SingleBinary mode.
 read:
   replicas: 0
@@ -45,24 +42,19 @@ write:
   replicas: 0
 backend:
   replicas: 0
-
 gateway:
   enabled: false
-
 # Memcached for distributed mode; not needed for SingleBinary on a small cluster.
 chunksCache:
   enabled: false
 resultsCache:
   enabled: false
-
 lokiCanary:
   enabled: false
-
 monitoring:
   selfMonitoring:
     enabled: false
     grafanaAgent:
       installOperator: false
-
 test:
   enabled: false
