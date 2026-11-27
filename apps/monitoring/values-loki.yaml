@@ -4,6 +4,12 @@
 deploymentMode: SingleBinary
 
 loki:
+  # The chart pins its own image tag and doesn't follow appVersion, so set it here.
+  # Argo CD Image Updater keeps it current (~3.6, the line chart 7.x targets).
+  image:
+    registry: docker.io
+    repository: grafana/loki
+    tag: "3.6.22"
   auth_enabled: false
   commonConfig:
     replication_factor: 1

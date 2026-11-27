@@ -209,6 +209,22 @@ spec:
               name: image.repository
               tag: image.tag
 
+    # Loki only: the other monitoring charts follow their appVersion and are bumped with the chart.
+    - namePattern: monitoring
+      writeBackConfig:
+        method: git:secret:argocd/argocd-image-updater-git
+        gitConfig:
+          writeBackTarget: helmvalues:values-loki.yaml
+      images:
+        - alias: loki
+          # ~3.6: chart 7.x targets Loki 3.6; move to 3.7 together with a chart that supports it.
+          imageName: docker.io/grafana/loki:~3.6
+          manifestTargets:
+            helm:
+              # name = repository only; registry stays loki.image.registry (avoid docker.io/docker.io/…).
+              name: loki.image.repository
+              tag: loki.image.tag
+
     - namePattern: miniflux
       images:
         - alias: miniflux
