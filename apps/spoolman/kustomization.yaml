@@ -12,7 +12,7 @@ resources:
 helmCharts:
   - name: app-template
     repo: https://bjw-s-labs.github.io/helm-charts/
-    version: 5.0.1
+    version: 5.3.0
     releaseName: spoolman
     namespace: spoolman
     valuesFile: values.yaml
